@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLK - Clientes</title>
+
+    <link rel="stylesheet" href="lib/css/clientes.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div id="app">
+
+    <!-- HEADER -->
+
+    <header class="topbar">
+
+        <div class="logo">
+            BLK
+        </div>
+
+        <nav>
+            <a href="{{url_for('agenda')}}">Agenda</a>
+            <a class="active" href="#">Clientes</a>
+            <a href="#">Atendimentos</a>
+            <a href="{{url_for('servicos')}}">Serviços</a>
+        </nav>
+
+    </header>
+
+    <!-- SUB HEADER -->
+
+    <section class="page-header">
+
+        <h1>Clientes</h1>
+
+        <button id="btnNovoCliente" class="new-btn">
+            Novo Cliente
+            <span>+</span>
+        </button>
+
+    </section>
+
+    <!-- CONTEÚDO -->
+
+    <main class="page-content">
+
+        <div class="search-container">
+
+            <div class="search-box">
+
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Pesquisar Clientes"
+                >
+
+                <button type="button">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                <tr>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Data de cadastro</th>
+                    <th>Endereço</th>
+                    <th>ID</th>
+                    <th>Ações</th>
+                </tr>
+
+                </thead>
+
+                <tbody id="clientesTableBody">
+
+                <!--
+                    FLASK FUTURO
+
+                    Os clientes poderão ser
+                    carregados do backend
+                    ou renderizados via JS.
+
+                    {% for cliente in clientes %}
+                    {% endfor %}
+                -->
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- MODAL CADASTRO -->
+
+<div id="createModal" class="modal-overlay">
+
+    <div class="modal">
+
+        <button class="close-btn"
+                onclick="closeCreateModal()">
+            &times;
+        </button>
+
+        <h2>CADASTRAR CLIENTE</h2>
+
+        <form id="createForm" method="get">
+
+            <input
+                type="text"
+                id="createNome"
+                placeholder="Nome*"
+                name="nome"
+                required
+            >
+
+            <input
+                type="text"
+                id="createTelefone"
+                placeholder="Telefone*"
+                name="telefone"
+                required
+            >
+
+            <input
+                type="text"
+                id="createEndereco"
+                placeholder="Endereço*"
+                name="endereco"
+                required
+            >
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                Cadastrar
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- MODAL EDIÇÃO -->
+
+<div id="editModal" class="modal-overlay">
+
+    <div class="modal">
+
+        <button class="close-btn"
+                onclick="closeEditModal()">
+            &times;
+        </button>
+
+        <h2>EDITAR CLIENTE</h2>
+
+        <form id="editForm" method="get">
+
+            <input
+                type="hidden"
+                id="editId"
+            >
+
+            <input
+                type="text"
+                id="editNome"
+                placeholder="Nome*"
+                name="nomeedit"
+                required
+            >
+
+            <input
+                type="text"
+                id="editTelefone"
+                placeholder="Telefone*"
+                name="telefoneedit"
+                required
+            >
+
+            <input
+                type="text"
+                id="editEndereco"
+                placeholder="Endereço*"
+                name="enderecoedit"
+                required
+            >
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                Salvar
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<script src="lib/js/clientes.js"></script>
+
+</body>
+</html>

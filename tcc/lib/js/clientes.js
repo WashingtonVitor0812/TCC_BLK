@@ -1,0 +1,409 @@
+// ========================================
+// DADOS TEMPORÁRIOS
+// ========================================
+
+// REMOVER QUANDO O FLASK ESTIVER PRONTO
+
+let clientes = [
+    {
+        id: 1,
+        nome: "José Silva",
+        telefone: "(81) 1111-1111",
+        endereco: "Rua Exemplo",
+        dataCadastro: "03/06/2026"
+    },
+    {
+        id: 2,
+        nome: "Arlindo",
+        telefone: "(81) 2222-2222",
+        endereco: "Rua Exemplo",
+        dataCadastro: "03/06/2026"
+    }
+];
+
+// Próximo ID disponível
+let nextClientId = 3;
+
+function renderClientes(lista = clientes) {
+
+    const tbody =
+        document.getElementById(
+            "clientesTableBody"
+        );
+
+    tbody.innerHTML = "";
+
+    lista.forEach(cliente => {
+
+        tbody.innerHTML += `
+            <tr>
+
+                <td>${cliente.nome}</td>
+
+                <td>${cliente.telefone}</td>
+
+                <td>${cliente.dataCadastro}</td>
+
+                <td>${cliente.endereco}</td>
+
+                <td>${cliente.id}</td>
+
+                <td>
+
+                    <button
+                        class="edit-btn"
+                        onclick="openEditModal(${cliente.id})"
+                    >
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+
+                    <button
+                        class="delete-btn"
+                        onclick="deleteClient(${cliente.id})"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+
+                </td>
+
+            </tr>
+        `;
+    });
+
+}
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+searchInput.addEventListener(
+    "input",
+    () => {
+
+        const termo =
+            searchInput.value
+            .toLowerCase();
+
+        const filtrados =
+            clientes.filter(cliente =>
+                cliente.nome
+                .toLowerCase()
+                .includes(termo)
+            );
+
+        renderClientes(filtrados);
+    }
+);
+
+const createModal =
+    document.getElementById(
+        "createModal"
+    );
+
+document
+.getElementById("btnNovoCliente")
+.addEventListener("click", () => {
+
+    createModal.classList.add("active");
+
+});
+
+document
+.getElementById("createForm")
+.addEventListener(
+    "submit",
+    (e) => {
+
+        e.preventDefault();
+
+        const novoCliente = {
+
+            id: nextClientId++,
+
+            nome:
+                document
+                .getElementById("createNome")
+                .value,
+
+            telefone:
+                document
+                .getElementById("createTelefone")
+                .value,
+
+            endereco:
+                document
+                .getElementById("createEndereco")
+                .value,
+
+            dataCadastro:
+                new Date()
+                .toLocaleDateString("pt-BR")
+        };
+
+        clientes.push(
+            novoCliente
+        );
+
+        /*
+        ====================================
+        FLASK FUTURO
+        ====================================
+
+        fetch("/clientes", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify(
+                novoCliente
+            )
+
+        });
+
+        ====================================
+        */
+
+        renderClientes();
+
+        createModal.classList.remove(
+            "active"
+        );
+
+        e.target.reset();
+    }
+);
+
+function openEditModal(id){
+
+    const cliente =
+        clientes.find(
+            c => c.id === id
+        );
+
+    document
+    .getElementById("editId")
+    .value = cliente.id;
+
+    document
+    .getElementById("editNome")
+    .value = cliente.nome;
+
+    document
+    .getElementById("editTelefone")
+    .value = cliente.telefone;
+
+    document
+    .getElementById("editEndereco")
+    .value = cliente.endereco;
+
+    document
+    .getElementById("editModal")
+    .classList.add("active");
+}
+
+const editModal =
+    document.getElementById(
+        "editModal"
+    );
+
+function closeCreateModal() {
+
+    createModal.classList.remove(
+        "active"
+    );
+
+}
+
+function closeEditModal() {
+
+    editModal.classList.remove(
+        "active"
+    );
+
+}
+
+createModal.addEventListener(
+    "click",
+    (e) => {
+
+        if (e.target === createModal) {
+
+            closeCreateModal();
+
+        }
+
+    }
+);
+
+editModal.addEventListener(
+    "click",
+    (e) => {
+
+        if (e.target === editModal) {
+
+            closeEditModal();
+
+        }
+
+    }
+);
+
+function closeAllModals() {
+
+    createModal.classList.remove(
+        "active"
+    );
+
+    editModal.classList.remove(
+        "active"
+    );
+
+}
+
+document.addEventListener(
+    "keydown",
+    (e) => {
+
+        if (e.key === "Escape") {
+
+            closeAllModals();
+
+        }
+
+    }
+);
+
+document
+.getElementById("editForm")
+.addEventListener(
+    "submit",
+    (e) => {
+
+        e.preventDefault();
+
+        const id =
+            Number(
+                document
+                .getElementById("editId")
+                .value
+            );
+
+        const cliente =
+            clientes.find(
+                c => c.id === id
+            );
+
+        cliente.nome =
+            document
+            .getElementById("editNome")
+            .value;
+
+        cliente.telefone =
+            document
+            .getElementById("editTelefone")
+            .value;
+
+        cliente.endereco =
+            document
+            .getElementById("editEndereco")
+            .value;
+
+        /*
+        ====================================
+        FLASK FUTURO
+        ====================================
+
+        fetch(`/clientes/${id}`, {
+
+            method: "PUT",
+
+            headers: {
+                "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+                nome:
+                    cliente.nome,
+
+                telefone:
+                    cliente.telefone,
+
+                endereco:
+                    cliente.endereco
+            })
+        });
+
+        ====================================
+        */
+
+        renderClientes();
+
+        document
+        .getElementById("editModal")
+        .classList.remove("active");
+    }
+);
+
+function deleteClient(id){
+
+    if(
+        !confirm(
+            "Excluir cliente?"
+        )
+    ){
+        return;
+    }
+
+    clientes =
+        clientes.filter(
+            cliente =>
+                cliente.id !== id
+        );
+
+    renderClientes();
+
+    /*
+    ====================================
+    FLASK FUTURO
+    ====================================
+
+    fetch(`/clientes/${id}`, {
+
+        method: "DELETE"
+
+    });
+
+    ====================================
+    */
+}
+
+/*
+====================================
+FLASK FUTURO
+====================================
+
+async function carregarClientes(){
+
+    const resposta =
+        await fetch(
+            "/clientes"
+        );
+
+    clientes =
+        await resposta.json();
+
+    renderClientes();
+}
+
+carregarClientes();
+
+====================================
+*/
+
+renderClientes();
