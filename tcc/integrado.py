@@ -1,6 +1,6 @@
-import flask , plotly.express as px , pandas,mysql.connector
+import flask #, plotly.express as px , pandas,mysql.connector
 #flask --app integrado run --debug 
-cnx = mysql.connector.connect(
+'''cnx = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
     user="root",
@@ -17,12 +17,12 @@ for cliente in dados:
     print(cliente)
 
 cur.close()
-cnx.close()
+cnx.close()'''
 
 app=flask.Flask(__name__)
 
 
-@app.route('/',methods=["GET"])
+@app.route('/agenda',methods=["GET",'POST'])
 def agenda():
     data=flask.request.form.get('data')
     atendimento=flask.request.form.get('atendimento')
@@ -31,7 +31,7 @@ def agenda():
 
 
 
-@app.route('/clientes',methods=["GET"])
+@app.route('/clientes',methods=["GET",'POST'])
 def clientes():
     nome=flask.request.form.get('nome')
     telefone=flask.request.form.get('telefone')
@@ -42,17 +42,19 @@ def clientes():
     return flask.render_template('clientes.html')
 
 
-@app.route('/login',methods=['GET'])
+@app.route('/',methods=['POST','GET'])
 def login():
-    nome=flask.request.form.get('emailuser')
-    senha=str(flask.request.form.get('senhauser'))
+    nome=flask.request.form.get('email')
+    senha=str(flask.request.form.get('senha'))
+    print(nome)
+    print(senha)
     if nome == 'BLK@gmail.com' and senha == '12345':
         return flask.render_template('agenda.html')
     else:
         return flask.render_template('login.html')
     
     
-@app.route('/servico',methods=['GET'])
+@app.route('/servico',methods=['GET','POST'])
 def servicos():
     servico_nome=flask.request.form.get('servinome')
     servico_valor=flask.request.form.get('servivalor')
