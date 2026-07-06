@@ -65,27 +65,23 @@
 
                 <div id="remindersList" class="reminders-list">
 
-                    <!--
-                    Flask irá renderizar os lembretes aqui.
-
-                    Exemplo:
-                    {% for reminder in reminders %}
-                    ...
-                    {% endfor %}
-                    -->
+                    
 
                     <div class="reminder-item">
 
-                        <div class="day-circle">
-                            1
-                        </div>
+                        {% for dado in dados %}
+                            <br>
+                            <div class="day-circle">
+                                {{dado.idservico}}
+                            </div>
 
-                        <div class="reminder-card">
-                            <h3>Lorem Ipsum</h3>
-                            <p>
-                                Descrição do lembrete.
-                            </p>
-                        </div>
+                            <div class="reminder-card">
+                                <h3>{{dado.atendimento}}</h3>
+                                <p>
+                                    {{dado.descricao}}
+                                </p>
+                            </div>
+                        {% endfor %}
 
                     </div>
 
@@ -125,14 +121,13 @@
 
             <h2>CRIAR LEMBRETE</h2>
 
-            <form id="reminderForm">
-
+            <form id="reminderForm" method="post" action="{{url_for('pegar_dados')}}" >
                 <div class="input-group">
 
                     <input
                         type="date"
                         id="date"
-                        name="date"
+                        name="data"
                         required
                     >
 
@@ -149,9 +144,10 @@
                         type="text"
                         id="appointment"
                         placeholder="Atendimento"
+                        name="atendimento"
                     >
 
-                    <button type="button" class="icon-btn">
+                    <button type="submit" class="icon-btn">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
 
@@ -162,13 +158,14 @@
                     <textarea
                         id="description"
                         placeholder="Descrição"
+                        name="descricao"
                     ></textarea>
 
                 </div>
 
                 <div class="modal-actions">
 
-                    <button type="submit" class="save-btn">
+                    <button type="submit" class="save-btn" name="criar_lembrente" value="salvar">
                         Criar
                     </button>
 

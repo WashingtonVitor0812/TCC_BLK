@@ -39,6 +39,7 @@ form.addEventListener("submit", (event) => {
     const date = document.getElementById("date").value;
     const appointment = document.getElementById("appointment").value;
     const description = document.getElementById("description").value;
+    const dados={data:date,atendimento:appointment,descricao:description}
 
     if (!date) {
         alert("Selecione uma data.");
@@ -68,22 +69,22 @@ form.addEventListener("submit", (event) => {
     /*
     ==========================
     INTEGRAÇÃO FLASK FUTURA
-    ==========================
+    ==========================*/
 
-    fetch('/api/reminders', {
-        method: 'POST',
-        headers: {
-            'Content-Type':'application/json'
-        },
-        body: JSON.stringify({
-            date,
-            appointment,
-            description
-        })
-    });
+    fetch("/pegar_dados", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(dados) // Converte objeto JS para JSON
+            })
+            .then(response => response.json())
+            .then(retorno => {
+                console.log("Resposta do servidor:", retorno);
+            })
+            .catch(err => console.error("Erro:", err));
+        });
 
-    */
-
+    
     form.reset();
     closeModal();
-});
