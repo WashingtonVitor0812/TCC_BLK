@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLK - Agenda</title>
     <link rel="stylesheet" href="{{url_for('static', filename='css/agenda.css')}}">
 </head>
+
 <body>
 
     <div id="app">
@@ -33,7 +35,7 @@
 
             <div class="left-info">
 
-                <h1 style="font-family: luciole;">Agenda</h1>  
+                <h1 style="font-family: luciole;">Agenda</h1>
 
                 <div class="legend">
                     <strong>Legenda:</strong>
@@ -65,25 +67,23 @@
 
                 <div id="remindersList" class="reminders-list">
 
-                    
-
+                    {% for dado in dados %}
                     <div class="reminder-item">
+                        <br>
+                        <div class="day-circle">
+                            {{dado.dataservico}}
+                        </div>
 
-                        {% for dado in dados %}
-                            <br>
-                            <div class="day-circle">
-                                {{dado.idservico}}
-                            </div>
+                        <div class="reminder-card">
+                            <h3>{{dado.atendimento}}</h3>
+                            <p>
+                                {{dado.descricao}}
+                            </p>
+                        </div>
 
-                            <div class="reminder-card">
-                                <h3>{{dado.atendimento}}</h3>
-                                <p>
-                                    {{dado.descricao}}
-                                </p>
-                            </div>
-                        {% endfor %}
 
                     </div>
+                    {% endfor %}
 
                 </div>
 
@@ -103,7 +103,10 @@
 
                 <div class="calendar-placeholder">
 
-                    <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FRecife&showTitle=0&src=d2FzaGluZ3RvbnZpdG9yMzBAZ21haWwuY29t&src=cHQtYnIuYnJhemlsaWFuI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y2xhc3Nyb29tMTAxMDM3NTQ4MjE4Njc3NDgxMzU4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAxNjE2ODE3NDY5NjY2NDYxOTU5QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAxOTg0MzIwMzMwMDQ4MzI4ODQ5QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAyNjkzNTY2NzU2NDMyMDk1NjgyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAzNjQ1NDI4NzE1MTYwNzAzODE1QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTA3Njc5MDg5ODAwNzczOTUzMjEyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTE0NTA4MTI0MTMzNTYzNjQ2MTkyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTE1MzY4MjM1NzgyMDE2MTM1OTQ3QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23039be5&color=%230b8043&color=%231967d2&color=%23202124&color=%231967d2&color=%23202124&color=%23007b83&color=%23202124&color=%23202124&color=%23202124" style="border:solid 1px #777" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
+                    <iframe
+                        src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FRecife&showTitle=0&src=d2FzaGluZ3RvbnZpdG9yMzBAZ21haWwuY29t&src=cHQtYnIuYnJhemlsaWFuI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y2xhc3Nyb29tMTAxMDM3NTQ4MjE4Njc3NDgxMzU4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAxNjE2ODE3NDY5NjY2NDYxOTU5QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAxOTg0MzIwMzMwMDQ4MzI4ODQ5QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAyNjkzNTY2NzU2NDMyMDk1NjgyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAzNjQ1NDI4NzE1MTYwNzAzODE1QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTA3Njc5MDg5ODAwNzczOTUzMjEyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTE0NTA4MTI0MTMzNTYzNjQ2MTkyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTE1MzY4MjM1NzgyMDE2MTM1OTQ3QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23039be5&color=%230b8043&color=%231967d2&color=%23202124&color=%231967d2&color=%23202124&color=%23007b83&color=%23202124&color=%23202124&color=%23202124"
+                        style="border:solid 1px #777" width="100%" height="100%" frameborder="0"
+                        scrolling="no"></iframe>
 
                 </div>
 
@@ -121,15 +124,10 @@
 
             <h2>CRIAR LEMBRETE</h2>
 
-            <form id="reminderForm" method="post" action="{{url_for('pegar_dados')}}" >
+            <form id="reminderForm" method="post" action="{{url_for('pegar_dados')}}">
                 <div class="input-group">
 
-                    <input
-                        type="date"
-                        id="date"
-                        name="data"
-                        required
-                    >
+                    <input type="date" id="date" name="data" required>
 
                 </div>
 
@@ -140,14 +138,9 @@
                     no banco de dados.
                     -->
 
-                    <input
-                        type="text"
-                        id="appointment"
-                        placeholder="Atendimento"
-                        name="atendimento"
-                    >
+                    <input type="text" id="appointment" placeholder="Atendimento" name="atendimento">
 
-                    <button type="submit" class="icon-btn">
+                    <button class="icon-btn">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
 
@@ -155,11 +148,7 @@
 
                 <div class="input-group">
 
-                    <textarea
-                        id="description"
-                        placeholder="Descrição"
-                        name="descricao"
-                    ></textarea>
+                    <textarea id="description" placeholder="Descrição" name="descricao"></textarea>
 
                 </div>
 
@@ -180,4 +169,5 @@
     <script src="{{url_for('static', filename='js/agenda.js')}}"></script>
 
 </body>
+
 </html>

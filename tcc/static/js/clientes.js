@@ -111,72 +111,40 @@ document
 
 document
 .getElementById("createForm")
-.addEventListener(
-    "submit",
-    (e) => {
+.addEventListener("submit", (e) => {
 
-        e.preventDefault();
+    e.preventDefault();
 
-        const novoCliente = {
+    const novoCliente = {
+        id: nextClientId++,
+        nome: document.getElementById("createNome").value,
+        telefone: document.getElementById("createTelefone").value,
+        endereco: document.getElementById("createEndereco").value,
+        dataCadastro: new Date().toLocaleDateString("pt-BR")
+    };
 
-            id: nextClientId++,
+    fetch("/pegar_cliente", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(novoCliente)
+    })
+    .then(response => response.json())
+    .then(retorno => {
+        console.log(retorno);
+    })
+    .catch(err => console.error(err));
 
-            nome:
-                document
-                .getElementById("createNome")
-                .value,
+    clientes.push(novoCliente);
 
-            telefone:
-                document
-                .getElementById("createTelefone")
-                .value,
+    renderClientes();
 
-            endereco:
-                document
-                .getElementById("createEndereco")
-                .value,
+    createModal.classList.remove("active");
 
-            dataCadastro:
-                new Date()
-                .toLocaleDateString("pt-BR")
-        };
+    e.target.reset();
 
-        clientes.push(
-            novoCliente
-        );
-
-        /*
-        ====================================
-        FLASK FUTURO
-        ====================================
-
-        fetch("/clientes", {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type":
-                "application/json"
-            },
-
-            body: JSON.stringify(
-                novoCliente
-            )
-
-        });
-
-        ====================================
-        */
-
-        renderClientes();
-
-        createModal.classList.remove(
-            "active"
-        );
-
-        e.target.reset();
-    }
-);
+});
 
 function openEditModal(id){
 
@@ -280,75 +248,67 @@ document.addEventListener(
 
 document
 .getElementById("editForm")
-.addEventListener(
-    "submit",
-    (e) => {
+.addEventListener("submit", async (e) => {
 
-        e.preventDefault();
+    e.preventDefault();
 
-        const id =
-            Number(
-                document
-                .getElementById("editId")
-                .value
-            );
+    const id = Number(
+        document.getElementById("editId").value
+    );
 
-        const cliente =
-            clientes.find(
-                c => c.id === id
-            );
+    const dados = {
 
-        cliente.nome =
-            document
-            .getElementById("editNome")
-            .value;
+        nome:
+            document.getElementById("editNome").value,
 
-        cliente.telefone =
-            document
-            .getElementById("editTelefone")
-            .value;
+        telefone:
+            document.getElementById("editTelefone").value,
 
-        cliente.endereco =
-            document
-            .getElementById("editEndereco")
-            .value;
+        endereco:
+            document.getElementById("editEndereco").value
 
-        /*
-        ====================================
-        FLASK FUTURO
-        ====================================
+    };
 
-        fetch(`/clientes/${id}`, {
+    try {
+
+        const resposta = await fetch(`/clientes/${id}`, {
 
             method: "PUT",
 
             headers: {
-                "Content-Type":
-                "application/json"
+                "Content-Type": "application/json"
             },
 
-            body: JSON.stringify({
-                nome:
-                    cliente.nome,
+            body: JSON.stringify(dados)
 
-                telefone:
-                    cliente.telefone,
-
-                endereco:
-                    cliente.endereco
-            })
         });
 
-        ====================================
-        */
+        if (!resposta.ok) {
+
+            alert("Erro ao atualizar cliente.");
+            return;
+
+        }
+
+        const cliente = clientes.find(c => c.id === id);
+
+        cliente.nome = dados.nome;
+        cliente.telefone = dados.telefone;
+        cliente.endereco = dados.endereco;
 
         renderClientes();
 
-        document
-        .getElementById("editModal")
-        .classList.remove("active");
+        closeEditModal();
+
     }
-);
+
+    catch (erro) {
+
+        console.error(erro);
+
+    }
+
+});
 
 function deleteClient(id){
 
@@ -377,7 +337,7 @@ function deleteClient(id){
 
         method: "DELETE"
 
-    });
+    }); 
 
     ====================================
     */
