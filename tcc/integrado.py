@@ -20,7 +20,7 @@ dicioagenda={
     'data':None,
     'atendimento':None,
     'descricao':None,
-    'idservico':0
+    'dataservico':0
 }
 app=flask.Flask(__name__)
 app.config["SECRET_KEY"] = "chave_temporária"
@@ -33,13 +33,14 @@ def agenda():
 def pegar_dados():
     try:
         dados = flask.request.get_json(force=True)  # Lê JSON enviado
+        data=dados.get('data')
         if not isinstance(dados, dict):
             return flask.jsonify({"erro": "Formato inválido"}), 400
         
         dicioagenda['data'] = dados.get("data")
         dicioagenda['atendimento'] = dados.get("atendimento")
         dicioagenda['descricao'] = dados.get("descricao")
-        dicioagenda['idservico']=None
+        dicioagenda['dataservico']=f'{data[8]}{data[9]}' 
         listaagenda.append(dicioagenda.copy())
         print(f"Data: {dicioagenda['data']} \nAtendimento: {dicioagenda['atendimento']} \nDescricão: {dicioagenda['descricao']} \n {listaagenda}")
 
