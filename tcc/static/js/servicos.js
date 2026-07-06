@@ -150,12 +150,18 @@ document
 
         servicos.push(servico);
 
-        /*
-        FLASK FUTURO
-
-        POST /servicos
-
-        */
+    fetch("/pegar_servico", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(servico) // Converte objeto JS para JSON
+            })
+            .then(response => response.json())
+            .then(retorno => {
+                console.log("Resposta do servidor:", retorno);
+            })
+            .catch(err => console.error("Erro:", err));
 
         renderServicos();
 

@@ -45,17 +45,19 @@ form.addEventListener("submit", (event) => {
         alert("Selecione uma data.");
         return;
     }
-
-    const day = new Date(date).getDate();
+    console.log(date)
+    console.log(Date(date))
+    const day = new Date(date).getUTCDate();
 
     // Simulação visual até integrar com Flask
     const reminder = document.createElement("div");
 
     reminder.classList.add("reminder-item");
 
+    console.log(String(day).padStart(2, '0'))
     reminder.innerHTML = `
         <div class="day-circle">
-            ${day}
+            ${String(day).padStart(2, '0')}
         </div>
 
         <div class="reminder-card">
@@ -83,8 +85,7 @@ form.addEventListener("submit", (event) => {
                 console.log("Resposta do servidor:", retorno);
             })
             .catch(err => console.error("Erro:", err));
-        });
 
     
     form.reset();
-    closeModal();
+    closeModal()})
