@@ -85,8 +85,7 @@ form.addEventListener("submit", (event) => {
                 console.log("Resposta do servidor:", retorno);
             })
             .catch(err => console.error("Erro:", err));
-        });
 
     
     form.reset();
-    closeModal();
+    closeModal()})

@@ -265,13 +265,14 @@ document
             document.getElementById("editTelefone").value,
 
         endereco:
-            document.getElementById("editEndereco").value
-
+            document.getElementById("editEndereco").value,
+        id:
+            document.getElementById("editId")
     };
 
     try {
 
-        const resposta = await fetch(`/clientes/${id}`, {
+        const resposta = await fetch('/pegar_cliiente', {
 
             method: "PUT",
 
@@ -309,7 +310,6 @@ document
     }
 
 });
-
 function deleteClient(id){
 
     if(

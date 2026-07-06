@@ -94,31 +94,61 @@ def pegar_dados():
     except Exception as e:
         return flask.jsonify({"erro": str(e)}), 500
 
-@app.route('/pegar_cliente',methods=["POST"])
+@app.route('/pegar_cliente', methods=["POST","PUT"])
 @login_required
 def pegar_cliente():
+    if flask.request.method == "POST":
+        try:
+            dados = flask.request.get_json(force=True)  # Lê JSON enviado
+            if not isinstance(dados, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
+
+            diciocliente['nome'] = dados.get("nome")
+            diciocliente['telefone'] = dados.get("telefone")
+            diciocliente['endereco'] = dados.get("endereco")
+            diciocliente['dataCadastro']=dados.get("dataCadastro")
+            diciocliente['id']=dados.get('id') 
+            listacliente.append(diciocliente.copy())
+            print(f"{diciocliente['nome']}\n{diciocliente['telefone']}\n    {diciocliente['endereco']}\n{diciocliente['dataCadastro']}\n    {diciocliente['id']}\n{listacliente}")
+
+            return flask.jsonify({"sucess": "cadastrado com sucesso"})
+        except Exception as e:
+            return flask.jsonify({"erro": str(e)}), 500
+    if flask.request.method=="PUT":
+        try:
+            dados2 = flask.request.get_json(force=True)  # Lê JSON enviado
+            if not isinstance(dados2, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
+            for i in listacliente:
+                if dados2.get('id')==i.get('id'):
+                    diciocliente['nome'] = dados2.get("nome")
+                    diciocliente['telefone'] = dados2.get("telefone")
+                    diciocliente['endereco'] = dados2.get("endereco")
+                    listacliente.insert(i.get('id'),diciocliente.copy())
+                    print(f"{diciocliente['nome']}\n{diciocliente['telefone']}\n {diciocliente['endereco']}\n{diciocliente['dataCadastro']}\n{diciocliente['id']}\n{listacliente}")
+
+                    return flask.jsonify({"sucess": "cadastrado com sucesso"})
+        except Exception as e:
+            return flask.jsonify({"erro": str(e)}), 500
+    
+@app.route('/pegar_servico',methods=["GET","POST"])
+@login_required
+def pegar_servico():
     try:
         dados = flask.request.get_json(force=True)  # Lê JSON enviado
         if not isinstance(dados, dict):
             return flask.jsonify({"erro": "Formato inválido"}), 400
         
-        diciocliente['nome'] = dados.get("nome")
-        diciocliente['telefone'] = dados.get("telefone")
-        diciocliente['endereco'] = dados.get("endereco")
-        diciocliente['dataCadastro']=dados.get("dataCadastro")
-        diciocliente['id']=dados.get('id') 
-        listacliente.append(diciocliente.copy())
-        print(f"{diciocliente['nome']}\n{diciocliente['telefone']}\n{diciocliente['endereco']}\n{diciocliente['dataCadastro']}\n{diciocliente['id']}\n{listacliente}")
+        dicioservico['nome'] = dados.get("nome")
+        dicioservico['valor'] = dados.get("valosBasa")
+        dicioservico['descricao'] = dados.get("descricao")
+        listaservico.append(dicioservico.copy())
+        print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valor']} \nDescricão: {dicioservico['descricao']} \n {listaservico}")
 
-        return flask.render_template('agenda.html',dado=listaagenda)
+        return flask.jsonify({"sucess": "cadastrado com sucesso"})
 
     except Exception as e:
         return flask.jsonify({"erro": str(e)}), 500
-    
-@app.route('/pegar_sevico',methods=["GET","POST"])
-@login_required
-def pegar_servico():
-    return 'n'
 
 @app.route('/clientes',methods=["GET",'POST'])
 @login_required
