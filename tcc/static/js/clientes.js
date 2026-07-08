@@ -267,25 +267,31 @@ document
         endereco:
             document.getElementById("editEndereco").value,
         id:
-            document.getElementById("editId")
+            Number(document.getElementById("editId").value)
     };
 
     try {
+        console.log(dados);
+        console.log(JSON.stringify(dados));
+        
 
-        const resposta = await fetch('/pegar_cliiente', {
-
+        var resposta = await fetch('/pegar_cliente', {
+            
+            
             method: "PUT",
-
+            
             headers: {
                 "Content-Type": "application/json"
             },
-
+            
             body: JSON.stringify(dados)
 
         });
 
+        console.log(resposta);
+        
         if (!resposta.ok) {
-
+            
             alert("Erro ao atualizar cliente.");
             return;
 
