@@ -1,5 +1,6 @@
 import flask ,flask_cors
 from functools import wraps#,mysql.connector
+#cd tcc
 #flask --app integrado run --debug 
 
 '''cnx = mysql.connector.connect(
@@ -149,14 +150,15 @@ def pegar_cliente():
                     return flask.jsonify({"erro": "Formato inválido"}), 400
             for cliente in listacliente:
                 if int(cliente["id"]) == int(dados3['id']):
-                    listacliente.pop(cliente["id"])
+                    #mudar o valor que subtrai o id 
+                    listacliente.pop(cliente["id"]-3)
                     return flask.jsonify({"success": "Cliente atualizado"})
 
             return flask.jsonify({"erro": "Cliente não encontrado"}), 404
 
         except Exception as e:
             print(e)
-    
+            return flask.jsonify({"erro": str(e)}), 500
 @app.route('/pegar_servico',methods=["GET","POST"])
 @login_required
 def pegar_servico():
@@ -199,13 +201,6 @@ def verificarLogin():
 @app.route('/servico',methods=['GET','POST'])
 @login_required
 def servicos():
-    servico_nome=flask.request.form.get('nomeservico')
-    servico_valor=flask.request.form.get('valorservico')
-    servico_descricao=flask.request.form.get('descricaoservico')
-    edit_nome=flask.request.form.get('nomeedit')
-    edit_valor=flask.request.form.get('valoredit')
-    edit_descricao=flask.request.form.get('descricaoedit')
-    print(f'{servico_nome}\n{servico_valor}\n{servico_descricao}\n{edit_nome}\n{edit_valor}\n{edit_descricao}')
     return flask.render_template('servicos.html')
 
 
