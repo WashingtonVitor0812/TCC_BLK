@@ -44,6 +44,7 @@ dicioservico={
     'nome':None,
     'valor':None,
     'descricao':None,
+    'idservico':None
 }
 
 app=flask.Flask(__name__)
@@ -159,24 +160,67 @@ def pegar_cliente():
         except Exception as e:
             print(e)
             return flask.jsonify({"erro": str(e)}), 500
-@app.route('/pegar_servico',methods=["GET","POST"])
+@app.route('/pegar_servico',methods=["POST","PUT","DELETE"])
 @login_required
 def pegar_servico():
-    try:
-        dados = flask.request.get_json(force=True)  # Lê JSON enviado
-        if not isinstance(dados, dict):
-            return flask.jsonify({"erro": "Formato inválido"}), 400
+    if flask.request.method=="POST":    
+        try:
+            dados = flask.request.get_json(force=True)  # Lê JSON enviado
+            if not isinstance(dados, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
+
+            dicioservico['nome'] = dados.get("nome")
+            dicioservico['valor'] = dados.get("valorBase")
+            dicioservico['descricao'] = dados.get("descricao")
+            dicioservico['idservico']=dados.get("id")
+            listaservico.append(dicioservico.copy())
+            print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valor']} \nDescricão: {dicioservico['descricao']} \nID:{dicioservico['idservico']}\n {listaservico}")
+
+            return flask.jsonify({"sucess": "cadastrado com sucesso"})
+
+        except Exception as e:
+            return flask.jsonify({"erro": str(e)}), 500
         
-        dicioservico['nome'] = dados.get("nome")
-        dicioservico['valor'] = dados.get("valosBasa")
-        dicioservico['descricao'] = dados.get("descricao")
-        listaservico.append(dicioservico.copy())
-        print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valor']} \nDescricão: {dicioservico['descricao']} \n {listaservico}")
+    if flask.request.method=="PUT":
+        try:
+            dados2 = flask.request.get_json(force=True)
 
-        return flask.jsonify({"sucess": "cadastrado com sucesso"})
+            if not isinstance(dados2, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
 
-    except Exception as e:
-        return flask.jsonify({"erro": str(e)}), 500
+            for servico in listaservico:
+
+                if int(servico["idservico"]) == int(dados2["id"]):
+
+                    servico["nome"] = dados2["nome"]
+                    servico["valor"] = dados2["valor"]
+                    servico["descricao"] = dados2["descricao"]
+
+                    print(servico)
+
+                    return flask.jsonify({"success": "Cliente atualizado"})
+
+            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+
+        except Exception as e:
+            print(e)
+            
+            return flask.jsonify({"erro": str(e)}), 500
+    if flask.request.method=="DELETE":
+        try:
+           dados3 = flask.request.get_json(force=True)
+           if not isinstance(dados3, dict):
+                   return flask.jsonify({"erro": "Formato inválido"}), 400
+           for servico in listaservico:
+               if int(servico["idservico"]) == int(dados3['id']):
+                   #mudar o valor que subtrai o id 
+                   listaservico.pop(servico["idservico"]-3)
+                   return flask.jsonify({"success": "serviço atualizado"})
+           return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+        
+        except Exception as e:
+           print(e)
+           return flask.jsonify({"erro": str(e)}), 500
 
 @app.route('/clientes',methods=["GET",'POST'])
 @login_required
