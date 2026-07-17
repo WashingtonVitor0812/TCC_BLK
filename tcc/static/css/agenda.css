@@ -309,3 +309,96 @@ nav a.active{
 
     cursor:pointer;
 }
+
+.calendar{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+
+}
+
+.calendar th{
+
+    background:#0c4fad;
+    color:white;
+    height:55px;
+
+}
+
+.calendar td{
+
+    height:90px;
+
+    border:1px solid #ddd;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    position:relative;
+
+    font-size:26px;
+
+    color:#003f97;
+
+}
+
+.calendar td:hover{
+
+    background:#f4f4f4;
+
+}
+
+.today{
+
+    color:#ff6d1a;
+    font-weight:bold;
+
+}
+
+.event::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:42px;
+    height:42px;
+
+    border:2px solid #ff6d1a;
+
+    border-radius:50%;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+}
+
+.calendar-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:15px;
+
+}
+
+.nav-btn{
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    font-size:30px;
+
+    color:#003f97;
+
+}

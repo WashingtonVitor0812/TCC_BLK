@@ -93,19 +93,43 @@
 
             <section class="calendar-panel">
 
-                <!--
-                Futuramente substituir por Embed do Google Agenda.
+                <div class="calendar-header">
 
-                Exemplo:
+                    <button id="prevMonth" class="nav-btn">
+                        &#10094;
+                    </button>
 
-                <iframe src="{{ google_calendar_url }}"></iframe>
-                -->
+                    <h2 id="monthYear"></h2>
 
-                <div class="calendar-placeholder">
-
-                    <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FRecife&showTitle=0&src=d2FzaGluZ3RvbnZpdG9yMzBAZ21haWwuY29t&src=cHQtYnIuYnJhemlsaWFuI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y2xhc3Nyb29tMTAxMDM3NTQ4MjE4Njc3NDgxMzU4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAxNjE2ODE3NDY5NjY2NDYxOTU5QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAxOTg0MzIwMzMwMDQ4MzI4ODQ5QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAyNjkzNTY2NzU2NDMyMDk1NjgyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTAzNjQ1NDI4NzE1MTYwNzAzODE1QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTA3Njc5MDg5ODAwNzczOTUzMjEyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTE0NTA4MTI0MTMzNTYzNjQ2MTkyQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y2xhc3Nyb29tMTE1MzY4MjM1NzgyMDE2MTM1OTQ3QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23039be5&color=%230b8043&color=%231967d2&color=%23202124&color=%231967d2&color=%23202124&color=%23007b83&color=%23202124&color=%23202124&color=%23202124" style="border:solid 1px #777" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
+                    <button id="nextMonth" class="nav-btn">
+                        &#10095;
+                    </button>
 
                 </div>
+
+                <table class="calendar">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Dom</th>
+                            <th>Seg</th>
+                            <th>Ter</th>
+                            <th>Qua</th>
+                            <th>Qui</th>
+                            <th>Sex</th>
+                            <th>Sáb</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="calendarBody">
+
+                    </tbody>
+
+                </table>
 
             </section>
 
