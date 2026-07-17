@@ -150,12 +150,18 @@ document
 
         servicos.push(servico);
 
-        /*
-        FLASK FUTURO
-
-        POST /servicos
-
-        */
+    fetch("/pegar_servico", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(servico) // Converte objeto JS para JSON
+            })
+            .then(response => response.json())
+            .then(retorno => {
+                console.log("Resposta do servidor:", retorno);
+            })
+            .catch(err => console.error("Erro:", err));
 
         renderServicos();
 
@@ -213,7 +219,6 @@ document
             servicos.find(
                 s => s.id === id
             );
-
         servico.nome =
             document
             .getElementById("editNome")
@@ -230,13 +235,19 @@ document
             document
             .getElementById("editDescricao")
             .value;
-
-        /*
-        FLASK FUTURO
-
-        PUT /servicos/{id}
-
-        */
+        const servicoEdit={nome:servico.nome,valor:servico.valorBase,descricao:servico.descricao,id:id}
+        fetch("/pegar_servico", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(servicoEdit)
+        })
+        .then(response => response.json())
+        .then(retorno => {
+            console.log(retorno);
+        })
+        .catch(err => console.error(err));
 
         renderServicos();
 
@@ -262,12 +273,20 @@ function deleteServico(id){
 
     renderServicos();
 
-    /*
-    FLASK FUTURO
-
-    DELETE /servicos/{id}
-
-    */
+    fetch("/pegar_servico", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id:id }) 
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Resposta do servidor:", data);
+    })
+    .catch(error => {
+        console.error("Erro na requisição:", error);
+    });
 }
 
 const searchInput =

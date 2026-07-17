@@ -111,72 +111,40 @@ document
 
 document
 .getElementById("createForm")
-.addEventListener(
-    "submit",
-    (e) => {
+.addEventListener("submit", (e) => {
 
-        e.preventDefault();
+    e.preventDefault();
 
-        const novoCliente = {
+    const novoCliente = {
+        id: nextClientId++,
+        nome: document.getElementById("createNome").value,
+        telefone: document.getElementById("createTelefone").value,
+        endereco: document.getElementById("createEndereco").value,
+        dataCadastro: new Date().toLocaleDateString("pt-BR")
+    };
 
-            id: nextClientId++,
+    fetch("/pegar_cliente", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(novoCliente)
+    })
+    .then(response => response.json())
+    .then(retorno => {
+        console.log(retorno);
+    })
+    .catch(err => console.error(err));
 
-            nome:
-                document
-                .getElementById("createNome")
-                .value,
+    clientes.push(novoCliente);
 
-            telefone:
-                document
-                .getElementById("createTelefone")
-                .value,
+    renderClientes();
 
-            endereco:
-                document
-                .getElementById("createEndereco")
-                .value,
+    createModal.classList.remove("active");
 
-            dataCadastro:
-                new Date()
-                .toLocaleDateString("pt-BR")
-        };
+    e.target.reset();
 
-        clientes.push(
-            novoCliente
-        );
-
-        /*
-        ====================================
-        FLASK FUTURO
-        ====================================
-
-        fetch("/clientes", {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type":
-                "application/json"
-            },
-
-            body: JSON.stringify(
-                novoCliente
-            )
-
-        });
-
-        ====================================
-        */
-
-        renderClientes();
-
-        createModal.classList.remove(
-            "active"
-        );
-
-        e.target.reset();
-    }
-);
+});
 
 function openEditModal(id){
 
@@ -280,76 +248,74 @@ document.addEventListener(
 
 document
 .getElementById("editForm")
-.addEventListener(
-    "submit",
-    (e) => {
+.addEventListener("submit", async (e) => {
 
-        e.preventDefault();
+    e.preventDefault();
 
-        const id =
-            Number(
-                document
-                .getElementById("editId")
-                .value
-            );
+    const id = Number(
+        document.getElementById("editId").value
+    );
 
-        const cliente =
-            clientes.find(
-                c => c.id === id
-            );
+    const dados = {
 
-        cliente.nome =
-            document
-            .getElementById("editNome")
-            .value;
+        nome:
+            document.getElementById("editNome").value,
 
-        cliente.telefone =
-            document
-            .getElementById("editTelefone")
-            .value;
+        telefone:
+            document.getElementById("editTelefone").value,
 
-        cliente.endereco =
-            document
-            .getElementById("editEndereco")
-            .value;
+        endereco:
+            document.getElementById("editEndereco").value,
+        id:
+            Number(document.getElementById("editId").value)
+    };
 
-        /*
-        ====================================
-        FLASK FUTURO
-        ====================================
+    try {
+        console.log(dados);
+        console.log(JSON.stringify(dados));
+        
 
-        fetch(`/clientes/${id}`, {
-
+        var resposta = await fetch('/pegar_cliente', {
+            
+            
             method: "PUT",
-
+            
             headers: {
-                "Content-Type":
-                "application/json"
+                "Content-Type": "application/json"
             },
+            
+            body: JSON.stringify(dados)
 
-            body: JSON.stringify({
-                nome:
-                    cliente.nome,
-
-                telefone:
-                    cliente.telefone,
-
-                endereco:
-                    cliente.endereco
-            })
         });
 
-        ====================================
-        */
+        console.log(resposta);
+        
+        if (!resposta.ok) {
+            
+            alert("Erro ao atualizar cliente.");
+            return;
+
+        }
+
+        const cliente = clientes.find(c => c.id === id);
+
+        cliente.nome = dados.nome;
+        cliente.telefone = dados.telefone;
+        cliente.endereco = dados.endereco;
 
         renderClientes();
 
-        document
-        .getElementById("editModal")
-        .classList.remove("active");
-    }
-);
+        closeEditModal();
 
+    }
+
+    catch (erro) {
+
+        console.error(erro);
+
+    }
+
+});
 function deleteClient(id){
 
     if(
@@ -371,16 +337,23 @@ function deleteClient(id){
     /*
     ====================================
     FLASK FUTURO
-    ====================================
+    ====================================*/
 
-    fetch(`/clientes/${id}`, {
-
-        method: "DELETE"
-
+    fetch("/pegar_cliente", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id:id }) 
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Resposta do servidor:", data);
+    })
+    .catch(error => {
+        console.error("Erro na requisição:", error);
     });
 
-    ====================================
-    */
 }
 
 /*

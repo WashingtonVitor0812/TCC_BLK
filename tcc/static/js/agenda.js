@@ -31,160 +31,6 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-const meses = [
-
-"Janeiro",
-"Fevereiro",
-"Março",
-"Abril",
-"Maio",
-"Junho",
-"Julho",
-"Agosto",
-"Setembro",
-"Outubro",
-"Novembro",
-"Dezembro"
-
-];
-
-let dataAtual = new Date();
-
-let mesAtual = dataAtual.getMonth();
-
-let anoAtual = dataAtual.getFullYear();
-
-function criarCalendario(){
-
-    monthYear.innerHTML =
-        meses[mesAtual] + " " + anoAtual;
-
-    const tbody =
-        document.getElementById("calendarBody");
-
-    tbody.innerHTML="";
-
-    const primeiroDia =
-        new Date(anoAtual,mesAtual,1).getDay();
-
-    const ultimoDia =
-        new Date(anoAtual,mesAtual+1,0).getDate();
-
-    let linha=document.createElement("tr");
-
-    for(let i=0;i<primeiroDia;i++){
-
-        linha.appendChild(document.createElement("td"));
-
-    }
-
-    for(let dia=1;dia<=ultimoDia;dia++){
-
-        if(linha.children.length===7){
-
-            tbody.appendChild(linha);
-
-            linha=document.createElement("tr");
-
-        }
-
-        const td=document.createElement("td");
-
-        td.innerHTML=dia;
-
-        const hoje=new Date();
-
-        if(
-
-            dia===hoje.getDate()
-
-            &&
-
-            mesAtual===hoje.getMonth()
-
-            &&
-
-            anoAtual===hoje.getFullYear()
-
-        ){
-
-            td.classList.add("today");
-
-        }
-
-        const possuiEvento = lembretes.some(item=>{
-
-            const d=new Date(item.data);
-
-            return(
-
-                d.getDate()===dia
-                &&
-
-                d.getMonth()===mesAtual
-
-                &&
-
-                d.getFullYear()===anoAtual
-
-            );
-
-        });
-
-        if(possuiEvento){
-
-            td.classList.add("event");
-
-        }
-
-        linha.appendChild(td);
-
-    }
-
-    while(linha.children.length<7){
-
-        linha.appendChild(document.createElement("td"));
-
-    }
-
-    tbody.appendChild(linha);
-
-}
-
-prevMonth.onclick=()=>{
-
-    mesAtual--;
-
-    if(mesAtual<0){
-
-        mesAtual=11;
-
-        anoAtual--;
-
-    }
-
-    criarCalendario();
-
-};
-
-nextMonth.onclick=()=>{
-
-    mesAtual++;
-
-    if(mesAtual>11){
-
-        mesAtual=0;
-
-        anoAtual++;
-
-    }
-
-    criarCalendario();
-
-};
-
-criarCalendario();
-
 // Submit
 form.addEventListener("submit", (event) => {
 
@@ -199,17 +45,19 @@ form.addEventListener("submit", (event) => {
         alert("Selecione uma data.");
         return;
     }
-
-    const day = new Date(date).getDate();
+    console.log(date)
+    console.log(Date(date))
+    const day = new Date(date).getUTCDate();
 
     // Simulação visual até integrar com Flask
     const reminder = document.createElement("div");
 
     reminder.classList.add("reminder-item");
 
+    console.log(String(day).padStart(2, '0'))
     reminder.innerHTML = `
         <div class="day-circle">
-            ${day}
+            ${String(day).padStart(2, '0')}
         </div>
 
         <div class="reminder-card">
@@ -237,10 +85,7 @@ form.addEventListener("submit", (event) => {
                 console.log("Resposta do servidor:", retorno);
             })
             .catch(err => console.error("Erro:", err));
-        });
 
     
     form.reset();
-    closeModal();
-
-    
+    closeModal()})

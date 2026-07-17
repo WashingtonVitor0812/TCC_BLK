@@ -1,5 +1,8 @@
-import flask #,mysql.connector
+import flask ,flask_cors
+from functools import wraps#,mysql.connector
+#cd tcc
 #flask --app integrado run --debug 
+
 '''cnx = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
@@ -15,25 +18,69 @@ for cliente in dados:
 
 cur.close()
 cnx.close()'''
+
 listaagenda=[]
+
 dicioagenda={
     'data':None,
     'atendimento':None,
     'descricao':None,
     'dataservico':0
 }
+
+listacliente=[]
+
+diciocliente={
+    'nome':None,
+    'telefone':None,
+    'endereco':None,
+    'dataCadastro':None,
+    'id':0
+}
+
+listaservico=[]
+
+dicioservico={
+    'nome':None,
+    'valor':None,
+    'descricao':None,
+    'idservico':None
+}
+
 app=flask.Flask(__name__)
-app.config["SECRET_KEY"] = "chave_temporária"
+app.secret_key = "essa segurança é um bo****"
+
+
+flask_cors.CORS(app)
+
+# ==========================
+# Decorator de autenticação
+# ==========================
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        if "logado" not in flask.session:
+            return flask.redirect(flask.url_for("login"))
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 
 @app.route('/agenda',methods=["GET",'POST'])
+@login_required
 def agenda():
     return flask.render_template('agenda.html',dados=listaagenda)
 
 @app.route('/pegar_dados',methods=['POST'])
+@login_required
 def pegar_dados():
     try:
         dados = flask.request.get_json(force=True)  # Lê JSON enviado
+        
         data=dados.get('data')
+        
         if not isinstance(dados, dict):
             return flask.jsonify({"erro": "Formato inválido"}), 400
         
@@ -44,42 +91,162 @@ def pegar_dados():
         listaagenda.append(dicioagenda.copy())
         print(f"Data: {dicioagenda['data']} \nAtendimento: {dicioagenda['atendimento']} \nDescricão: {dicioagenda['descricao']} \n {listaagenda}")
 
-        return flask.render_template('agenda.html',dado=listaagenda)
+        return flask.jsonify({"sucess": "cadastrado com sucesso"})
 
     except Exception as e:
         return flask.jsonify({"erro": str(e)}), 500
-     
+
+@app.route('/pegar_cliente', methods=["POST","PUT","DELETE"])
+@login_required
+def pegar_cliente():
+    if flask.request.method == "POST":
+        try:
+            dados = flask.request.get_json(force=True)  # Lê JSON enviado
+            if not isinstance(dados, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
+
+            diciocliente['nome'] = dados.get("nome")
+            diciocliente['telefone'] = dados.get("telefone")
+            diciocliente['endereco'] = dados.get("endereco")
+            diciocliente['dataCadastro']=dados.get("dataCadastro")
+            diciocliente['id']=dados.get('id') 
+            listacliente.append(diciocliente.copy())
+            print(f"{diciocliente['nome']}\n{diciocliente['telefone']}\n    {diciocliente['endereco']}\n{diciocliente['dataCadastro']}\n    {diciocliente['id']}\n{listacliente}")
+
+            return flask.jsonify({"sucess": "cadastrado com sucesso"})
+        except Exception as e:
+            return flask.jsonify({"erro": str(e)}), 500
+    if flask.request.method == "PUT":
+        try:
+            dados2 = flask.request.get_json(force=True)
+
+            if not isinstance(dados2, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
+
+            for cliente in listacliente:
+
+                if int(cliente["id"]) == int(dados2["id"]):
+
+                    cliente["nome"] = dados2["nome"]
+                    cliente["telefone"] = dados2["telefone"]
+                    cliente["endereco"] = dados2["endereco"]
+
+                    print(cliente)
+
+                    print(type(dados2.get("id")))
+                    print(type(cliente.get("id")))
+
+                    return flask.jsonify({"success": "Cliente atualizado"})
+
+            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+
+        except Exception as e:
+            print(e)
+            
+            return flask.jsonify({"erro": str(e)}), 500
+    if flask.request.method=="DELETE":
+        try:
+            dados3 = flask.request.get_json(force=True)
+            if not isinstance(dados3, dict):
+                    return flask.jsonify({"erro": "Formato inválido"}), 400
+            for cliente in listacliente:
+                if int(cliente["id"]) == int(dados3['id']):
+                    #mudar o valor que subtrai o id 
+                    listacliente.pop(cliente["id"]-3)
+                    return flask.jsonify({"success": "Cliente atualizado"})
+
+            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+
+        except Exception as e:
+            print(e)
+            return flask.jsonify({"erro": str(e)}), 500
+@app.route('/pegar_servico',methods=["POST","PUT","DELETE"])
+@login_required
+def pegar_servico():
+    if flask.request.method=="POST":    
+        try:
+            dados = flask.request.get_json(force=True)  # Lê JSON enviado
+            if not isinstance(dados, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
+
+            dicioservico['nome'] = dados.get("nome")
+            dicioservico['valor'] = dados.get("valorBase")
+            dicioservico['descricao'] = dados.get("descricao")
+            dicioservico['idservico']=dados.get("id")
+            listaservico.append(dicioservico.copy())
+            print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valor']} \nDescricão: {dicioservico['descricao']} \nID:{dicioservico['idservico']}\n {listaservico}")
+
+            return flask.jsonify({"sucess": "cadastrado com sucesso"})
+
+        except Exception as e:
+            return flask.jsonify({"erro": str(e)}), 500
+        
+    if flask.request.method=="PUT":
+        try:
+            dados2 = flask.request.get_json(force=True)
+
+            if not isinstance(dados2, dict):
+                return flask.jsonify({"erro": "Formato inválido"}), 400
+
+            for servico in listaservico:
+
+                if int(servico["idservico"]) == int(dados2["id"]):
+
+                    servico["nome"] = dados2["nome"]
+                    servico["valor"] = dados2["valor"]
+                    servico["descricao"] = dados2["descricao"]
+
+                    print(servico)
+
+                    return flask.jsonify({"success": "Cliente atualizado"})
+
+            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+
+        except Exception as e:
+            print(e)
+            
+            return flask.jsonify({"erro": str(e)}), 500
+    if flask.request.method=="DELETE":
+        try:
+           dados3 = flask.request.get_json(force=True)
+           if not isinstance(dados3, dict):
+                   return flask.jsonify({"erro": "Formato inválido"}), 400
+           for servico in listaservico:
+               if int(servico["idservico"]) == int(dados3['id']):
+                   #mudar o valor que subtrai o id 
+                   listaservico.pop(servico["idservico"]-3)
+                   return flask.jsonify({"success": "serviço atualizado"})
+           return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+        
+        except Exception as e:
+           print(e)
+           return flask.jsonify({"erro": str(e)}), 500
 
 @app.route('/clientes',methods=["GET",'POST'])
+@login_required
 def clientes():
-    nome=flask.request.form.get('nome')
-    telefone=flask.request.form.get('telefone')
-    endereco=flask.request.form.get('endereco')
-    novo_nome=flask.request.form.get('nome2')
-    novo_telefone=flask.request.form.get('telefone2')
-    novo_endereco=flask.request.form.get('endereco2')
-    print(f'{nome}\n{telefone}\n{endereco}\n{novo_nome}\n{novo_telefone}\n{novo_endereco}')
     return flask.render_template('clientes.html')
 
-@app.route('/',methods=['GET','POST'])
+@app.route('/')
 def login():
+    return flask.render_template('login.html')
+
+@app.route('/', methods=['POST'])
+def verificarLogin():
     nome=flask.request.form.get('email')
     senha=flask.request.form.get('senha')
     print(nome,'\n', senha)
     if nome == 'BLK@gmail.com' and senha == '12345':
-        return flask.redirect('/agenda')
+        flask.session['logado'] = True
+        return flask.redirect(flask.url_for('agenda'))
     else:
-        return flask.render_template('login.html')
-
+        return flask.redirect(flask.url_for('login'))
+    
 @app.route('/servico',methods=['GET','POST'])
+@login_required
 def servicos():
-    servico_nome=flask.request.form.get('nomeservico')
-    servico_valor=flask.request.form.get('valorservico')
-    servico_descricao=flask.request.form.get('descricaoservico')
-    edit_nome=flask.request.form.get('nomeedit')
-    edit_valor=flask.request.form.get('valoredit')
-    edit_descricao=flask.request.form.get('descricaoedit')
-    print(f'{servico_nome}\n{servico_valor}\n{servico_descricao}\n{edit_nome}\n{edit_valor}\n{edit_descricao}')
     return flask.render_template('servicos.html')
+
+
 if __name__ == '_main_':
     app.run(debug=True)
