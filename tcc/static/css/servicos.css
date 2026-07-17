@@ -47,6 +47,11 @@ nav a{
     font-weight:600;
 }
 
+.topbar nav a:hover{
+
+    color:#ff7417;
+}
+
 nav a.active{
     color:#ff6d1a;
 }

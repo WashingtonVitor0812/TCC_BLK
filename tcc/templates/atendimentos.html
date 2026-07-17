@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BLK • Atendimentos</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="..\static\css\atendimentos.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+    <div id="app">
+
+        <!-- ===================================================== -->
+        <!-- HEADER -->
+        <!-- ===================================================== -->
+
+        <header class="topbar">
+
+            <div class="logo">
+                BLK
+            </div>
+
+            <nav>
+
+                <a href="agenda.html">
+                    Agenda
+                </a>
+
+                <a href="clientes.html">
+                    Clientes
+                </a>
+
+                <a class="active" href="#">
+                    Atendimentos
+                </a>
+
+                <a href="servicos.html">
+                    Serviços
+                </a>
+
+            </nav>
+
+        </header>
+
+        <!-- ===================================================== -->
+        <!-- TÍTULO -->
+        <!-- ===================================================== -->
+
+        <section class="page-header">
+
+            <h1>
+                Atendimentos
+            </h1>
+
+            <button
+                id="btnNovoAtendimento"
+                class="new-btn">
+
+                Novo atendimento
+
+                <span>
+                    +
+                </span>
+
+            </button>
+
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- CONTEÚDO -->
+        <!-- ===================================================== -->
+
+        <main class="page-content">
+
+            <!-- Barra de pesquisa -->
+
+            <div class="toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Pesquisar atendimentos">
+
+                    <button>
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                    </button>
+
+                </div>
+
+                <!-- ============================= -->
+                <!-- FILTROS -->
+                <!-- ============================= -->
+
+                <select id="filterType">
+
+                    <option value="nome">
+                        Nome
+                    </option>
+
+                    <option value="cliente">
+                        Cliente
+                    </option>
+
+                    <option value="status">
+                        Status
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- ===================================================== -->
+            <!-- TABELA -->
+            <!-- ===================================================== -->
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Nome</th>
+
+                            <th>Valor total</th>
+
+                            <th>Data</th>
+
+                            <th>Cliente</th>
+
+                            <th>Status</th>
+
+                            <th>Ações</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="atendimentosTableBody">
+
+                        <!--
+
+                        ====================================================
+
+                        FLASK FUTURO
+
+                        GET /atendimentos
+
+                        Renderização poderá ser feita
+                        via fetch() ou Jinja.
+
+                        ====================================================
+
+                        -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- MODAL DE VISUALIZAÇÃO -->
+    <!-- ===================================================== -->
+
+    <div
+        id="viewModal"
+        class="modal-overlay">
+
+        <div class="modal large">
+
+            <button
+                class="close-btn"
+                onclick="closeViewModal()">
+
+                &times;
+
+            </button>
+
+            <h2>
+
+                VISUALIZAR ATENDIMENTO
+
+            </h2>
+
+            <div class="details-grid">
+
+                <div class="detail">
+
+                    <label>
+                        Nome
+                    </label>
+
+                    <span id="viewNome"></span>
+
+                </div>
+
+                <div class="detail">
+
+                    <label>
+                        Cliente
+                    </label>
+
+                    <span id="viewCliente"></span>
+
+                </div>
+
+                <div class="detail">
+
+                    <label>
+                        Data
+                    </label>
+
+                    <span id="viewData"></span>
+
+                </div>
+
+                <div class="detail">
+
+                    <label>
+                        Status
+                    </label>
+
+                    <span id="viewStatus"></span>
+
+                </div>
+
+                <div class="detail full">
+
+                    <label>
+                        Descrição
+                    </label>
+
+                    <span id="viewDescricao"></span>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================================== -->
+            <!-- SERVIÇOS -->
+            <!-- ===================================================== -->
+
+            <h3>
+
+                Serviços
+
+            </h3>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Serviço</th>
+
+                        <th>Quantidade</th>
+
+                        <th>Valor Unit.</th>
+
+                        <th>Total</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="viewServices">
+
+                    <!--
+
+                    FLASK FUTURO
+
+                    GET /atendimentos/<id>
+
+                    Retornar também a lista
+                    completa dos serviços.
+
+                    -->
+
+                </tbody>
+
+            </table>
+
+            <div class="total-area">
+
+                <strong>
+
+                    Total:
+
+                </strong>
+
+                <span id="viewTotal"></span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- MODAL CONFIRMAÇÃO -->
+    <!-- ===================================================== -->
+
+    <div
+        id="deleteModal"
+        class="modal-overlay">
+
+        <div class="modal small">
+
+            <h2>
+
+                EXCLUIR ATENDIMENTO?
+
+            </h2>
+
+            <p style="text-align:center">
+
+                Esta ação não poderá ser desfeita.
+
+            </p>
+
+            <div class="modal-buttons">
+
+                <button
+                    class="cancel-btn"
+                    onclick="closeDeleteModal()">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                    class="submit-btn"
+                    id="confirmDelete">
+
+                    Excluir
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- PDF -->
+    <!-- ===================================================== -->
+
+    <!--
+
+    Biblioteca sugerida:
+
+    https://pdfmake.github.io/docs/
+
+    Vantagens:
+
+    • totalmente em JavaScript
+    • funciona muito bem com Flask
+    • gera PDFs complexos
+    • suporta tabelas
+    • não depende do navegador
+
+    -->
+
+    <!-- ===================================================== -->
+    <!-- JS -->
+    <!-- ===================================================== -->
+
+    <script src="..\static\js\atendimentos.js"></script>
+
+</body>
+
+</html>

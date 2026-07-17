@@ -40,6 +40,11 @@ nav{
     gap:50px;
 }
 
+nav a:hover{
+
+    color:#ff7417;
+}
+
 nav a{
     color:white;
     text-decoration:none;
