@@ -144,7 +144,7 @@ nav a.active{
     border-radius:8px;
     padding:15px;
 
-    height:calc(100vh - 180px);
+    height:calc(110vh - 180px);
 }
 
 .reminders-panel h2{
@@ -156,7 +156,7 @@ nav a.active{
 
 .reminders-list{
     overflow-y:auto;
-    height:100%;
+    height:90%;
 }
 
 .reminder-item{
@@ -498,5 +498,71 @@ nav a.active{
     font-size:30px;
 
     color:#003f97;
+
+}
+
+.day-tooltip{
+
+    position:absolute;
+
+    min-width:220px;
+
+    background:white;
+
+    border:2px solid #ff6b00;
+
+    border-radius:8px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.2);
+
+    z-index:999;
+
+    overflow:hidden;
+
+}
+
+.day-tooltip.hidden{
+
+    display:none;
+
+}
+
+.tooltip-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:10px;
+
+    cursor:pointer;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+.tooltip-item:last-child{
+
+    border-bottom:none;
+
+}
+
+.tooltip-item:hover{
+
+    background:#fff5ef;
+
+}
+
+.tooltip-circle{
+
+    width:20px;
+
+    height:20px;
+
+    border:2px solid #ff6b00;
+
+    border-radius:50%;
 
 }

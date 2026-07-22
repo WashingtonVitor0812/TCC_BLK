@@ -2,6 +2,9 @@ const modal = document.getElementById("modalOverlay");
 const openBtn = document.getElementById("openReminderModal");
 const form = document.getElementById("reminderForm");
 const remindersList = document.getElementById("remindersList");
+const tooltip = document.getElementById("dayTooltip");
+tooltip.addEventListener("mouseleave", esconderTooltip);
+let lembreteEditando = null;
 
 // Abre modal
 function openModal() {
@@ -15,7 +18,19 @@ function closeModal() {
     document.body.style.overflow = "auto";
 }
 
-openBtn.addEventListener("click", openModal);
+openBtn.addEventListener("click",()=>{
+
+    lembreteEditando=null;
+
+    form.reset();
+
+    document.querySelector(".modal h2").textContent="CRIAR LEMBRETE";
+
+    document.querySelector(".save-btn").textContent="Criar";
+
+    openModal();
+
+});
 
 // Fecha clicando fora
 modal.addEventListener("click", (event) => {
@@ -135,9 +150,30 @@ function criarCalendario(){
 
             td.classList.add("event");
 
+            td.addEventListener("mouseenter",()=>{
+
+                mostrarTooltip(td,dia);
+
+            });
+
+            td.addEventListener("mouseleave",()=>{
+
+                setTimeout(()=>{
+
+                    if(!tooltip.matches(":hover")){
+
+                        esconderTooltip();
+
+                    }
+
+                },100);
+
+            });
+
         }
 
         linha.appendChild(td);
+        
 
     }
 
@@ -190,6 +226,66 @@ function carregarLembretes(){
         remindersList.appendChild(reminder);
 
     });
+
+}
+
+function mostrarTooltip(td, dia){
+
+    const lembretesDia = lembretes.filter(item=>{
+
+        const data = new Date(item.data);
+
+        return (
+
+            data.getUTCDate()==dia &&
+
+            data.getUTCMonth()==mesAtual &&
+
+            data.getUTCFullYear()==anoAtual
+
+        );
+
+    });
+
+    if(lembretesDia.length==0) return;
+
+    tooltip.innerHTML="";
+
+    lembretesDia.forEach(item=>{
+
+        const div=document.createElement("div");
+
+        div.className="tooltip-item";
+
+        div.innerHTML=`
+
+            <div class="tooltip-circle"></div>
+
+            <span>${item.titulo}</span>
+
+        `;
+
+        div.onclick=()=>abrirEdicao(item);
+
+        tooltip.appendChild(div);
+
+    });
+
+    const rect = td.getBoundingClientRect();
+
+    tooltip.classList.remove("hidden");
+
+    tooltip.style.left =
+        (window.scrollX + rect.left + rect.width/2 - tooltip.offsetWidth/2) + "px";
+
+    tooltip.style.top =
+        (window.scrollY + rect.top - tooltip.offsetHeight - 8) + "px";
+
+}
+
+function esconderTooltip(){
+
+    tooltip.classList.add("hidden");
 
 }
 
@@ -273,21 +369,94 @@ form.addEventListener("submit", (event) => {
     ==========================
     INTEGRAÇÃO FLASK FUTURA
     ==========================*/
+    if(lembreteEditando){
 
-    fetch("/pegar_dados", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(dados) // Converte objeto JS para JSON
+        fetch("/editar_lembrete", {
+
+            method: "PUT",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                id: lembreteEditando.id,
+                data: date,
+                atendimento: appointment,
+                descricao: description
+
             })
-            .then(response => response.json())
-            .then(retorno => {
-                console.log("Resposta do servidor:", retorno);
-            })
-            .catch(err => console.error("Erro:", err));
+
+        })
+        .then(response => response.json())
+        .then(retorno => {
+
+            lembreteEditando.data = date;
+            lembreteEditando.titulo = appointment;
+            lembreteEditando.descricao = description;
+
+            carregarLembretes();
+            criarCalendario();
+
+            console.log("Resposta do servidor:", retorno);
+
+        })
+        .catch(err => console.error("Erro:", err));
+
+    }else{
+
+        fetch("/pegar_dados",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(dados)
+
+        })
+        .then(response => response.json())
+        .then(retorno => {
+
+            lembretes.push({
+
+                id: retorno.id,
+                data: date,
+                titulo: appointment,
+                descricao: description
+
+            });
+
+            carregarLembretes();
+            criarCalendario();
+
+        })
+        .catch(err => console.error("Erro:", err));
+
+    }
 
     
     form.reset();
     closeModal()})
 
+function abrirEdicao(item){
+
+    lembreteEditando = item;
+
+    openModal();
+
+    tooltip.classList.add("hidden");
+
+    document.querySelector(".modal h2").textContent="EDITAR LEMBRETE";
+
+    document.querySelector(".save-btn").textContent="Salvar";
+
+    date.value=item.data;
+
+    appointment.value=item.titulo;
+
+    description.value=item.descricao;
+
+}

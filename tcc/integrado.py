@@ -22,6 +22,7 @@ cnx.close()'''
 listaagenda=[]
 
 dicioagenda={
+    'id':0,
     'data':None,
     'atendimento':None,
     'descricao':None,
@@ -84,6 +85,7 @@ def pegar_dados():
         if not isinstance(dados, dict):
             return flask.jsonify({"erro": "Formato inválido"}), 400
         
+        dicioagenda['id']=len(listaagenda)+1
         dicioagenda['data'] = dados.get("data")
         dicioagenda['atendimento'] = dados.get("atendimento")
         dicioagenda['descricao'] = dados.get("descricao")
@@ -91,10 +93,33 @@ def pegar_dados():
         listaagenda.append(dicioagenda.copy())
         print(f"Data: {dicioagenda['data']} \nAtendimento: {dicioagenda['atendimento']} \nDescricão: {dicioagenda['descricao']} \n {listaagenda}")
 
-        return flask.jsonify({"sucess": "cadastrado com sucesso"})
+        return flask.jsonify({
+
+            "success": True,
+            "id": dicioagenda["id"]
+
+        })
 
     except Exception as e:
         return flask.jsonify({"erro": str(e)}), 500
+
+@app.route("/editar_lembrete",methods=["PUT"])
+@login_required
+def editar_lembrete():
+
+    dados=flask.request.get_json()
+
+    for lembrete in listaagenda:
+
+        if lembrete["id"]==dados["id"]:
+
+            lembrete["data"]=dados["data"]
+            lembrete["atendimento"]=dados["atendimento"]
+            lembrete["descricao"]=dados["descricao"]
+
+            return flask.jsonify({"success":True})
+
+    return flask.jsonify({"success":False}),404
 
 @app.route('/pegar_cliente', methods=["POST","PUT","DELETE"])
 @login_required

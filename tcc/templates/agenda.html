@@ -187,6 +187,8 @@
 
     </div>
 
+    <div id="dayTooltip" class="day-tooltip hidden"></div>
+
     <script>
 
     const lembretes = [
@@ -194,8 +196,15 @@
     {% for dado in dados %}
 
     {
+
+        id: "{{ dado.id }}",
+
         data: "{{ dado.data }}",
-        titulo: "{{ dado.atendimento }}"
+
+        titulo: "{{ dado.atendimento }}",
+
+        descricao: `{{ dado.descricao }}`
+
     },
 
     {% endfor %}
