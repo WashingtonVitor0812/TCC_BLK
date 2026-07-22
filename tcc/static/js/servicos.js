@@ -289,6 +289,21 @@ function deleteServico(id){
     });
 }
 
+async function carregarServicos(){
+
+    const resposta =
+        await fetch(
+            "/enviar_servico"
+        );
+
+    servico =await resposta.json();
+    console.log(servico)
+
+    renderServicos();
+}
+
+carregarServicos();
+
 const searchInput =
     document.getElementById("searchInput");
 
@@ -310,6 +325,7 @@ if (searchInput) {
                 );
 
             renderServicos(filtrados);
+
         }
     );
 

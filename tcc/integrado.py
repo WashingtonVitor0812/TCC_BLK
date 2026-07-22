@@ -247,6 +247,14 @@ def pegar_servico():
            print(e)
            return flask.jsonify({"erro": str(e)}), 500
 
+@app.route('/enviar_cliente')
+def enviar_cliente():
+    return flask.jsonify(listacliente)
+
+@app.route('/enviar_servico')
+def enviar_servico():
+    return flask.jsonify(listaservico)
+
 @app.route('/clientes',methods=["GET",'POST'])
 @login_required
 def clientes():
@@ -272,6 +280,10 @@ def verificarLogin():
 def servicos():
     return flask.render_template('servicos.html')
 
+@app.route('/atendimentos',methods=['GET','POST'])
+@login_required
+def atendimentos():
+    return flask.render_template('atendimentos.html')
 
 if __name__ == '_main_':
     app.run(debug=True)

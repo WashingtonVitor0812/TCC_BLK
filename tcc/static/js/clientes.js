@@ -359,24 +359,23 @@ function deleteClient(id){
 /*
 ====================================
 FLASK FUTURO
-====================================
+====================================*/
 
 async function carregarClientes(){
 
     const resposta =
         await fetch(
-            "/clientes"
+            "/enviar_cliente"
         );
 
-    clientes =
-        await resposta.json();
+    clientes =await resposta.json();
+    console.log(clientes)
 
     renderClientes();
 }
 
 carregarClientes();
 
-====================================
-*/
+
 
 renderClientes();
