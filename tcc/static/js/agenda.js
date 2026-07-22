@@ -151,6 +151,48 @@ function criarCalendario(){
 
 }
 
+function carregarLembretes(){
+
+    remindersList.innerHTML = "";
+
+    const lembretesDoMes = lembretes
+        .filter(item => {
+
+            const data = new Date(item.data);
+
+            return (
+                data.getUTCMonth() === mesAtual &&
+                data.getUTCFullYear() === anoAtual
+            );
+
+        })
+        .sort((a,b) => new Date(a.data) - new Date(b.data));
+
+    lembretesDoMes.forEach(item => {
+
+        const data = new Date(item.data);
+
+        const reminder = document.createElement("div");
+
+        reminder.classList.add("reminder-item");
+
+        reminder.innerHTML = `
+            <div class="day-circle">
+                ${String(data.getUTCDate()).padStart(2,"0")}
+            </div>
+
+            <div class="reminder-card">
+                <h3>${item.titulo}</h3>
+                <p>${item.descricao ?? ""}</p>
+            </div>
+        `;
+
+        remindersList.appendChild(reminder);
+
+    });
+
+}
+
 prevMonth.onclick=()=>{
 
     mesAtual--;
@@ -164,8 +206,11 @@ prevMonth.onclick=()=>{
     }
 
     criarCalendario();
+    carregarLembretes();
 
 };
+
+
 
 nextMonth.onclick=()=>{
 
@@ -180,10 +225,12 @@ nextMonth.onclick=()=>{
     }
 
     criarCalendario();
+    carregarLembretes();
 
 };
 
 criarCalendario();
+carregarLembretes();
 
 // Submit
 form.addEventListener("submit", (event) => {
