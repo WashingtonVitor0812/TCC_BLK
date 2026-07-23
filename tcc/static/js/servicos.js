@@ -1,19 +1,6 @@
-let servicos = [
-    {
-        id: 1,
-        nome: "Limpeza Sofá 3 lugares",
-        valorBase: 100,
-        descricao: "Limpeza completa de sofá."
-    },
-    {
-        id: 2,
-        nome: "Limpeza Sofá 5 lugares",
-        valorBase: 150,
-        descricao: "Limpeza completa de sofá."
-    }
-];
-
-let nextServicoId = 3;
+let servicos = [];
+let idV=0
+//let nextServicoId = 3;
 
 function renderServicos(lista = servicos){
 
@@ -125,10 +112,12 @@ document
     (e) => {
 
         e.preventDefault();
-
+        if (servicos.length >0){
+            idV=servicos[servicos.length -1].id +1
+        }else{idV =1}
         const servico = {
 
-            id: nextServicoId++,
+            id: idV,
 
             nome:
                 document
@@ -296,8 +285,8 @@ async function carregarServicos(){
             "/enviar_servico"
         );
 
-    servico =await resposta.json();
-    console.log(servico)
+    servicos =await resposta.json();
+    console.log(servicos)
 
     renderServicos();
 }

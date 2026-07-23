@@ -43,9 +43,9 @@ listaservico=[]
 
 dicioservico={
     'nome':None,
-    'valor':None,
+    'valorBase':None,
     'descricao':None,
-    'idservico':None
+    'id':None
 }
 
 app=flask.Flask(__name__)
@@ -177,7 +177,7 @@ def pegar_cliente():
             for cliente in listacliente:
                 if int(cliente["id"]) == int(dados3['id']):
                     #mudar o valor que subtrai o id 
-                    listacliente.pop(cliente["id"]-3)
+                    listacliente.pop(cliente["id"]-1)
                     return flask.jsonify({"success": "Cliente atualizado"})
 
             return flask.jsonify({"erro": "Cliente não encontrado"}), 404
@@ -195,11 +195,11 @@ def pegar_servico():
                 return flask.jsonify({"erro": "Formato inválido"}), 400
 
             dicioservico['nome'] = dados.get("nome")
-            dicioservico['valor'] = dados.get("valorBase")
+            dicioservico['valorBase'] = dados.get("valorBase")
             dicioservico['descricao'] = dados.get("descricao")
-            dicioservico['idservico']=dados.get("id")
+            dicioservico['id']=dados.get("id")
             listaservico.append(dicioservico.copy())
-            print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valor']} \nDescricão: {dicioservico['descricao']} \nID:{dicioservico['idservico']}\n {listaservico}")
+            print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valorBase']} \nDescricão: {dicioservico['descricao']} \nID:{dicioservico['id']}\n {listaservico}")
 
             return flask.jsonify({"sucess": "cadastrado com sucesso"})
 
@@ -215,7 +215,7 @@ def pegar_servico():
 
             for servico in listaservico:
 
-                if int(servico["idservico"]) == int(dados2["id"]):
+                if int(servico["id"]) == int(dados2["id"]):
 
                     servico["nome"] = dados2["nome"]
                     servico["valor"] = dados2["valor"]
@@ -237,9 +237,9 @@ def pegar_servico():
            if not isinstance(dados3, dict):
                    return flask.jsonify({"erro": "Formato inválido"}), 400
            for servico in listaservico:
-               if int(servico["idservico"]) == int(dados3['id']):
+               if int(servico["id"]) == int(dados3['id']):
                    #mudar o valor que subtrai o id 
-                   listaservico.pop(servico["idservico"]-3)
+                   listaservico.pop(servico["id"]-3)
                    return flask.jsonify({"success": "serviço atualizado"})
            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
         

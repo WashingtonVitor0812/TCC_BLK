@@ -4,26 +4,8 @@
 
 // REMOVER QUANDO O FLASK ESTIVER PRONTO
 
-let clientes = [
-    {
-        id: 1,
-        nome: "José Silva",
-        telefone: "(81) 1111-1111",
-        endereco: "Rua Exemplo",
-        dataCadastro: "03/06/2026"
-    },
-    {
-        id: 2,
-        nome: "Arlindo",
-        telefone: "(81) 2222-2222",
-        endereco: "Rua Exemplo",
-        dataCadastro: "03/06/2026"
-    }
-];
-
-// Próximo ID disponível
-let nextClientId = 3;
-
+let clientes = [];
+let idV=0
 function renderClientes(lista = clientes) {
 
     const tbody =
@@ -114,9 +96,11 @@ document
 .addEventListener("submit", (e) => {
 
     e.preventDefault();
-
+    if (clientes.length >0){
+        idV=clientes[clientes.length - 1].id +1
+    }else{idV = 1}
     const novoCliente = {
-        id: nextClientId++,
+        id: idV,
         nome: document.getElementById("createNome").value,
         telefone: document.getElementById("createTelefone").value,
         endereco: document.getElementById("createEndereco").value,
@@ -137,7 +121,7 @@ document
     .catch(err => console.error(err));
 
     clientes.push(novoCliente);
-
+    console.log(clientes)
     renderClientes();
 
     createModal.classList.remove("active");
@@ -369,7 +353,6 @@ async function carregarClientes(){
         );
 
     clientes =await resposta.json();
-    console.log(clientes)
 
     renderClientes();
 }
