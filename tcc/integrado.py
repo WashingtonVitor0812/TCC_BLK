@@ -272,6 +272,40 @@ def verificarLogin():
 def servicos():
     return flask.render_template('servicos.html')
 
+@app.route('/atendimentos', methods=['GET'])
+@login_required
+def atendimentos():
 
-if __name__ == '_main_':
+    return flask.render_template(
+        'atendimentos.html'
+    )
+
+@app.route('/criar_atendimentos', methods=['GET'])
+@login_required
+def criar_atendimento():
+
+    return flask.render_template(
+        'criar_atendimentos.html',
+
+        # ==========================================
+        # DADOS TEMPORÁRIOS
+        # ==========================================
+        #
+        # Atualmente vêm das listas em memória.
+        #
+        # FUTURO MYSQL:
+        #
+        # clientes = SELECT * FROM clientes
+        # servicos = SELECT * FROM servicos
+        #
+        # O JavaScript poderá utilizar esses dados
+        # para preencher as pesquisas.
+        # ==========================================
+
+        clientes=listacliente,
+        servicos=listaservico
+    )
+
+
+if __name__ == '__main__':
     app.run(debug=True)

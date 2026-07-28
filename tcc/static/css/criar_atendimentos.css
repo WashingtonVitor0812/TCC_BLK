@@ -200,7 +200,7 @@
    CAMPO DE PESQUISA
 =========================================================== */
 
-.attendance-search-field {
+.search-field {
 
     display: flex;
 
@@ -218,7 +218,12 @@
 
 }
 
-.attendance-search-field input {
+
+/* ===========================================================
+   INPUT DA PESQUISA
+=========================================================== */
+
+.search-field input {
 
     flex: 1;
 
@@ -230,23 +235,40 @@
 
     padding: 0 13px;
 
+    background: white;
+
+    color: #0d3d8c;
+
     font-family: Luciole, sans-serif;
 
     font-size: 17px;
 
-    color: #0d3d8c;
-
 }
 
-.attendance-search-field input::placeholder {
+
+.search-field input::placeholder {
 
     color: #b6b6b6;
 
 }
 
-.attendance-search-field button {
+
+.search-field input:focus {
+
+    outline: none;
+
+}
+
+
+/* ===========================================================
+   BOTÃO DA LUPA
+=========================================================== */
+
+.search-button {
 
     width: 48px;
+
+    flex-shrink: 0;
 
     border: none;
 
@@ -262,11 +284,243 @@
 
 }
 
-.attendance-search-field button:hover {
+
+.search-button:hover {
 
     color: #1452ad;
 
     background: #f7f7f7;
+
+}
+
+/* ===========================================================
+   GRUPO DE PESQUISA
+=========================================================== */
+
+.attendance-search-group {
+
+    position: relative;
+
+    width: 100%;
+
+}
+
+
+/* ===========================================================
+   RESULTADOS DA PESQUISA
+=========================================================== */
+
+.search-results {
+
+    position: absolute;
+
+    top: 43px;
+
+    left: 0;
+
+    width: 100%;
+
+    background: white;
+
+    border: 1px solid #d0d0d0;
+
+    border-radius: 0 0 8px 8px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+
+    overflow: hidden;
+
+    z-index: 100;
+
+    display: none;
+
+}
+
+
+/*
+Quando houver resultados, o JavaScript poderá
+adicionar esta classe.
+*/
+
+.search-results.active {
+
+    display: block;
+
+}
+
+
+/* ===========================================================
+   ITEM INDIVIDUAL DO RESULTADO
+=========================================================== */
+
+.search-result-item {
+
+    width: 100%;
+
+    padding: 10px 14px;
+
+    background: white;
+
+    border: none;
+
+    border-bottom: 1px solid #eeeeee;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    color: #0d3d8c;
+
+    font-family: Luciole, sans-serif;
+
+    transition: background .15s ease;
+
+}
+
+
+/*
+Remove a borda do último resultado.
+*/
+
+.search-result-item:last-child {
+
+    border-bottom: none;
+
+}
+
+
+/*
+Hover do resultado.
+*/
+
+.search-result-item:hover {
+
+    background: #f1f5fb;
+
+}
+
+
+/* ===========================================================
+   INFORMAÇÕES DO CLIENTE
+=========================================================== */
+
+.search-result-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+    min-width: 0;
+
+}
+
+
+.search-result-name {
+
+    color: #0d3d8c;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+.search-result-detail {
+
+    color: #777;
+
+    font-size: 14px;
+
+}
+
+
+/* ===========================================================
+   ÍCONE DO RESULTADO
+=========================================================== */
+
+.search-result-icon {
+
+    color: #1452ad;
+
+    font-size: 18px;
+
+    flex-shrink: 0;
+
+}
+
+
+/* ===========================================================
+   RESULTADO SEM CORRESPONDÊNCIA
+=========================================================== */
+
+.search-result-empty {
+
+    padding: 14px;
+
+    color: #888;
+
+    text-align: center;
+
+    font-size: 15px;
+
+}
+
+
+/* ===========================================================
+   RESULTADO DE SERVIÇO
+=========================================================== */
+
+.service-result-price {
+
+    color: #0d3d8c;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ===========================================================
+   RESPONSIVO
+=========================================================== */
+
+@media(max-width:600px){
+
+    .search-result-item {
+
+        padding: 10px;
+
+    }
+
+    .search-result-name {
+
+        font-size: 15px;
+
+    }
+
+    .search-result-detail {
+
+        font-size: 13px;
+
+    }
 
 }
 

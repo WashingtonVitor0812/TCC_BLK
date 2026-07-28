@@ -33,21 +33,10 @@
 
             <nav>
 
-                <a href="agenda.html">
-                    Agenda
-                </a>
-
-                <a href="clientes.html">
-                    Clientes
-                </a>
-
-                <a class="active" href="#">
-                    Atendimentos
-                </a>
-
-                <a href="servicos.html">
-                    Serviços
-                </a>
+                <a href="{{url_for('agenda') }}">Agenda</a>
+                <a href="{{url_for('clientes') }}">Clientes</a>
+                <a class="active" href="#">Atendimentos</a>
+                <a href="{{url_for('servicos') }}">Serviços</a>
 
             </nav>
 
@@ -64,10 +53,11 @@
             </h1>
 
             <button
-                id="btnNovoAtendimento"
-                class="new-btn">
-
-                Novo atendimento
+                type="button"
+                class="new-btn"
+                onclick="window.location.href='{{ url_for('criar_atendimento') }}'"
+            >
+                Criar atendimento
 
                 <span>
                     +
@@ -387,6 +377,14 @@
     <!-- ===================================================== -->
     <!-- JS -->
     <!-- ===================================================== -->
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+
+    <script
+        src="{{ url_for('static', filename='js/criar_atendimento.js') }}">
+    </script>
 
     <script src="..\static\js\atendimentos.js"></script>
 

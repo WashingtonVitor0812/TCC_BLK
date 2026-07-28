@@ -51,9 +51,9 @@
 
     <header class="creation-header">
 
-        <a href="atendimentos.html">
+        <a href="{{ url_for('atendimentos') }}">
             &lt; Criação de Atendimentos
-        </a>
+        </a>   
 
     </header>
 
@@ -160,34 +160,42 @@
                      CLIENTE
                 ================================================== -->
 
-                <div class="attendance-search-field">
+                <div class="attendance-search-group">
 
-                    <label
-                        for="clienteInput"
-                        class="sr-only"
+                    <div class="search-field">
+
+                        <label
+                            for="clienteInput"
+                            class="sr-only"
+                        >
+                            Cliente
+                        </label>
+
+                        <input
+                            type="text"
+                            id="clienteInput"
+                            name="cliente"
+                            placeholder="Cliente*"
+                            autocomplete="off"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="btnPesquisarCliente"
+                            class="search-button"
+                            title="Pesquisar cliente"
+                        >
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="clienteResultados"
+                        class="search-results"
                     >
-                        Cliente
-                    </label>
-
-                    <input
-                        type="text"
-                        id="clienteInput"
-                        name="cliente"
-                        placeholder="Cliente*"
-                        autocomplete="off"
-                        required
-                    >
-
-                    <button
-                        type="button"
-                        id="btnPesquisarCliente"
-                        title="Pesquisar cliente"
-                        aria-label="Pesquisar cliente"
-                    >
-
-                        <i class="fa-solid fa-magnifying-glass"></i>
-
-                    </button>
+                    </div>
 
                 </div>
 
@@ -208,46 +216,50 @@
                      JavaScript
                 ================================================== -->
 
-                <div
-                    id="clienteResultados"
-                    class="search-results"
-                >
-                </div>
-
 
 
                 <!-- ==================================================
                      SERVIÇO
                 ================================================== -->
 
-                <div class="attendance-search-field">
+                <div class="attendance-search-group">
 
-                    <label
-                        for="servicoInput"
-                        class="sr-only"
+                    <div class="search-field">
+
+                        <label
+                            for="servicoInput"
+                            class="sr-only"
+                        >
+                            Serviço
+                        </label>
+
+                        <input
+                            type="text"
+                            id="servicoInput"
+                            name="servico"
+                            placeholder="Serviço"
+                            autocomplete="off"
+                            
+                        >
+
+                        <button
+                            type="button"
+                            id="btnPesquisarServico"
+                            class="search-button"
+                            title="Pesquisar serviço"
+                        >
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="servicoResultados"
+                        class="search-results"
                     >
-                        Serviço
-                    </label>
-
-                    <input
-                        type="text"
-                        id="servicoInput"
-                        name="servico"
-                        placeholder="Serviço*"
-                        autocomplete="off"
-                        required
-                    >
-
-                    <button
-                        type="button"
-                        id="btnPesquisarServico"
-                        title="Pesquisar serviço"
-                        aria-label="Pesquisar serviço"
-                    >
-
-                        <i class="fa-solid fa-magnifying-glass"></i>
-
-                    </button>
+                    </div>
 
                 </div>
 
@@ -261,13 +273,6 @@
                      Ao selecionar um serviço, ele deverá ser
                      acrescentado à tabela abaixo.
                 ================================================== -->
-
-                <div
-                    id="servicoResultados"
-                    class="search-results"
-                >
-                </div>
-
 
 
                 <!-- ==================================================
@@ -586,131 +591,6 @@
 
 
 
-    <!-- ==================================================
-         MODAL DE PESQUISA — CLIENTES
-    ================================================== -->
-
-    <div
-        id="clienteModal"
-        class="modal-overlay"
-        aria-hidden="true"
-    >
-
-        <div
-            class="modal search-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="clienteModalTitle"
-        >
-
-            <button
-                type="button"
-                class="modal-close"
-                data-close-modal="clienteModal"
-                aria-label="Fechar"
-            >
-
-                <i class="fa-solid fa-xmark"></i>
-
-            </button>
-
-
-            <h2 id="clienteModalTitle">
-                SELECIONAR CLIENTE
-            </h2>
-
-
-            <div class="modal-search">
-
-                <input
-                    type="text"
-                    id="clienteModalSearch"
-                    placeholder="Pesquisar cliente"
-                    autocomplete="off"
-                >
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-            </div>
-
-
-            <div
-                id="clienteModalResults"
-                class="modal-results"
-            >
-
-                <!-- Resultados inseridos pelo JavaScript -->
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- ==================================================
-         MODAL DE PESQUISA — SERVIÇOS
-    ================================================== -->
-
-    <div
-        id="servicoModal"
-        class="modal-overlay"
-        aria-hidden="true"
-    >
-
-        <div
-            class="modal search-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="servicoModalTitle"
-        >
-
-            <button
-                type="button"
-                class="modal-close"
-                data-close-modal="servicoModal"
-                aria-label="Fechar"
-            >
-
-                <i class="fa-solid fa-xmark"></i>
-
-            </button>
-
-
-            <h2 id="servicoModalTitle">
-                SELECIONAR SERVIÇO
-            </h2>
-
-
-            <div class="modal-search">
-
-                <input
-                    type="text"
-                    id="servicoModalSearch"
-                    placeholder="Pesquisar serviço"
-                    autocomplete="off"
-                >
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-            </div>
-
-
-            <div
-                id="servicoModalResults"
-                class="modal-results"
-            >
-
-                <!-- Resultados inseridos pelo JavaScript -->
-
-            </div>
-
-        </div>
-
-    </div>
-
-
 
     <!-- ==================================================
          INTEGRAÇÃO FLASK / MYSQL
@@ -836,8 +716,35 @@
          JAVASCRIPT
     ================================================== -->
 
+    <script>
+
+    /*
+    ==========================================================
+    DADOS ENVIADOS PELO FLASK
+    ==========================================================
+
+    Estes dados são temporários.
+
+    Atualmente:
+        Flask → listas em memória → HTML → JavaScript
+
+    Futuramente:
+        MySQL → Flask → HTML → JavaScript
+
+    ==========================================================
+    */
+
+        const clientesFlask =
+            {{ clientes | tojson }};
+
+        const servicosFlask =
+            {{ servicos | tojson }};
+
+    </script>
+
+
     <script
-        src="../static/js/criar_atendimento.js"
+        src="{{ url_for('static', filename='js/criar_atendimentos.js') }}"
     ></script>
 
 
