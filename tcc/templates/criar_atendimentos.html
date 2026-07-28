@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Criar Atendimento - BLK Higienização</title>
+
+
+    <!-- ==================================================
+         TAILWIND CSS
+    ================================================== -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <!-- ==================================================
+         FONT AWESOME
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- ==================================================
+         CSS DA APLICAÇÃO
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="../static/css/criar_atendimentos.css"
+    >
+
+</head>
+
+
+<body class="attendance-creation-page">
+
+
+    <!-- ==================================================
+         CABEÇALHO
+    ================================================== -->
+
+    <header class="creation-header">
+
+        <a href="{{ url_for('atendimentos') }}">
+            &lt; Criação de Atendimentos
+        </a>   
+
+    </header>
+
+
+
+    <!-- ==================================================
+         CONTEÚDO PRINCIPAL
+    ================================================== -->
+
+    <main class="attendance-form-page">
+
+
+        <!-- ==================================================
+             TÍTULO E AÇÕES PDF
+        ================================================== -->
+
+        <section class="attendance-title-row">
+
+            <h1 class="attendance-title">
+                CRIAR ATENDIMENTO
+            </h1>
+
+
+            <div class="attendance-document-actions">
+
+                <!-- Gerar PDF -->
+
+                <button
+                    type="button"
+                    id="btnGerarPDF"
+                    title="Gerar PDF"
+                    aria-label="Gerar PDF"
+                >
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                </button>
+
+
+                <!-- Compartilhar PDF -->
+
+                <button
+                    type="button"
+                    id="btnCompartilharPDF"
+                    title="Compartilhar PDF"
+                    aria-label="Compartilhar PDF"
+                >
+
+                    <i class="fa-solid fa-share"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             FORMULÁRIO
+        ================================================== -->
+
+        <form
+            id="atendimentoForm"
+            class="atendimento-form"
+        >
+
+
+            <!-- ==================================================
+                 CAMPOS SUPERIORES
+            ================================================== -->
+
+            <section class="attendance-top-form">
+
+
+                <!-- ==================================================
+                     NOME DO ATENDIMENTO
+                ================================================== -->
+
+                <div class="attendance-name-field">
+
+                    <label
+                        for="nomeAtendimento"
+                        class="sr-only"
+                    >
+                        Nome do atendimento
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nomeAtendimento"
+                        name="nomeAtendimento"
+                        class="attendance-field"
+                        placeholder="Nome do atendimento*"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     CLIENTE
+                ================================================== -->
+
+                <div class="attendance-search-group">
+
+                    <div class="search-field">
+
+                        <label
+                            for="clienteInput"
+                            class="sr-only"
+                        >
+                            Cliente
+                        </label>
+
+                        <input
+                            type="text"
+                            id="clienteInput"
+                            name="cliente"
+                            placeholder="Cliente*"
+                            autocomplete="off"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="btnPesquisarCliente"
+                            class="search-button"
+                            title="Pesquisar cliente"
+                        >
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="clienteResultados"
+                        class="search-results"
+                    >
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     RESULTADOS DE CLIENTES
+
+                     O JS preencherá este elemento.
+
+                     Futuramente poderá receber dados de:
+
+                     Flask
+                     ↓
+                     MySQL
+                     ↓
+                     /api/clientes
+                     ↓
+                     JavaScript
+                ================================================== -->
+
+
+
+                <!-- ==================================================
+                     SERVIÇO
+                ================================================== -->
+
+                <div class="attendance-search-group">
+
+                    <div class="search-field">
+
+                        <label
+                            for="servicoInput"
+                            class="sr-only"
+                        >
+                            Serviço
+                        </label>
+
+                        <input
+                            type="text"
+                            id="servicoInput"
+                            name="servico"
+                            placeholder="Serviço"
+                            autocomplete="off"
+                            
+                        >
+
+                        <button
+                            type="button"
+                            id="btnPesquisarServico"
+                            class="search-button"
+                            title="Pesquisar serviço"
+                        >
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="servicoResultados"
+                        class="search-results"
+                    >
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     RESULTADOS DE SERVIÇOS
+
+                     O JS preencherá este elemento com os serviços
+                     encontrados.
+
+                     Ao selecionar um serviço, ele deverá ser
+                     acrescentado à tabela abaixo.
+                ================================================== -->
+
+
+                <!-- ==================================================
+                     DESCRIÇÃO
+                ================================================== -->
+
+                <textarea
+                    id="descricaoAtendimento"
+                    name="descricao"
+                    class="attendance-field attendance-description"
+                    placeholder="Descrição"
+                ></textarea>
+
+            </section>
+
+
+
+            <!-- ==================================================
+                 TABELA DE SERVIÇOS
+            ================================================== -->
+
+            <section class="attendance-services-wrapper">
+
+
+                <!-- ==================================================
+                     COLUNA DE AÇÕES
+
+                     Cada serviço adicionado receberá um botão
+                     de exclusão nesta coluna.
+                ================================================== -->
+
+                <div
+                    id="attendanceServiceActions"
+                    class="attendance-service-actions"
+                >
+
+                    <!--
+
+                    Exemplo gerado pelo JavaScript:
+
+                    <div class="attendance-service-action">
+
+                        <button
+                            type="button"
+                            title="Remover serviço"
+                        >
+
+                            <i class="fa-solid fa-trash"></i>
+
+                        </button>
+
+                    </div>
+
+                    -->
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     TABELA
+                ================================================== -->
+
+                <table
+                    id="servicosTable"
+                    class="attendance-services-table"
+                >
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Serviço
+                            </th>
+
+                            <th>
+                                Custo base
+                            </th>
+
+                            <th>
+                                Quantidade
+                            </th>
+
+                            <th>
+                                Valor
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="servicosTableBody"
+                    >
+
+                        <!-- ==================================================
+                             SERVIÇOS SERÃO INSERIDOS PELO JAVASCRIPT
+
+                             Exemplo:
+
+                             <tr data-servico-id="1">
+
+                                 <td class="service-name">
+                                     Limpeza Sofá 5 espaços
+                                 </td>
+
+                                 <td>
+
+                                     <input
+                                         type="number"
+                                         class="service-cost"
+                                         value="50"
+                                         step="0.01"
+                                     >
+
+                                 </td>
+
+                                 <td>
+
+                                     <input
+                                         type="number"
+                                         class="service-quantity"
+                                         value="2"
+                                         min="1"
+                                     >
+
+                                 </td>
+
+                                 <td class="service-total-value">
+                                     R$ 100,00
+                                 </td>
+
+                             </tr>
+
+                        ================================================== -->
+
+                    </tbody>
+
+
+
+                    <!-- ==================================================
+                         TOTAL
+                    ================================================== -->
+
+                    <tfoot>
+
+                        <tr class="attendance-total-row">
+
+                            <td
+                                colspan="2"
+                                class="total-empty"
+                            >
+                            </td>
+
+
+                            <td class="attendance-total-label">
+                                Total:
+                            </td>
+
+
+                            <td
+                                id="valorTotal"
+                                class="attendance-grand-total"
+                            >
+                                R$ 0,00
+                            </td>
+
+                        </tr>
+
+                    </tfoot>
+
+                </table>
+
+            </section>
+
+
+
+            <!-- ==================================================
+                 DADOS OCULTOS
+            ================================================== -->
+
+
+            <!-- ID DO CLIENTE -->
+
+            <input
+                type="hidden"
+                id="clienteId"
+                name="clienteId"
+            >
+
+
+            <!-- IDs DOS SERVIÇOS -->
+
+            <input
+                type="hidden"
+                id="servicosSelecionados"
+                name="servicosSelecionados"
+            >
+
+
+            <!-- ID DO ATENDIMENTO CRIADO
+
+                 Será preenchido pelo JS após o Flask
+                 retornar o atendimento criado.
+
+                 Necessário para criar o lembrete posteriormente.
+            -->
+
+            <input
+                type="hidden"
+                id="atendimentoId"
+                name="atendimentoId"
+            >
+
+
+
+            <!-- ==================================================
+                 BOTÃO SALVAR
+            ================================================== -->
+
+            <div class="attendance-save-area">
+
+                <button
+                    type="submit"
+                    id="btnSalvarAtendimento"
+                    class="attendance-save-btn"
+                >
+
+                    Salvar
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+
+
+    <!-- ==================================================
+         MODAL — CRIAR LEMBRETE
+         
+         Aparece depois que o atendimento for salvo.
+
+         SIM:
+         → salva os dados
+         → guarda o atendimento
+         → redireciona para a Agenda
+         → abre o modal de criação de lembrete
+         → preenche o atendimento automaticamente
+
+         NÃO:
+         → volta para a tela de Atendimentos
+    ================================================== -->
+
+    <div
+        id="agendaModal"
+        class="reminder-question-overlay"
+        aria-hidden="true"
+    >
+
+        <div
+            class="reminder-question-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="agendaModalTitle"
+        >
+
+            <h2 id="agendaModalTitle">
+                Atendimento criado!
+            </h2>
+
+
+            <p>
+                Deseja criar um lembrete para este atendimento
+                na agenda?
+            </p>
+
+
+            <div class="reminder-question-buttons">
+
+
+                <!-- NÃO -->
+
+                <button
+                    type="button"
+                    id="btnNaoCriarLembrete"
+                    class="reminder-no-btn"
+                >
+
+                    Não
+
+                </button>
+
+
+                <!-- SIM -->
+
+                <button
+                    type="button"
+                    id="btnCriarLembrete"
+                    class="reminder-yes-btn"
+                >
+
+                    Sim
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <!-- ==================================================
+         INTEGRAÇÃO FLASK / MYSQL
+         
+         NÃO IMPLEMENTAR AINDA.
+
+         --------------------------------------------------
+         CLIENTES
+         --------------------------------------------------
+
+         Futuramente:
+
+         GET /api/clientes
+
+         Exemplo de retorno:
+
+         [
+             {
+                 "id": 1,
+                 "nome": "Dona Sofia",
+                 "telefone": "(81) 99999-9999"
+             }
+         ]
+
+
+         --------------------------------------------------
+         SERVIÇOS
+         --------------------------------------------------
+
+         Futuramente:
+
+         GET /api/servicos
+
+         Exemplo:
+
+         [
+             {
+                 "id": 1,
+                 "nome": "Limpeza Sofá 5 espaços",
+                 "valor_base": 50.00,
+                 "descricao": "..."
+             }
+         ]
+
+
+         --------------------------------------------------
+         CRIAR ATENDIMENTO
+         --------------------------------------------------
+
+         Futuramente:
+
+         POST /api/atendimentos
+
+         Corpo:
+
+         {
+             "nome": "...",
+             "cliente_id": 1,
+             "descricao": "...",
+
+             "servicos": [
+
+                 {
+                     "servico_id": 1,
+                     "quantidade": 2,
+                     "custo_base": 50.00,
+                     "valor": 100.00
+                 }
+
+             ],
+
+             "valor_total": 100.00
+         }
+
+
+         --------------------------------------------------
+         RESPOSTA DO FLASK
+         --------------------------------------------------
+
+         O Flask deverá retornar algo semelhante a:
+
+         {
+             "sucesso": true,
+             "atendimento": {
+                 "id": 25,
+                 "nome": "Limpeza da Dona Sofia"
+             }
+         }
+
+
+         O ID será utilizado pelo JavaScript para:
+
+         1. Identificar o atendimento recém-criado.
+         2. Criar o lembrete na Agenda.
+         3. Preencher automaticamente o campo
+            "Atendimento" do popup da Agenda.
+
+
+         --------------------------------------------------
+         IMPORTANTE
+         --------------------------------------------------
+
+         A conexão com o MySQL deverá ficar no Flask.
+
+         O JavaScript NÃO deverá acessar o MySQL
+         diretamente.
+
+         Fluxo:
+
+         HTML
+           ↓
+         JavaScript
+           ↓
+         Flask
+           ↓
+         MySQL
+
+    ================================================== -->
+
+
+
+    <!-- ==================================================
+         JAVASCRIPT
+    ================================================== -->
+
+    <script>
+
+    /*
+    ==========================================================
+    DADOS ENVIADOS PELO FLASK
+    ==========================================================
+
+    Estes dados são temporários.
+
+    Atualmente:
+        Flask → listas em memória → HTML → JavaScript
+
+    Futuramente:
+        MySQL → Flask → HTML → JavaScript
+
+    ==========================================================
+    */
+
+        const clientesFlask =
+            {{ clientes | tojson }};
+
+        const servicosFlask =
+            {{ servicos | tojson }};
+
+    </script>
+
+
+    <script
+        src="{{ url_for('static', filename='js/criar_atendimentos.js') }}"
+    ></script>
+
+
+</body>
+
+</html>

@@ -43,9 +43,9 @@ listaservico=[]
 
 dicioservico={
     'nome':None,
-    'valorBase':None,
+    'valor':None,
     'descricao':None,
-    'id':None
+    'idservico':None
 }
 
 app=flask.Flask(__name__)
@@ -177,7 +177,7 @@ def pegar_cliente():
             for cliente in listacliente:
                 if int(cliente["id"]) == int(dados3['id']):
                     #mudar o valor que subtrai o id 
-                    listacliente.pop(cliente["id"]-1)
+                    listacliente.pop(cliente["id"]-3)
                     return flask.jsonify({"success": "Cliente atualizado"})
 
             return flask.jsonify({"erro": "Cliente não encontrado"}), 404
@@ -195,11 +195,11 @@ def pegar_servico():
                 return flask.jsonify({"erro": "Formato inválido"}), 400
 
             dicioservico['nome'] = dados.get("nome")
-            dicioservico['valorBase'] = dados.get("valorBase")
+            dicioservico['valor'] = dados.get("valorBase")
             dicioservico['descricao'] = dados.get("descricao")
-            dicioservico['id']=dados.get("id")
+            dicioservico['idservico']=dados.get("id")
             listaservico.append(dicioservico.copy())
-            print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valorBase']} \nDescricão: {dicioservico['descricao']} \nID:{dicioservico['id']}\n {listaservico}")
+            print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valor']} \nDescricão: {dicioservico['descricao']} \nID:{dicioservico['idservico']}\n {listaservico}")
 
             return flask.jsonify({"sucess": "cadastrado com sucesso"})
 
@@ -215,7 +215,7 @@ def pegar_servico():
 
             for servico in listaservico:
 
-                if int(servico["id"]) == int(dados2["id"]):
+                if int(servico["idservico"]) == int(dados2["id"]):
 
                     servico["nome"] = dados2["nome"]
                     servico["valor"] = dados2["valor"]
@@ -237,23 +237,15 @@ def pegar_servico():
            if not isinstance(dados3, dict):
                    return flask.jsonify({"erro": "Formato inválido"}), 400
            for servico in listaservico:
-               if int(servico["id"]) == int(dados3['id']):
+               if int(servico["idservico"]) == int(dados3['id']):
                    #mudar o valor que subtrai o id 
-                   listaservico.pop(servico["id"]-3)
+                   listaservico.pop(servico["idservico"]-3)
                    return flask.jsonify({"success": "serviço atualizado"})
            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
         
         except Exception as e:
            print(e)
            return flask.jsonify({"erro": str(e)}), 500
-
-@app.route('/enviar_cliente')
-def enviar_cliente():
-    return flask.jsonify(listacliente)
-
-@app.route('/enviar_servico')
-def enviar_servico():
-    return flask.jsonify(listaservico)
 
 @app.route('/clientes',methods=["GET",'POST'])
 @login_required
@@ -280,10 +272,40 @@ def verificarLogin():
 def servicos():
     return flask.render_template('servicos.html')
 
-@app.route('/atendimentos',methods=['GET','POST'])
+@app.route('/atendimentos', methods=['GET'])
 @login_required
 def atendimentos():
-    return flask.render_template('atendimentos.html')
 
-if __name__ == '_main_':
+    return flask.render_template(
+        'atendimentos.html'
+    )
+
+@app.route('/criar_atendimentos', methods=['GET'])
+@login_required
+def criar_atendimento():
+
+    return flask.render_template(
+        'criar_atendimentos.html',
+
+        # ==========================================
+        # DADOS TEMPORÁRIOS
+        # ==========================================
+        #
+        # Atualmente vêm das listas em memória.
+        #
+        # FUTURO MYSQL:
+        #
+        # clientes = SELECT * FROM clientes
+        # servicos = SELECT * FROM servicos
+        #
+        # O JavaScript poderá utilizar esses dados
+        # para preencher as pesquisas.
+        # ==========================================
+
+        clientes=listacliente,
+        servicos=listaservico
+    )
+
+
+if __name__ == '__main__':
     app.run(debug=True)
