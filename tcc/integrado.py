@@ -1,23 +1,67 @@
-import flask ,flask_cors
-from functools import wraps#,mysql.connector
+import flask ,flask_cors,mysql.connector
+from functools import wraps
 #cd tcc
 #flask --app integrado run --debug 
-
-'''cnx = mysql.connector.connect(
+#*args=tupla de dados
+#**kwargs=dicionário de dados
+def conecta():
+    return mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
     user="root",
     password="@C15@w08@Z22@d15")
-cur=cnx.cursor()
-cur.execute("SELECT * FROM clientes")
+#create
+def criar(nometabela:str,*args,**kwargs):
+    cnx=conecta()
+    cursor=cnx.cursor()
+    comando=f"INSERT INTO {nometabela}(dados que serão adicionados) VALUES (%s)"
+    valor=args
+    cursor.execute(comando,*valor)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
 
-dados = cur.fetchall()
+#read
+def ler(nometabela:str,*args,**kwargs):
+    cnx=conecta()
+    cursor=cnx.cursor()
+    comando=f"SELECT * FROM {nometabela}"
+    cursor.execute(comando)
+    retorno=cursor.fetchall()
+    for dados in retorno:
+        for ind in dados:
+            args=ind
+    cursor.close()
+    cnx.close()
 
-for cliente in dados:
-    print(cliente)
+#update
+def atualizar(nometabela:str,*args,**kwargs):
+    conexao = conecta()
+    cursor = conexao.cursor()
+    
+    comando = f"UPDATE {nometabela} SET nome = %s, email = %s WHERE id = %s"
+    valores = args
+    
+    cursor.execute(comando, *valores)
+    conexao.commit()
+    
+    cursor.close()
+    conexao.close()
 
-cur.close()
-cnx.close()'''
+
+#delete
+def delete(nometabela:str,id):
+    conexao = conecta()
+    cursor = conexao.cursor()
+    
+    comando = f"DELETE FROM {nometabela} WHERE id = %s"
+    valores = (id)
+    
+    cursor.execute(comando, valores)
+    conexao.commit()
+    
+    cursor.close()
+    conexao.close()
 
 listaagenda=[]
 
@@ -129,15 +173,11 @@ def pegar_cliente():
             dados = flask.request.get_json(force=True)  # Lê JSON enviado
             if not isinstance(dados, dict):
                 return flask.jsonify({"erro": "Formato inválido"}), 400
-
-            diciocliente['nome'] = dados.get("nome")
-            diciocliente['telefone'] = dados.get("telefone")
-            diciocliente['endereco'] = dados.get("endereco")
-            diciocliente['dataCadastro']=dados.get("dataCadastro")
-            diciocliente['id']=dados.get('id') 
-            listacliente.append(diciocliente.copy())
-            print(f"{diciocliente['nome']}\n{diciocliente['telefone']}\n    {diciocliente['endereco']}\n{diciocliente['dataCadastro']}\n    {diciocliente['id']}\n{listacliente}")
-
+            criar("Clientes",dados.get("nome"),
+                  dados.get("telefone"),
+                  dados.get("dataCadastro"),
+                  dados.get("endereco"))
+            #id é auto increment, não precisa pegar do javascript
             return flask.jsonify({"sucess": "cadastrado com sucesso"})
         except Exception as e:
             return flask.jsonify({"erro": str(e)}), 500
@@ -176,7 +216,6 @@ def pegar_cliente():
                     return flask.jsonify({"erro": "Formato inválido"}), 400
             for cliente in listacliente:
                 if int(cliente["id"]) == int(dados3['id']):
-                    #mudar o valor que subtrai o id 
                     listacliente.pop(cliente["id"]-1)
                     return flask.jsonify({"success": "Cliente atualizado"})
 
@@ -238,8 +277,7 @@ def pegar_servico():
                    return flask.jsonify({"erro": "Formato inválido"}), 400
            for servico in listaservico:
                if int(servico["id"]) == int(dados3['id']):
-                   #mudar o valor que subtrai o id 
-                   listaservico.pop(servico["id"]-3)
+                   listaservico.pop(servico["id"]-1)
                    return flask.jsonify({"success": "serviço atualizado"})
            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
         
