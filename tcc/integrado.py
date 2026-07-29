@@ -14,9 +14,12 @@ def conecta():
 def criar(nometabela:str,*args,**kwargs):
     cnx=conecta()
     cursor=cnx.cursor()
-    comando=f"INSERT INTO {nometabela}(dados que serão adicionados) VALUES (%s)"
+    colunas = ", ".join(args.keys())
     valor=args
-    cursor.execute(comando,*valor)
+    placeholders = ", ".join(["%s"] * len(args))
+    query = f"INSERT INTO {nometabela} ({colunas}) VALUES ({placeholders})"
+    valor=args
+    cursor.execute(query,valor)
     cnx.commit()
     cursor.close()
     cnx.close()
@@ -188,20 +191,9 @@ def pegar_cliente():
             if not isinstance(dados2, dict):
                 return flask.jsonify({"erro": "Formato inválido"}), 400
 
-            for cliente in listacliente:
+            atualizar("Clientes",dados2.get("nome"),dados2.get("telefone"),dados2.get("endereco"))
 
-                if int(cliente["id"]) == int(dados2["id"]):
-
-                    cliente["nome"] = dados2["nome"]
-                    cliente["telefone"] = dados2["telefone"]
-                    cliente["endereco"] = dados2["endereco"]
-
-                    print(cliente)
-
-                    print(type(dados2.get("id")))
-                    print(type(cliente.get("id")))
-
-                    return flask.jsonify({"success": "Cliente atualizado"})
+            return flask.jsonify({"success": "Cliente atualizado"})
 
             return flask.jsonify({"erro": "Cliente não encontrado"}), 404
 
