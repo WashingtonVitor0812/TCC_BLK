@@ -1,52 +1,146 @@
 import flask ,flask_cors
-from functools import wraps#,mysql.connector
+from functools import wraps
+import mysql.connector
 #cd tcc
 #flask --app integrado run --debug 
+#*args=tupla de dados
+#**kwargs=dicionário de dados
 
-'''cnx = mysql.connector.connect(
-    host="127.0.0.1",
-    port=3306,
-    user="root",
-    password="@C15@w08@Z22@d15")
-cur=cnx.cursor()
-cur.execute("SELECT * FROM clientes")
+def conecta():
+    return mysql.connector.connect(
+        host="127.0.0.1",
+        port=3306,
+        user="root",
+        password="@C15@w08@Z22@d15",
+        database="sistema_atendimento"
+    )
 
-dados = cur.fetchall()
+# ==========================
+# CREATE
+# ==========================
+def criar(nometabela: str, **dados):
+    conexao = conecta()
+    cursor = conexao.cursor()
 
-for cliente in dados:
-    print(cliente)
+    try:
+        colunas = ", ".join(dados.keys())
+        placeholders = ", ".join(["%s"] * len(dados))
 
-cur.close()
-cnx.close()'''
+        comando = f"""
+            INSERT INTO {nometabela} ({colunas})
+            VALUES ({placeholders})
+        """
 
-listaagenda=[]
+        valores = tuple(dados.values())
 
-dicioagenda={
-    'id':0,
-    'data':None,
-    'atendimento':None,
-    'descricao':None,
-    'dataservico':0
-}
+        cursor.execute(comando, valores)
+        conexao.commit()
 
-listacliente=[]
+        return cursor.lastrowid
 
-diciocliente={
-    'nome':None,
-    'telefone':None,
-    'endereco':None,
-    'dataCadastro':None,
-    'id':0
-}
+    except Exception:
+        conexao.rollback()
+        raise
 
-listaservico=[]
+    finally:
+        cursor.close()
+        conexao.close()
 
-dicioservico={
-    'nome':None,
-    'valor':None,
-    'descricao':None,
-    'idservico':None
-}
+
+# ==========================
+# READ
+# ==========================
+def ler(nometabela: str, **filtros):
+    conexao = conecta()
+    cursor = conexao.cursor(dictionary=True)
+
+    try:
+        comando = f"SELECT * FROM {nometabela}"
+        valores = []
+
+        if filtros:
+            condicoes = []
+
+            for coluna, valor in filtros.items():
+                condicoes.append(f"{coluna} = %s")
+                valores.append(valor)
+
+            comando += " WHERE " + " AND ".join(condicoes)
+
+        cursor.execute(comando, tuple(valores))
+
+        return cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conexao.close()
+
+
+# ==========================
+# UPDATE
+# ==========================
+def atualizar(nometabela: str, coluna_id: str, id_valor, **dados):
+    conexao = conecta()
+    cursor = conexao.cursor()
+
+    try:
+        if not dados:
+            raise ValueError("Nenhum dado foi informado para atualização.")
+
+        alteracoes = ", ".join(
+            f"{coluna} = %s"
+            for coluna in dados.keys()
+        )
+
+        comando = f"""
+            UPDATE {nometabela}
+            SET {alteracoes}
+            WHERE {coluna_id} = %s
+        """
+
+        valores = list(dados.values())
+        valores.append(id_valor)
+
+        cursor.execute(comando, tuple(valores))
+        conexao.commit()
+
+        return cursor.rowcount
+
+    except Exception:
+        conexao.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conexao.close()
+
+
+# ==========================
+# DELETE
+# ==========================
+def delete(nometabela: str, coluna_id: str, id_valor):
+    conexao = conecta()
+    cursor = conexao.cursor()
+
+    try:
+        comando = f"""
+            DELETE FROM {nometabela}
+            WHERE {coluna_id} = %s
+        """
+
+        cursor.execute(comando, (id_valor,))
+        conexao.commit()
+
+        return cursor.rowcount
+
+    except Exception:
+        conexao.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conexao.close()
+
 
 app=flask.Flask(__name__)
 app.secret_key = "essa segurança é um bo****"
@@ -69,188 +163,412 @@ def login_required(f):
     return decorated_function
 
 
-@app.route('/agenda',methods=["GET",'POST'])
+@app.route('/agenda', methods=["GET"])
 @login_required
 def agenda():
-    return flask.render_template('agenda.html',dados=listaagenda)
+    lembretes = ler("Lembrete")
 
-@app.route('/pegar_dados',methods=['POST'])
+    dados = []
+
+    for lembrete in lembretes:
+        dados.append({
+            "id": lembrete["ID_lembrete"],
+            "data": str(lembrete["data_lembrete"]),
+            "atendimento": "",
+            "descricao": lembrete["descricao"],
+            "dataservico": str(lembrete["data_lembrete"].day)
+        })
+
+    return flask.render_template(
+        "agenda.html",
+        dados=dados
+    )
+
+@app.route('/pegar_dados', methods=['POST'])
 @login_required
 def pegar_dados():
     try:
-        dados = flask.request.get_json(force=True)  # Lê JSON enviado
-        
-        data=dados.get('data')
-        
+        dados = flask.request.get_json(force=True)
+
         if not isinstance(dados, dict):
-            return flask.jsonify({"erro": "Formato inválido"}), 400
-        
-        dicioagenda['id']=len(listaagenda)+1
-        dicioagenda['data'] = dados.get("data")
-        dicioagenda['atendimento'] = dados.get("atendimento")
-        dicioagenda['descricao'] = dados.get("descricao")
-        dicioagenda['dataservico']=f'{data[8]}{data[9]}' 
-        listaagenda.append(dicioagenda.copy())
-        print(f"Data: {dicioagenda['data']} \nAtendimento: {dicioagenda['atendimento']} \nDescricão: {dicioagenda['descricao']} \n {listaagenda}")
+            return flask.jsonify({
+                "erro": "Formato inválido"
+            }), 400
+
+        data = dados.get("data")
+        descricao = dados.get("descricao")
+
+        if not data:
+            return flask.jsonify({
+                "erro": "Data não informada"
+            }), 400
+
+        id_lembrete = criar(
+            "Lembrete",
+            data_lembrete=data,
+            descricao=descricao
+        )
 
         return flask.jsonify({
-
             "success": True,
-            "id": dicioagenda["id"]
-
+            "id": id_lembrete
         })
 
     except Exception as e:
-        return flask.jsonify({"erro": str(e)}), 500
+        return flask.jsonify({
+            "erro": str(e)
+        }), 500
 
-@app.route("/editar_lembrete",methods=["PUT"])
+@app.route("/editar_lembrete", methods=["PUT"])
 @login_required
 def editar_lembrete():
 
-    dados=flask.request.get_json()
+    try:
+        dados = flask.request.get_json(force=True)
 
-    for lembrete in listaagenda:
+        if not isinstance(dados, dict):
+            return flask.jsonify({
+                "erro": "Formato inválido"
+            }), 400
 
-        if lembrete["id"]==dados["id"]:
+        id_lembrete = dados.get("id")
 
-            lembrete["data"]=dados["data"]
-            lembrete["atendimento"]=dados["atendimento"]
-            lembrete["descricao"]=dados["descricao"]
+        if not id_lembrete:
+            return flask.jsonify({
+                "erro": "ID do lembrete não informado"
+            }), 400
 
-            return flask.jsonify({"success":True})
+        quantidade = atualizar(
+            "Lembrete",
+            "ID_lembrete",
+            id_lembrete,
+            data_lembrete=dados.get("data"),
+            descricao=dados.get("descricao")
+        )
 
-    return flask.jsonify({"success":False}),404
+        if quantidade == 0:
+            return flask.jsonify({
+                "success": False,
+                "erro": "Lembrete não encontrado"
+            }), 404
 
-@app.route('/pegar_cliente', methods=["POST","PUT","DELETE"])
+        return flask.jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+        return flask.jsonify({
+            "erro": str(e)
+        }), 500
+
+@app.route("/excluir_lembrete", methods=["DELETE"])
+@login_required
+def excluir_lembrete():
+
+    try:
+        dados = flask.request.get_json(force=True)
+
+        if not isinstance(dados, dict):
+            return flask.jsonify({
+                "erro": "Formato inválido"
+            }), 400
+
+        id_lembrete = dados.get("id")
+
+        if not id_lembrete:
+            return flask.jsonify({
+                "erro": "ID do lembrete não informado"
+            }), 400
+
+        quantidade = delete(
+            "Lembrete",
+            "ID_lembrete",
+            id_lembrete
+        )
+
+        if quantidade == 0:
+            return flask.jsonify({
+                "success": False,
+                "erro": "Lembrete não encontrado"
+            }), 404
+
+        return flask.jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+        return flask.jsonify({
+            "erro": str(e)
+        }), 500
+
+@app.route('/pegar_cliente', methods=["POST", "PUT", "DELETE"])
 @login_required
 def pegar_cliente():
+
+    # ==========================
+    # CREATE
+    # ==========================
     if flask.request.method == "POST":
+
         try:
-            dados = flask.request.get_json(force=True)  # Lê JSON enviado
+            dados = flask.request.get_json(force=True)
+
             if not isinstance(dados, dict):
-                return flask.jsonify({"erro": "Formato inválido"}), 400
+                return flask.jsonify({
+                    "erro": "Formato inválido"
+                }), 400
 
-            diciocliente['nome'] = dados.get("nome")
-            diciocliente['telefone'] = dados.get("telefone")
-            diciocliente['endereco'] = dados.get("endereco")
-            diciocliente['dataCadastro']=dados.get("dataCadastro")
-            diciocliente['id']=dados.get('id') 
-            listacliente.append(diciocliente.copy())
-            print(f"{diciocliente['nome']}\n{diciocliente['telefone']}\n    {diciocliente['endereco']}\n{diciocliente['dataCadastro']}\n    {diciocliente['id']}\n{listacliente}")
+            id_cliente = criar(
+                "Cliente",
+                nome_cliente=dados.get("nome"),
+                telefone=dados.get("telefone"),
+                data_cadastro=dados.get("dataCadastro"),
+                endereco=dados.get("endereco")
+            )
 
-            return flask.jsonify({"sucess": "cadastrado com sucesso"})
+            return flask.jsonify({
+                "success": True,
+                "id": id_cliente
+            })
+
         except Exception as e:
-            return flask.jsonify({"erro": str(e)}), 500
+            return flask.jsonify({
+                "erro": str(e)
+            }), 500
+
+
+    # ==========================
+    # UPDATE
+    # ==========================
     if flask.request.method == "PUT":
+
         try:
-            dados2 = flask.request.get_json(force=True)
+            dados = flask.request.get_json(force=True)
 
-            if not isinstance(dados2, dict):
-                return flask.jsonify({"erro": "Formato inválido"}), 400
+            if not isinstance(dados, dict):
+                return flask.jsonify({
+                    "erro": "Formato inválido"
+                }), 400
 
-            for cliente in listacliente:
+            id_cliente = dados.get("id")
 
-                if int(cliente["id"]) == int(dados2["id"]):
+            if not id_cliente:
+                return flask.jsonify({
+                    "erro": "ID do cliente não informado"
+                }), 400
 
-                    cliente["nome"] = dados2["nome"]
-                    cliente["telefone"] = dados2["telefone"]
-                    cliente["endereco"] = dados2["endereco"]
+            quantidade = atualizar(
+                "Cliente",
+                "ID_cliente",
+                id_cliente,
+                nome_cliente=dados.get("nome"),
+                telefone=dados.get("telefone"),
+                endereco=dados.get("endereco")
+            )
 
-                    print(cliente)
+            if quantidade == 0:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Cliente não encontrado"
+                }), 404
 
-                    print(type(dados2.get("id")))
-                    print(type(cliente.get("id")))
-
-                    return flask.jsonify({"success": "Cliente atualizado"})
-
-            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+            return flask.jsonify({
+                "success": True,
+                "mensagem": "Cliente atualizado"
+            })
 
         except Exception as e:
-            print(e)
-            
-            return flask.jsonify({"erro": str(e)}), 500
-    if flask.request.method=="DELETE":
-        try:
-            dados3 = flask.request.get_json(force=True)
-            if not isinstance(dados3, dict):
-                    return flask.jsonify({"erro": "Formato inválido"}), 400
-            for cliente in listacliente:
-                if int(cliente["id"]) == int(dados3['id']):
-                    #mudar o valor que subtrai o id 
-                    listacliente.pop(cliente["id"]-3)
-                    return flask.jsonify({"success": "Cliente atualizado"})
+            return flask.jsonify({
+                "erro": str(e)
+            }), 500
 
-            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+
+    # ==========================
+    # DELETE
+    # ==========================
+    if flask.request.method == "DELETE":
+
+        try:
+            dados = flask.request.get_json(force=True)
+
+            if not isinstance(dados, dict):
+                return flask.jsonify({
+                    "erro": "Formato inválido"
+                }), 400
+
+            id_cliente = dados.get("id")
+
+            if not id_cliente:
+                return flask.jsonify({
+                    "erro": "ID do cliente não informado"
+                }), 400
+
+            quantidade = delete(
+                "Cliente",
+                "ID_cliente",
+                id_cliente
+            )
+
+            if quantidade == 0:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Cliente não encontrado"
+                }), 404
+
+            return flask.jsonify({
+                "success": True,
+                "mensagem": "Cliente excluído"
+            })
 
         except Exception as e:
-            print(e)
-            return flask.jsonify({"erro": str(e)}), 500
-@app.route('/pegar_servico',methods=["POST","PUT","DELETE"])
+            return flask.jsonify({
+                "erro": str(e)
+            }), 500
+        
+@app.route('/pegar_servico', methods=["POST", "PUT", "DELETE"])
 @login_required
 def pegar_servico():
-    if flask.request.method=="POST":    
+
+    # ==========================
+    # CREATE
+    # ==========================
+    if flask.request.method == "POST":
+
         try:
-            dados = flask.request.get_json(force=True)  # Lê JSON enviado
+            dados = flask.request.get_json(force=True)
+
             if not isinstance(dados, dict):
-                return flask.jsonify({"erro": "Formato inválido"}), 400
+                return flask.jsonify({
+                    "erro": "Formato inválido"
+                }), 400
 
-            dicioservico['nome'] = dados.get("nome")
-            dicioservico['valor'] = dados.get("valorBase")
-            dicioservico['descricao'] = dados.get("descricao")
-            dicioservico['idservico']=dados.get("id")
-            listaservico.append(dicioservico.copy())
-            print(f"Data: {dicioservico['nome']} \nAtendimento: {dicioservico['valor']} \nDescricão: {dicioservico['descricao']} \nID:{dicioservico['idservico']}\n {listaservico}")
+            id_servico = criar(
+                "Servico",
+                nome_servico=dados.get("nome"),
+                valor_base=dados.get("valorBase"),
+                descricao=dados.get("descricao")
+            )
 
-            return flask.jsonify({"sucess": "cadastrado com sucesso"})
+            return flask.jsonify({
+                "success": True,
+                "id": id_servico
+            })
 
         except Exception as e:
-            return flask.jsonify({"erro": str(e)}), 500
-        
-    if flask.request.method=="PUT":
+            return flask.jsonify({
+                "erro": str(e)
+            }), 500
+
+
+    # ==========================
+    # UPDATE
+    # ==========================
+    if flask.request.method == "PUT":
+
         try:
-            dados2 = flask.request.get_json(force=True)
+            dados = flask.request.get_json(force=True)
 
-            if not isinstance(dados2, dict):
-                return flask.jsonify({"erro": "Formato inválido"}), 400
+            if not isinstance(dados, dict):
+                return flask.jsonify({
+                    "erro": "Formato inválido"
+                }), 400
 
-            for servico in listaservico:
+            id_servico = dados.get("id")
 
-                if int(servico["idservico"]) == int(dados2["id"]):
+            if not id_servico:
+                return flask.jsonify({
+                    "erro": "ID do serviço não informado"
+                }), 400
 
-                    servico["nome"] = dados2["nome"]
-                    servico["valor"] = dados2["valor"]
-                    servico["descricao"] = dados2["descricao"]
+            quantidade = atualizar(
+                "Servico",
+                "ID_servico",
+                id_servico,
+                nome_servico=dados.get("nome"),
+                valor_base=dados.get("valor"),
+                descricao=dados.get("descricao")
+            )
 
-                    print(servico)
+            if quantidade == 0:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Serviço não encontrado"
+                }), 404
 
-                    return flask.jsonify({"success": "Cliente atualizado"})
-
-            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
+            return flask.jsonify({
+                "success": True,
+                "mensagem": "Serviço atualizado"
+            })
 
         except Exception as e:
-            print(e)
-            
-            return flask.jsonify({"erro": str(e)}), 500
-    if flask.request.method=="DELETE":
+            return flask.jsonify({
+                "erro": str(e)
+            }), 500
+
+
+    # ==========================
+    # DELETE
+    # ==========================
+    if flask.request.method == "DELETE":
+
         try:
-           dados3 = flask.request.get_json(force=True)
-           if not isinstance(dados3, dict):
-                   return flask.jsonify({"erro": "Formato inválido"}), 400
-           for servico in listaservico:
-               if int(servico["idservico"]) == int(dados3['id']):
-                   #mudar o valor que subtrai o id 
-                   listaservico.pop(servico["idservico"]-3)
-                   return flask.jsonify({"success": "serviço atualizado"})
-           return flask.jsonify({"erro": "Cliente não encontrado"}), 404
-        
-        except Exception as e:
-           print(e)
-           return flask.jsonify({"erro": str(e)}), 500
+            dados = flask.request.get_json(force=True)
 
-@app.route('/clientes',methods=["GET",'POST'])
+            if not isinstance(dados, dict):
+                return flask.jsonify({
+                    "erro": "Formato inválido"
+                }), 400
+
+            id_servico = dados.get("id")
+
+            if not id_servico:
+                return flask.jsonify({
+                    "erro": "ID do serviço não informado"
+                }), 400
+
+            quantidade = delete(
+                "Servico",
+                "ID_servico",
+                id_servico
+            )
+
+            if quantidade == 0:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Serviço não encontrado"
+                }), 404
+
+            return flask.jsonify({
+                "success": True,
+                "mensagem": "Serviço excluído"
+            })
+
+        except Exception as e:
+            return flask.jsonify({
+                "erro": str(e)
+            }), 500
+
+@app.route('/clientes', methods=["GET"])
 @login_required
 def clientes():
-    return flask.render_template('clientes.html')
+
+    clientes_db = ler("Cliente")
+
+    clientes = []
+
+    for cliente in clientes_db:
+        clientes.append({
+            "id": cliente["ID_cliente"],
+            "nome": cliente["nome_cliente"],
+            "telefone": cliente["telefone"],
+            "endereco": cliente["endereco"],
+            "dataCadastro": str(cliente["data_cadastro"])
+        })
+
+    return flask.render_template(
+        "clientes.html",
+        clientes=clientes
+    )
 
 @app.route('/')
 def login():
@@ -267,10 +585,26 @@ def verificarLogin():
     else:
         return flask.redirect(flask.url_for('login'))
     
-@app.route('/servico',methods=['GET','POST'])
+@app.route('/servico', methods=["GET"])
 @login_required
 def servicos():
-    return flask.render_template('servicos.html')
+
+    servicos_db = ler("Servico")
+
+    servicos = []
+
+    for servico in servicos_db:
+        servicos.append({
+            "id": servico["ID_servico"],
+            "nome": servico["nome_servico"],
+            "valorBase": float(servico["valor_base"]),
+            "descricao": servico["descricao"]
+        })
+
+    return flask.render_template(
+        "servicos.html",
+        servicos=servicos
+    )
 
 @app.route('/atendimentos', methods=['GET'])
 @login_required
@@ -284,26 +618,33 @@ def atendimentos():
 @login_required
 def criar_atendimento():
 
+    clientes_db = ler("Cliente")
+    servicos_db = ler("Servico")
+
+    clientes = []
+
+    for cliente in clientes_db:
+        clientes.append({
+            "id": cliente["ID_cliente"],
+            "nome": cliente["nome_cliente"],
+            "telefone": cliente["telefone"],
+            "endereco": cliente["endereco"]
+        })
+
+    servicos = []
+
+    for servico in servicos_db:
+        servicos.append({
+            "id": servico["ID_servico"],
+            "nome": servico["nome_servico"],
+            "valorBase": float(servico["valor_base"]),
+            "descricao": servico["descricao"]
+        })
+
     return flask.render_template(
-        'criar_atendimentos.html',
-
-        # ==========================================
-        # DADOS TEMPORÁRIOS
-        # ==========================================
-        #
-        # Atualmente vêm das listas em memória.
-        #
-        # FUTURO MYSQL:
-        #
-        # clientes = SELECT * FROM clientes
-        # servicos = SELECT * FROM servicos
-        #
-        # O JavaScript poderá utilizar esses dados
-        # para preencher as pesquisas.
-        # ==========================================
-
-        clientes=listacliente,
-        servicos=listaservico
+        "criar_atendimentos.html",
+        clientes=clientes,
+        servicos=servicos
     )
 
 
