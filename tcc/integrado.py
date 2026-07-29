@@ -177,7 +177,7 @@ def pegar_cliente():
             for cliente in listacliente:
                 if int(cliente["id"]) == int(dados3['id']):
                     #mudar o valor que subtrai o id 
-                    listacliente.pop(cliente["id"]-3)
+                    listacliente.pop(cliente["id"]-1)
                     return flask.jsonify({"success": "Cliente atualizado"})
 
             return flask.jsonify({"erro": "Cliente não encontrado"}), 404
@@ -239,7 +239,7 @@ def pegar_servico():
            for servico in listaservico:
                if int(servico["idservico"]) == int(dados3['id']):
                    #mudar o valor que subtrai o id 
-                   listaservico.pop(servico["idservico"]-3)
+                   listaservico.pop(servico["idservico"]-1)
                    return flask.jsonify({"success": "serviço atualizado"})
            return flask.jsonify({"erro": "Cliente não encontrado"}), 404
         

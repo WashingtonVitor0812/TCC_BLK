@@ -1397,7 +1397,6 @@ function abrirModalAgenda() {
         "aria-hidden",
         "false"
     );
-
 }
 
 
