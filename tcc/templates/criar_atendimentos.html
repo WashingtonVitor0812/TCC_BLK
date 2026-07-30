@@ -36,7 +36,7 @@
 
     <link
         rel="stylesheet"
-        href="../static/css/criar_atendimentos.css"
+        href="{{ url_for('static', filename='css/criar_atendimentos.css') }}"
     >
 
 </head>
@@ -544,6 +544,15 @@
             aria-labelledby="agendaModalTitle"
         >
 
+            <button
+                type="button"
+                id="btnFecharAgendaModal"
+                class="reminder-modal-close"
+                aria-label="Fechar"
+            >
+                &times;
+            </button>
+
             <h2 id="agendaModalTitle">
                 Atendimento criado!
             </h2>
@@ -718,21 +727,7 @@
 
     <script>
 
-    /*
-    ==========================================================
-    DADOS ENVIADOS PELO FLASK
-    ==========================================================
-
-    Estes dados são temporários.
-
-    Atualmente:
-        Flask → listas em memória → HTML → JavaScript
-
-    Futuramente:
-        MySQL → Flask → HTML → JavaScript
-
-    ==========================================================
-    */
+    /* Dados atuais de clientes e serviços, enviados pelo Flask. */
 
         const clientesFlask =
             {{ clientes | tojson }};

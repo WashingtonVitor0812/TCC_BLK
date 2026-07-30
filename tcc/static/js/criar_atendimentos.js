@@ -35,93 +35,6 @@ const CONFIG = {
 
 
 /* ===========================================================
-   DADOS DE EXEMPLO
-   -----------------------------------------------------------
-   Estes dados existem somente para testes.
-   
-   Quando o Flask estiver funcionando, eles poderão ser
-   substituídos pelos dados vindos do banco MySQL.
-=========================================================== */
-
-
-/*
-   CLIENTES DE EXEMPLO
-*/
-
-const clientesExemplo = [
-
-    {
-        id: 1,
-        nome: "DONA SOFIA",
-        telefone: "(81) 99999-1111"
-    },
-
-    {
-        id: 2,
-        nome: "DONA MARIA",
-        telefone: "(81) 99999-2222"
-    },
-
-    {
-        id: 3,
-        nome: "SENHOR ZEZIN",
-        telefone: "(81) 99999-3333"
-    },
-
-    {
-        id: 4,
-        nome: "JOÃO DA SILVA",
-        telefone: "(81) 99999-4444"
-    }
-
-];
-
-
-/*
-   SERVIÇOS DE EXEMPLO
-*/
-
-const servicosExemplo = [
-
-    {
-        id: 1,
-        nome: "Limpeza Sofá 5 espaços",
-        valor_base: 50.00,
-        descricao: "Limpeza completa de sofá com cinco espaços."
-    },
-
-    {
-        id: 2,
-        nome: "Limpeza Sofá 3 espaços",
-        valor_base: 25.00,
-        descricao: "Limpeza completa de sofá com três espaços."
-    },
-
-    {
-        id: 3,
-        nome: "Limpeza de colchão",
-        valor_base: 80.00,
-        descricao: "Higienização completa de colchão."
-    },
-
-    {
-        id: 4,
-        nome: "Limpeza de tapete",
-        valor_base: 100.00,
-        descricao: "Higienização de tapete."
-    },
-
-    {
-        id: 5,
-        nome: "Limpeza de cadeira",
-        valor_base: 20.00,
-        descricao: "Higienização individual de cadeira."
-    }
-
-];
-
-
-/* ===========================================================
    ESTADO DA PÁGINA
 =========================================================== */
 
@@ -129,6 +42,18 @@ const servicosExemplo = [
 /*
    Cliente atualmente selecionado.
 */
+
+const clientesDisponiveis =
+    Array.isArray(clientesFlask)
+        ? clientesFlask
+        : [];
+
+
+const servicosDisponiveis =
+    Array.isArray(servicosFlask)
+        ? servicosFlask
+        : [];
+
 
 let clienteSelecionado = null;
 
@@ -236,6 +161,9 @@ const btnNaoCriarLembrete =
 const btnCriarLembrete =
     document.getElementById("btnCriarLembrete");
 
+const btnFecharAgendaModal =
+    document.getElementById("btnFecharAgendaModal");
+
 const attendanceServiceActions =
     document.getElementById("attendanceServiceActions");
 
@@ -279,6 +207,9 @@ function inicializarEventos() {
         clienteInput.addEventListener(
             "input",
             () => {
+
+                clienteSelecionado = null;
+                clienteIdInput.value = "";
 
                 pesquisarClientes(clienteInput.value);
 
@@ -408,6 +339,44 @@ function inicializarEventos() {
     }
 
 
+    if (btnFecharAgendaModal) {
+
+        btnFecharAgendaModal.addEventListener(
+            "click",
+            fecharModalAgenda
+        );
+
+    }
+
+
+    if (agendaModal) {
+
+        agendaModal.addEventListener(
+            "click",
+            (event) => {
+
+                if (event.target === agendaModal) {
+                    fecharModalAgenda();
+                }
+
+            }
+        );
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (event.key === "Escape") {
+                fecharModalAgenda();
+            }
+
+        }
+    );
+
+
     /* -------------------------------------------------------
        FECHAR RESULTADOS AO CLICAR FORA
     ------------------------------------------------------- */
@@ -468,7 +437,7 @@ function pesquisarClientes(termo) {
 
 
     const resultados =
-        clientesExemplo.filter(cliente => {
+        clientesDisponiveis.filter(cliente => {
 
             return normalizarTexto(cliente.nome)
                 .includes(busca);
@@ -532,15 +501,7 @@ function mostrarResultadosClientes(clientes) {
 
         item.addEventListener("click", () => {
 
-            clienteSelecionado = cliente;
-
-            clienteInput.value = cliente.nome;
-
-            clienteIdInput.value = cliente.id;
-
-            clienteResultados.innerHTML = "";
-
-            clienteResultados.classList.remove("active");
+            selecionarCliente(cliente);
 
         });
 
@@ -611,7 +572,7 @@ function pesquisarServicos(termo) {
 
 
     const resultados =
-        servicosExemplo.filter(servico => {
+        servicosDisponiveis.filter(servico => {
 
             return normalizarTexto(servico.nome)
                 .includes(busca);
@@ -669,7 +630,7 @@ function mostrarResultadosServicos(servicos) {
             </div>
 
             <span class="service-result-price">
-                R$ ${Number(servico.valor_base).toFixed(2).replace(".", ",")}
+                R$ ${Number(servico.valorBase).toFixed(2).replace(".", ",")}
             </span>
 
         `;
@@ -733,12 +694,12 @@ function adicionarServico(servico) {
         nome: servico.nome,
 
         custoBase:
-            Number(servico.valor_base) || 0,
+            Number(servico.valorBase) || 0,
 
         quantidade: 1,
 
         valor:
-            Number(servico.valor_base) || 0
+            Number(servico.valorBase) || 0
 
     };
 
@@ -1169,6 +1130,23 @@ async function salvarAtendimento(event) {
         descricaoAtendimento.value.trim();
 
 
+    const textoCliente = normalizarTexto(clienteInput.value);
+
+    const clientePeloId = clientesDisponiveis.find(
+        cliente => Number(cliente.id) === Number(clienteIdInput.value)
+    );
+
+    const clientesComMesmoNome = clientesDisponiveis.filter(
+        cliente => normalizarTexto(cliente.nome) === textoCliente
+    );
+
+    if (clientePeloId) {
+        clienteSelecionado = clientePeloId;
+    } else if (!clienteSelecionado && clientesComMesmoNome.length === 1) {
+        selecionarCliente(clientesComMesmoNome[0]);
+    }
+
+
     if (!nome) {
 
         alert(
@@ -1262,90 +1240,41 @@ async function salvarAtendimento(event) {
     };
 
 
-    /* -------------------------------------------------------
-       FLASK / MYSQL
-       
-       QUANDO FOR INTEGRAR:
-       
-       Remova o bloco de exemplo abaixo e descomente o
-       fetch().
-       ------------------------------------------------------- */
-
-
-    /*
     try {
 
         const response = await fetch(
             CONFIG.rotas.criarAtendimento,
             {
-
                 method: "POST",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
-                body: JSON.stringify(
-                    dadosAtendimento
-                )
-
+                body: JSON.stringify(dadosAtendimento)
             }
         );
 
+        const resultado = await response.json();
 
-        if (!response.ok) {
-
+        if (!response.ok || !resultado.success) {
             throw new Error(
-                "Erro ao criar atendimento."
+                resultado.erro ||
+                "Nao foi possivel salvar o atendimento."
             );
-
         }
 
-
-        const resultado =
-            await response.json();
-
-
         atendimentoCriado = {
-
             id: resultado.id,
-
-            ...dadosAtendimento
-
+            ...dadosAtendimento,
+            valor_total: resultado.valor_total
         };
-
 
     } catch (error) {
 
         console.error(error);
-
-        alert(
-            "Não foi possível salvar o atendimento."
-        );
-
+        alert(error.message || "Nao foi possivel salvar o atendimento.");
         return;
 
     }
-    */
-
-
-    /* -------------------------------------------------------
-       MODO DE TESTE
-       -------------------------------------------------------
-       
-       Enquanto o Flask não estiver conectado, criamos um ID
-       temporário para que todo o restante do sistema possa
-       ser testado.
-    ------------------------------------------------------- */
-
-    atendimentoCriado = {
-
-        id: gerarIdTemporario(),
-
-        ...dadosAtendimento
-
-    };
-
 
     console.log(
         "Atendimento criado:",
@@ -2224,19 +2153,6 @@ function fecharResultados() {
         servicoResultados.classList.remove("active");
 
     }
-
-}
-
-
-/*
-   Gera ID temporário para testes.
-
-   O Flask deverá substituir isso pelo ID real do banco.
-*/
-
-function gerarIdTemporario() {
-
-    return Date.now();
 
 }
 

@@ -1769,71 +1769,170 @@ def atendimentos():
 # CRIAR ATENDIMENTO
 # ============================================================
 
+def criar_atendimento_completo():
+
+    dados = flask.request.get_json(force=True)
+
+    if not isinstance(dados, dict):
+        return flask.jsonify({
+            "success": False,
+            "erro": "Formato invalido."
+        }), 400
+
+    try:
+        id_cliente = int(dados.get("id_cliente"))
+    except (TypeError, ValueError):
+        return flask.jsonify({
+            "success": False,
+            "erro": "Cliente nao informado."
+        }), 400
+
+    status = str(dados.get("status", "PENDENTE")).strip().upper()
+    status = status.replace(" ", "_")
+
+    if status not in {"PENDENTE", "EM_ANDAMENTO", "CONCLUIDO", "CANCELADO"}:
+        return flask.jsonify({
+            "success": False,
+            "erro": "Status invalido."
+        }), 400
+
+    data_atendimento = dados.get("data_atendimento") or str(date.today())
+
+    try:
+        data_atendimento = date.fromisoformat(data_atendimento)
+    except (TypeError, ValueError):
+        return flask.jsonify({
+            "success": False,
+            "erro": "Data do atendimento invalida."
+        }), 400
+
+    itens = dados.get("servicos")
+
+    if not isinstance(itens, list) or not itens:
+        return flask.jsonify({
+            "success": False,
+            "erro": "Adicione pelo menos um servico ao atendimento."
+        }), 400
+
+    servicos = []
+    ids_servicos = set()
+
+    for item in itens:
+        if not isinstance(item, dict):
+            return flask.jsonify({
+                "success": False,
+                "erro": "Formato de servico invalido."
+            }), 400
+
+        try:
+            id_servico = int(item.get("servico_id"))
+            quantidade = int(item.get("quantidade"))
+        except (TypeError, ValueError):
+            return flask.jsonify({
+                "success": False,
+                "erro": "Servico ou quantidade invalidos."
+            }), 400
+
+        if quantidade < 1:
+            return flask.jsonify({
+                "success": False,
+                "erro": "A quantidade de cada servico deve ser maior que zero."
+            }), 400
+
+        if id_servico in ids_servicos:
+            return flask.jsonify({
+                "success": False,
+                "erro": "Um servico foi informado mais de uma vez."
+            }), 400
+
+        ids_servicos.add(id_servico)
+        servicos.append((id_servico, quantidade))
+
+    conexao = conecta()
+    cursor = conexao.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            "SELECT ID_cliente FROM Cliente WHERE ID_cliente = %s",
+            (id_cliente,)
+        )
+
+        if not cursor.fetchone():
+            return flask.jsonify({
+                "success": False,
+                "erro": "Cliente nao encontrado."
+            }), 404
+
+        placeholders = ", ".join(["%s"] * len(ids_servicos))
+        cursor.execute(
+            f"SELECT ID_servico FROM Servico WHERE ID_servico IN ({placeholders})",
+            tuple(ids_servicos)
+        )
+        ids_existentes = {
+            registro["ID_servico"]
+            for registro in cursor.fetchall()
+        }
+
+        if ids_existentes != ids_servicos:
+            return flask.jsonify({
+                "success": False,
+                "erro": "Um ou mais servicos nao foram encontrados."
+            }), 404
+
+        cursor.execute(
+            """
+                INSERT INTO Atendimento
+                    (ID_cliente, status, data_atendimento)
+                VALUES (%s, %s, %s)
+            """,
+            (id_cliente, status, data_atendimento)
+        )
+        id_atendimento = cursor.lastrowid
+
+        cursor.executemany(
+            """
+                INSERT INTO Atendimento_Servico
+                    (ID_atendimento, ID_servico, quantidade)
+                VALUES (%s, %s, %s)
+            """,
+            [
+                (id_atendimento, id_servico, quantidade)
+                for id_servico, quantidade in servicos
+            ]
+        )
+
+        cursor.execute(
+            "SELECT valor_total FROM Atendimento WHERE ID_atendimento = %s",
+            (id_atendimento,)
+        )
+        atendimento = cursor.fetchone()
+        conexao.commit()
+
+        return flask.jsonify({
+            "success": True,
+            "id": id_atendimento,
+            "valor_total": float(atendimento["valor_total"] or 0)
+        }), 201
+
+    except Exception:
+        conexao.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conexao.close()
+
 @app.route('/api/atendimentos', methods=["POST"])
 @login_required
 def criar_atendimento_api():
 
     try:
-
-        dados = flask.request.get_json(force=True)
-
-        if not isinstance(dados, dict):
-
-            return flask.jsonify({
-                "erro": "Formato inválido"
-            }), 400
-
-        id_cliente = dados.get("id_cliente")
-
-        status = dados.get(
-            "status",
-            "PENDENTE"
-        )
-
-        data_atendimento = dados.get(
-            "data_atendimento"
-        )
-
-        if not id_cliente:
-
-            return flask.jsonify({
-                "erro": "Cliente não informado"
-            }), 400
-
-        if not data_atendimento:
-
-            return flask.jsonify({
-                "erro": "Data do atendimento não informada"
-            }), 400
-
-        id_atendimento = criar(
-
-            "Atendimento",
-
-            ID_cliente=id_cliente,
-
-            status=status,
-
-            data_atendimento=data_atendimento
-
-        )
-
-        return flask.jsonify({
-
-            "success": True,
-
-            "id": id_atendimento
-
-        })
-
+        return criar_atendimento_completo()
     except Exception as e:
-
         return flask.jsonify({
-
+            "success": False,
             "erro": str(e)
-
         }), 500
-
 
 # ============================================================
 # TELA DE CRIAÇÃO DE ATENDIMENTO

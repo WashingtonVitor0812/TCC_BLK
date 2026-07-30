@@ -1,1193 +1,403 @@
-    /* ===========================================================
-   CRIAÇÃO / EDIÇÃO DE ATENDIMENTO
-   Extensão do CSS da tela de Atendimentos
-=========================================================== */
-
 /* ===========================================================
-   CABEÇALHO DA TELA
+   CRIAR ATENDIMENTO — BLK HIGIENIZAÇÃO
 =========================================================== */
 
+@font-face {
+    font-family: Luciole;
+    src: url(fonts/Luciole/Luciole-Regular.ttf) format("truetype");
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Luciole, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: #ececec;
+    color: #0d3d8c;
+}
+
+/* Cabeçalho */
 .creation-header {
-
-    height: 65px;
-
-    background: #1452ad;
-
-    color: white;
-
     display: flex;
-
     align-items: center;
-
+    height: 60px;
     padding: 0 25px;
-
+    background: #003f97;
 }
 
 .creation-header a {
-
-    color: white;
-
-    text-decoration: none;
-
-    font-size: 28px;
-
+    color: #fff;
+    font-size: 18px;
     font-weight: 600;
-
+    text-decoration: none;
+    transition: color .15s ease;
 }
 
-.creation-header a:hover {
+.creation-header a:hover { color: #ff6d1a; }
 
-    color: #ff7417;
-
-}
-
-
-/* ===========================================================
-   ÁREA PRINCIPAL
-=========================================================== */
-
+/* Conteúdo */
 .attendance-form-page {
-
-    min-height: calc(100vh - 65px);
-
-    background: #f5f5f5;
-
-    padding: 20px 30px 35px;
-
-    color: #0d3d8c;
-
+    min-height: calc(100vh - 60px);
+    padding: 24px 20px 36px;
 }
-
-
-/* ===========================================================
-   TÍTULO + AÇÕES
-=========================================================== */
 
 .attendance-title-row {
-
-    width: 100%;
-
     display: flex;
-
     align-items: center;
-
-    justify-content: center;
-
-    position: relative;
-
-    margin-bottom: 10px;
-
+    justify-content: space-between;
+    width: min(100%, 1040px);
+    margin: 0 auto 14px;
 }
 
 .attendance-title {
-
-    color: #0d3d8c;
-
-    font-size: 40px;
-
-    font-weight: bold;
-
-    text-align: center;
-
-    letter-spacing: 1px;
-
+    color: #003f97;
+    font-size: 34px;
+    font-weight: 600;
 }
 
 .attendance-document-actions {
-
-    position: absolute;
-
-    right: 10px;
-
-    top: 50%;
-
-    transform: translateY(-50%);
-
     display: flex;
-
-    gap: 18px;
-
+    gap: 8px;
 }
 
 .attendance-document-actions button {
-
-    border: none;
-
-    background: transparent;
-
-    color: #0d3d8c;
-
-    font-size: 34px;
-
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 6px;
+    background: #fff;
+    color: #003f97;
+    font-size: 19px;
     cursor: pointer;
-
-    transition: .2s;
-
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+    transition: color .15s ease, background .15s ease;
 }
 
 .attendance-document-actions button:hover {
-
+    background: #fff2ea;
     color: #ff7417;
-
-    transform: scale(1.08);
-
 }
 
-
-/* ===========================================================
-   FORMULÁRIO SUPERIOR
-=========================================================== */
-
-.attendance-top-form {
-
-    max-width: 840px;
-
+.atendimento-form {
+    width: min(100%, 1040px);
     margin: 0 auto;
-
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 7px 10px;
-
+    padding: 22px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
 }
 
+/* Campos */
+.attendance-top-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
 
-/* ===========================================================
-   INPUTS
-=========================================================== */
+.attendance-name-field,
+.attendance-search-group { position: relative; }
+
+.attendance-field,
+.search-field {
+    width: 100%;
+    height: 44px;
+    border: 1px solid #cfd5dd;
+    border-radius: 8px;
+    background: #fff;
+}
 
 .attendance-field {
-
-    width: 100%;
-
-    height: 40px;
-
-    border: 1px solid #cfcfcf;
-
-    border-radius: 7px;
-
-    background: white;
-
-    padding: 0 13px;
-
+    padding: 0 12px;
     color: #0d3d8c;
-
-    font-family: Luciole, sans-serif;
-
-    font-size: 17px;
-
-    outline: none;
-
+    font-size: 16px;
+    outline: 0;
+    transition: border-color .15s ease, box-shadow .15s ease;
 }
 
-.attendance-field::placeholder {
-
-    color: #b6b6b6;
-
+.attendance-field:focus,
+.search-field:focus-within {
+    border-color: #0b4dad;
+    box-shadow: 0 0 0 2px rgba(11, 77, 173, .12);
 }
 
-.attendance-field:focus {
-
-    border-color: #1452ad;
-
-    box-shadow: 0 0 0 2px rgba(20,82,173,.12);
-
-}
-
-
-/* ===========================================================
-   CAMPO DE PESQUISA
-=========================================================== */
+.attendance-field::placeholder,
+.search-field input::placeholder { color: #999; }
 
 .search-field {
-
     display: flex;
-
-    width: 100%;
-
-    height: 40px;
-
-    background: white;
-
-    border: 1px solid #cfcfcf;
-
-    border-radius: 7px;
-
     overflow: hidden;
-
 }
-
-
-/* ===========================================================
-   INPUT DA PESQUISA
-=========================================================== */
 
 .search-field input {
-
-    flex: 1;
-
+    width: 100%;
     min-width: 0;
-
-    border: none;
-
-    outline: none;
-
-    padding: 0 13px;
-
-    background: white;
-
+    border: 0;
+    outline: 0;
+    padding: 0 12px;
     color: #0d3d8c;
-
-    font-family: Luciole, sans-serif;
-
-    font-size: 17px;
-
+    font-size: 16px;
 }
-
-
-.search-field input::placeholder {
-
-    color: #b6b6b6;
-
-}
-
-
-.search-field input:focus {
-
-    outline: none;
-
-}
-
-
-/* ===========================================================
-   BOTÃO DA LUPA
-=========================================================== */
 
 .search-button {
-
-    width: 48px;
-
-    flex-shrink: 0;
-
-    border: none;
-
-    border-left: 1px solid #d5d5d5;
-
-    background: white;
-
-    color: #b6b6b6;
-
-    font-size: 20px;
-
-    cursor: pointer;
-
-}
-
-
-.search-button:hover {
-
-    color: #1452ad;
-
-    background: #f7f7f7;
-
-}
-
-/* ===========================================================
-   GRUPO DE PESQUISA
-=========================================================== */
-
-.attendance-search-group {
-
-    position: relative;
-
-    width: 100%;
-
-}
-
-
-/* ===========================================================
-   RESULTADOS DA PESQUISA
-=========================================================== */
-
-.search-results {
-
-    position: absolute;
-
-    top: 43px;
-
-    left: 0;
-
-    width: 100%;
-
-    background: white;
-
-    border: 1px solid #d0d0d0;
-
-    border-radius: 0 0 8px 8px;
-
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
-
-    overflow: hidden;
-
-    z-index: 100;
-
-    display: none;
-
-}
-
-
-/*
-Quando houver resultados, o JavaScript poderá
-adicionar esta classe.
-*/
-
-.search-results.active {
-
-    display: block;
-
-}
-
-
-/* ===========================================================
-   ITEM INDIVIDUAL DO RESULTADO
-=========================================================== */
-
-.search-result-item {
-
-    width: 100%;
-
-    padding: 10px 14px;
-
-    background: white;
-
-    border: none;
-
-    border-bottom: 1px solid #eeeeee;
-
     display: flex;
-
     align-items: center;
-
-    justify-content: space-between;
-
-    gap: 15px;
-
-    cursor: pointer;
-
-    text-align: left;
-
-    color: #0d3d8c;
-
-    font-family: Luciole, sans-serif;
-
-    transition: background .15s ease;
-
-}
-
-
-/*
-Remove a borda do último resultado.
-*/
-
-.search-result-item:last-child {
-
-    border-bottom: none;
-
-}
-
-
-/*
-Hover do resultado.
-*/
-
-.search-result-item:hover {
-
-    background: #f1f5fb;
-
-}
-
-
-/* ===========================================================
-   INFORMAÇÕES DO CLIENTE
-=========================================================== */
-
-.search-result-info {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 2px;
-
-    min-width: 0;
-
-}
-
-
-.search-result-name {
-
-    color: #0d3d8c;
-
-    font-size: 16px;
-
-    font-weight: bold;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-
-.search-result-detail {
-
-    color: #777;
-
-    font-size: 14px;
-
-}
-
-
-/* ===========================================================
-   ÍCONE DO RESULTADO
-=========================================================== */
-
-.search-result-icon {
-
-    color: #1452ad;
-
-    font-size: 18px;
-
+    justify-content: center;
+    width: 48px;
     flex-shrink: 0;
-
+    border: 0;
+    border-left: 1px solid #d5d5d5;
+    background: #fff;
+    color: #b6b6b6;
+    font-size: 17px;
+    cursor: pointer;
+    transition: color .15s ease, background .15s ease;
 }
 
-
-/* ===========================================================
-   RESULTADO SEM CORRESPONDÊNCIA
-=========================================================== */
-
-.search-result-empty {
-
-    padding: 14px;
-
-    color: #888;
-
-    text-align: center;
-
-    font-size: 15px;
-
-}
-
-
-/* ===========================================================
-   RESULTADO DE SERVIÇO
-=========================================================== */
-
-.service-result-price {
-
-    color: #0d3d8c;
-
-    font-size: 14px;
-
-    white-space: nowrap;
-
-}
-
-
-/* ===========================================================
-   RESPONSIVO
-=========================================================== */
-
-@media(max-width:600px){
-
-    .search-result-item {
-
-        padding: 10px;
-
-    }
-
-    .search-result-name {
-
-        font-size: 15px;
-
-    }
-
-    .search-result-detail {
-
-        font-size: 13px;
-
-    }
-
-}
-
-
-/* ===========================================================
-   DESCRIÇÃO
-=========================================================== */
+.search-button:hover { background: #f7f7f7; color: #0b4dad; }
 
 .attendance-description {
-
     grid-column: 2;
-
-    grid-row: 1 / span 3;
-
-    height: 128px;
-
-    resize: none;
-
-    padding-top: 10px;
-
+    grid-row: 1 / span 2;
+    height: 100px;
+    padding-top: 11px;
+    resize: vertical;
 }
 
+.search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    z-index: 20;
+    display: none;
+    width: 100%;
+    max-height: 230px;
+    overflow-y: auto;
+    border: 1px solid #cfd5dd;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .14);
+}
 
-/* ===========================================================
-   TABELA DE SERVIÇOS
-=========================================================== */
+.search-results.active { display: block; }
 
+.search-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+    color: #0d3d8c;
+    text-align: left;
+    cursor: pointer;
+}
+
+.search-result-item:last-child { border-bottom: 0; }
+.search-result-item:hover { background: #f1f5fb; }
+.search-result-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.search-result-name { overflow: hidden; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.search-result-detail, .search-result-empty { color: #777; font-size: 13px; }
+.search-result-empty { padding: 14px; text-align: center; }
+.search-result-icon { color: #0b4dad; font-size: 15px; }
+.service-result-price { color: #0d3d8c; font-size: 14px; white-space: nowrap; }
+
+/* Serviços */
 .attendance-services-wrapper {
-
-    max-width: 840px;
-
-    margin: 10px auto 0;
-
     display: grid;
-
-    grid-template-columns: 40px 1fr;
-
+    grid-template-columns: 40px minmax(0, 1fr);
+    margin-top: 18px;
 }
-
-
-/*
-Coluna lateral destinada aos botões de remoção.
-*/
 
 .attendance-service-actions {
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
+    padding-top: 45px;
 }
 
 .attendance-service-action {
-
-    height: 55px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
+    height: 48px;
 }
 
 .attendance-service-action button {
-
-    border: none;
-
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 5px;
     background: transparent;
-
-    color: #0d3d8c;
-
-    font-size: 25px;
-
+    color: #003f97;
+    font-size: 15px;
     cursor: pointer;
-
-    transition: .2s;
-
 }
 
-.attendance-service-action button:hover {
-
-    color: #ff7417;
-
-    transform: scale(1.08);
-
-}
-
-
-/* ===========================================================
-   TABELA
-=========================================================== */
+.attendance-service-action button:hover { background: #fff2ea; color: #ff7417; }
 
 .attendance-services-table {
-
     width: 100%;
-
     border-collapse: collapse;
-
     table-layout: fixed;
-
-    background: white;
-
 }
 
 .attendance-services-table th {
-
-    height: 40px;
-
-    padding: 8px;
-
-    background: #1452ad;
-
-    color: white;
-
-    border: 1px solid #d0d0d0;
-
-    font-size: 17px;
-
-    font-weight: normal;
-
+    padding: 12px 10px;
+    border: 1px solid #0b4dad;
+    background: #0b4dad;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
     text-align: center;
-
 }
 
 .attendance-services-table td {
-
-    height: 55px;
-
-    padding: 7px;
-
-    border: 1px solid #d0d0d0;
-
-    color: #0d3d8c;
-
+    height: 48px;
+    padding: 8px;
+    border: 1px solid #d9d9d9;
+    color: #333;
+    font-size: 15px;
     text-align: center;
-
-    font-size: 16px;
-
+    vertical-align: middle;
 }
 
+.attendance-services-table tbody tr:hover td { background: #f1f5fb; }
+.attendance-services-table td:first-child { color: #0d3d8c; font-weight: 600; text-align: left; }
+.attendance-services-table th:nth-child(1), .attendance-services-table td:nth-child(1) { width: 36%; }
+.attendance-services-table th:nth-child(n + 2), .attendance-services-table td:nth-child(n + 2) { width: 21.33%; }
 
-/* ===========================================================
-   COLUNAS
-=========================================================== */
-
-.attendance-services-table th:nth-child(1),
-.attendance-services-table td:nth-child(1) {
-
-    width: 25%;
-
-}
-
-.attendance-services-table th:nth-child(2),
-.attendance-services-table td:nth-child(2) {
-
-    width: 25%;
-
-}
-
-.attendance-services-table th:nth-child(3),
-.attendance-services-table td:nth-child(3) {
-
-    width: 25%;
-
-}
-
-.attendance-services-table th:nth-child(4),
-.attendance-services-table td:nth-child(4) {
-
-    width: 25%;
-
-}
-
-
-/* ===========================================================
-   NOME DO SERVIÇO
-   Não editável.
-=========================================================== */
-
-.service-name {
-
-    font-weight: normal;
-
-    color: #0d3d8c;
-
-}
-
-
-/* ===========================================================
-   CÉLULAS EDITÁVEIS
-=========================================================== */
-
-.editable-cell {
-
-    width: 100%;
-
-    height: 100%;
-
-    min-height: 35px;
-
-    border: 1px solid transparent;
-
-    border-radius: 5px;
-
-    background: transparent;
-
-    color: #0d3d8c;
-
-    font-family: Luciole, sans-serif;
-
-    font-size: 16px;
-
-    text-align: center;
-
-    outline: none;
-
-}
-
-.editable-cell:hover {
-
-    border-color: #cfcfcf;
-
-    background: #fafafa;
-
-}
-
-.editable-cell:focus {
-
-    border-color: #1452ad;
-
-    background: white;
-
-}
-
-
-/*
-Campo de custo base.
-
-Ele pode ser alterado pelo usuário, mas o valor
-da coluna "Valor" deve continuar sendo calculado
-pelo JavaScript.
-*/
-
-.service-cost {
-
-    width: 100%;
-
-    border: 1px solid transparent;
-
-    background: transparent;
-
-    color: #0d3d8c;
-
-    text-align: center;
-
-    font-family: Luciole, sans-serif;
-
-    font-size: 16px;
-
-    outline: none;
-
-}
-
-.service-cost:focus {
-
-    border-color: #1452ad;
-
-    background: white;
-
-    border-radius: 5px;
-
-}
-
-
-/* ===========================================================
-   QUANTIDADE
-=========================================================== */
-
+.service-cost,
 .service-quantity {
-
-    width: 80px;
-
     height: 34px;
-
     border: 1px solid transparent;
-
     border-radius: 5px;
-
+    outline: 0;
     background: transparent;
-
     color: #0d3d8c;
-
+    font-size: 15px;
     text-align: center;
-
-    font-family: Luciole, sans-serif;
-
-    font-size: 16px;
-
-    outline: none;
-
 }
 
-.service-quantity:hover {
+.service-cost { width: 100%; }
+.service-quantity { width: 72px; }
+.service-cost:hover, .service-quantity:hover { border-color: #cfd5dd; }
+.service-cost:focus, .service-quantity:focus { border-color: #0b4dad; background: #fff; }
+.attendance-total-row td { background: #f7f9fc; font-weight: 600; }
+.attendance-grand-total { color: #003f97 !important; }
 
-    border-color: #cfcfcf;
-
-}
-
-.service-quantity:focus {
-
-    border-color: #1452ad;
-
-    background: white;
-
-}
-
-
-/* Remove setas do input number */
-
-.service-quantity::-webkit-inner-spin-button,
-.service-quantity::-webkit-outer-spin-button {
-
-    opacity: 1;
-
-}
-
-
-/* ===========================================================
-   VALOR CALCULADO
-=========================================================== */
-
-.service-total-value {
-
-    color: #0d3d8c;
-
-    font-weight: normal;
-
-}
-
-
-/*
-O valor é calculado pelo JS e, portanto,
-não deve ser editável diretamente.
-*/
-
-.service-total-value[readonly] {
-
-    cursor: default;
-
-}
-
-
-/* ===========================================================
-   LINHA DO TOTAL
-=========================================================== */
-
-.attendance-total-row td {
-
-    height: 45px;
-
-    font-weight: normal;
-
-}
-
-.attendance-total-label {
-
-    text-align: center !important;
-
-    font-size: 18px !important;
-
-}
-
-.attendance-grand-total {
-
-    text-align: center !important;
-
-    font-size: 18px !important;
-
-    color: #0d3d8c;
-
-}
-
-
-/* ===========================================================
-   BOTÃO SALVAR
-=========================================================== */
-
-.attendance-save-area {
-
-    display: flex;
-
-    justify-content: center;
-
-    margin-top: 70px;
-
-}
+/* Ações e modal */
+.attendance-save-area { display: flex; justify-content: center; margin-top: 24px; }
 
 .attendance-save-btn {
-
-    min-width: 155px;
-
-    height: 48px;
-
-    border: none;
-
-    border-radius: 7px;
-
-    background: #ff7417;
-
-    color: white;
-
-    font-family: Luciole, sans-serif;
-
-    font-size: 18px;
-
+    min-width: 170px;
+    height: 44px;
+    border: 0;
+    border-radius: 6px;
+    background: #ff6d1a;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
     cursor: pointer;
-
-    transition: .2s;
-
+    transition: background .15s ease, transform .1s ease;
 }
 
-.attendance-save-btn:hover {
-
-    background: #e9630b;
-
-    transform: translateY(-1px);
-
-}
-
-
-/* ===========================================================
-   MODAL — PERGUNTA SOBRE LEMBRETE
-=========================================================== */
+.attendance-save-btn:hover, .reminder-yes-btn:hover { background: #e85e0d; }
+.attendance-save-btn:active { transform: scale(.98); }
 
 .reminder-question-overlay {
-
     position: fixed;
-
     inset: 0;
-
-    background: rgba(0,0,0,.45);
-
+    z-index: 1000;
     display: none;
-
-    justify-content: center;
-
     align-items: center;
-
-    z-index: 9999;
-
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, .45);
 }
 
-.reminder-question-overlay.active {
-
-    display: flex;
-
-}
+.reminder-question-overlay.active { display: flex; }
 
 .reminder-question-modal {
-
-    width: 440px;
-
-    background: white;
-
+    position: relative;
+    width: min(440px, 100%);
+    padding: 34px;
     border-radius: 12px;
-
-    padding: 35px;
-
+    background: #fff;
     text-align: center;
-
-    box-shadow: 0 5px 25px rgba(0,0,0,.25);
-
+    box-shadow: 0 12px 35px rgba(0, 0, 0, .25);
+    animation: modal-open .2s ease;
 }
 
-.reminder-question-modal h2 {
-
-    color: #0d3d8c;
-
-    font-size: 28px;
-
-    margin-bottom: 15px;
-
+@keyframes modal-open {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.reminder-question-modal p {
-
-    color: #555;
-
-    font-size: 17px;
-
-    line-height: 1.5;
-
-    margin-bottom: 25px;
-
+.reminder-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    width: 35px;
+    height: 35px;
+    border: 0;
+    background: transparent;
+    color: #003f97;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
 }
 
-.reminder-question-buttons {
-
-    display: flex;
-
-    justify-content: center;
-
-    gap: 15px;
-
-}
+.reminder-modal-close:hover { color: #ff7417; }
+.reminder-question-modal h2 { margin-bottom: 14px; color: #003f97; font-size: 28px; }
+.reminder-question-modal p { margin-bottom: 24px; color: #555; font-size: 16px; line-height: 1.5; }
+.reminder-question-buttons { display: flex; justify-content: center; gap: 12px; }
 
 .reminder-question-buttons button {
-
-    min-width: 110px;
-
-    padding: 11px 25px;
-
-    border: none;
-
-    border-radius: 7px;
-
-    font-family: Luciole, sans-serif;
-
-    font-size: 17px;
-
+    min-width: 120px;
+    height: 42px;
+    border: 0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-
 }
 
-.reminder-yes-btn {
+.reminder-yes-btn { background: #ff6d1a; color: #fff; }
+.reminder-no-btn { background: #e3e5e8; color: #404040; }
+.reminder-no-btn:hover { background: #d3d6da; }
 
-    background: #ff7417;
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible { outline: 2px solid #0b4dad; outline-offset: 2px; }
 
-    color: white;
-
+@media (max-width: 700px) {
+    .attendance-form-page { padding: 18px 12px 28px; }
+    .attendance-title { font-size: 27px; }
+    .atendimento-form { padding: 14px; }
+    .attendance-top-form { grid-template-columns: 1fr; }
+    .attendance-description { grid-column: auto; grid-row: auto; height: 96px; }
+    .attendance-services-wrapper { overflow-x: auto; }
+    .attendance-services-table { min-width: 640px; }
 }
 
-.reminder-no-btn {
-
-    background: #dcdcdc;
-
-    color: #333;
-
-}
-
-.reminder-question-buttons button:hover {
-
-    opacity: .85;
-
-}
-
-
-/* ===========================================================
-   RESPONSIVO
-=========================================================== */
-
-@media(max-width:900px){
-
-    .attendance-form-page {
-
-        padding: 15px;
-
-    }
-
-    .attendance-title {
-
-        font-size: 32px;
-
-    }
-
-    .attendance-top-form {
-
-        grid-template-columns: 1fr;
-
-    }
-
-    .attendance-description {
-
-        grid-column: 1;
-
-        grid-row: auto;
-
-        height: 100px;
-
-    }
-
-    .attendance-services-wrapper {
-
-        grid-template-columns: 30px 1fr;
-
-    }
-
-    .attendance-services-table th,
-    .attendance-services-table td {
-
-        font-size: 14px;
-
-        padding: 5px;
-
-    }
-
-    .attendance-document-actions {
-
-        position: static;
-
-        transform: none;
-
-        margin-left: 15px;
-
-    }
-
-}
-
-@media(max-width:600px){
-
-    .creation-header {
-
-        padding: 0 15px;
-
-    }
-
-    .creation-header a {
-
-        font-size: 21px;
-
-    }
-
-    .attendance-title-row {
-
-        flex-direction: column;
-
-        gap: 8px;
-
-    }
-
-    .attendance-document-actions {
-
-        position: static;
-
-    }
-
-    .attendance-title {
-
-        font-size: 27px;
-
-    }
-
-    .attendance-services-wrapper {
-
-        overflow-x: auto;
-
-    }
-
-    .attendance-services-table {
-
-        min-width: 650px;
-
-    }
-
-    .attendance-save-area {
-
-        margin-top: 40px;
-
-    }
-
-    .reminder-question-modal {
-
-        width: calc(100% - 30px);
-
-    }
-
+@media (max-width: 460px) {
+    .creation-header { padding: 0 16px; }
+    .creation-header a { font-size: 15px; }
+    .attendance-title-row { align-items: flex-start; }
+    .attendance-document-actions button { width: 38px; height: 38px; }
+    .reminder-question-modal { padding: 32px 20px 24px; }
+    .reminder-question-buttons { flex-direction: column-reverse; }
+    .reminder-question-buttons button { width: 100%; }
 }
