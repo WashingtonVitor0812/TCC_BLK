@@ -1,63 +1,342 @@
-// ========================================
-// DADOS TEMPORÁRIOS
-// ========================================
+// ============================================================
+// DADOS
+// ============================================================
 
-// REMOVER QUANDO O FLASK ESTIVER PRONTO
+// Esta variável representa os clientes atualmente
+// carregados do banco de dados através do Flask.
 
 let clientes = [];
-let idV=0
+
+
+// ============================================================
+// ELEMENTOS DA PÁGINA
+// ============================================================
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const createModal =
+    document.getElementById("createModal");
+
+const editModal =
+    document.getElementById("editModal");
+
+const clientesTableBody =
+    document.getElementById("clientesTableBody");
+
+
+// ============================================================
+// RENDERIZAÇÃO DOS CLIENTES
+// ============================================================
+
 function renderClientes(lista = clientes) {
 
-    const tbody =
-        document.getElementById(
-            "clientesTableBody"
-        );
+    clientesTableBody.innerHTML = "";
 
-    tbody.innerHTML = "";
+
+    // Caso não existam clientes
+
+    if (lista.length === 0) {
+
+        const tr =
+            document.createElement("tr");
+
+        const td =
+            document.createElement("td");
+
+        td.colSpan = 6;
+
+        td.textContent =
+            "Nenhum cliente encontrado.";
+
+        tr.appendChild(td);
+
+        clientesTableBody.appendChild(tr);
+
+        return;
+    }
+
+
+    // Cria cada linha da tabela
 
     lista.forEach(cliente => {
 
-        tbody.innerHTML += `
-            <tr>
+        const tr =
+            document.createElement("tr");
 
-                <td>${cliente.nome}</td>
 
-                <td>${cliente.telefone}</td>
+        // ----------------------------------------
+        // Nome
+        // ----------------------------------------
 
-                <td>${cliente.dataCadastro}</td>
+        const tdNome =
+            document.createElement("td");
 
-                <td>${cliente.endereco}</td>
+        tdNome.textContent =
+            cliente.nome || "";
 
-                <td>${cliente.id}</td>
+        tr.appendChild(tdNome);
 
-                <td>
 
-                    <button
-                        class="edit-btn"
-                        onclick="openEditModal(${cliente.id})"
-                    >
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
+        // ----------------------------------------
+        // Telefone
+        // ----------------------------------------
 
-                    <button
-                        class="delete-btn"
-                        onclick="deleteClient(${cliente.id})"
-                    >
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+        const tdTelefone =
+            document.createElement("td");
 
-                </td>
+        tdTelefone.textContent =
+            cliente.telefone || "";
 
-            </tr>
-        `;
+        tr.appendChild(tdTelefone);
+
+
+        // ----------------------------------------
+        // Data de cadastro
+        // ----------------------------------------
+
+        const tdData =
+            document.createElement("td");
+
+        tdData.textContent =
+            formatarData(cliente.dataCadastro);
+
+        tr.appendChild(tdData);
+
+
+        // ----------------------------------------
+        // Endereço
+        // ----------------------------------------
+
+        const tdEndereco =
+            document.createElement("td");
+
+        tdEndereco.textContent =
+            cliente.endereco || "";
+
+        tr.appendChild(tdEndereco);
+
+
+        // ----------------------------------------
+        // ID
+        // ----------------------------------------
+
+        const tdId =
+            document.createElement("td");
+
+        tdId.textContent =
+            cliente.id;
+
+        tr.appendChild(tdId);
+
+
+        // ----------------------------------------
+        // Ações
+        // ----------------------------------------
+
+        const tdAcoes =
+            document.createElement("td");
+
+
+        // Botão editar
+
+        const botaoEditar =
+            document.createElement("button");
+
+        botaoEditar.type = "button";
+
+        botaoEditar.className =
+            "edit-btn";
+
+        botaoEditar.setAttribute(
+            "aria-label",
+            "Editar cliente"
+        );
+
+
+        const iconeEditar =
+            document.createElement("i");
+
+        iconeEditar.className =
+            "fa-solid fa-pen";
+
+
+        botaoEditar.appendChild(
+            iconeEditar
+        );
+
+
+        botaoEditar.addEventListener(
+            "click",
+            () => {
+
+                openEditModal(
+                    cliente.id
+                );
+
+            }
+        );
+
+
+        // Botão excluir
+
+        const botaoExcluir =
+            document.createElement("button");
+
+        botaoExcluir.type = "button";
+
+        botaoExcluir.className =
+            "delete-btn";
+
+        botaoExcluir.setAttribute(
+            "aria-label",
+            "Excluir cliente"
+        );
+
+
+        const iconeExcluir =
+            document.createElement("i");
+
+        iconeExcluir.className =
+            "fa-solid fa-trash";
+
+
+        botaoExcluir.appendChild(
+            iconeExcluir
+        );
+
+
+        botaoExcluir.addEventListener(
+            "click",
+            () => {
+
+                deleteClient(
+                    cliente.id
+                );
+
+            }
+        );
+
+
+        tdAcoes.appendChild(
+            botaoEditar
+        );
+
+        tdAcoes.appendChild(
+            botaoExcluir
+        );
+
+
+        tr.appendChild(tdAcoes);
+
+
+        // Adiciona a linha à tabela
+
+        clientesTableBody.appendChild(tr);
+
     });
 
 }
 
-const searchInput =
-    document.getElementById(
-        "searchInput"
+
+// ============================================================
+// FORMATAÇÃO DA DATA
+// ============================================================
+
+function formatarData(data) {
+
+    if (!data) {
+        return "";
+    }
+
+
+    /*
+        O Flask envia a data como:
+
+        YYYY-MM-DD
+
+        Exemplo:
+
+        2026-07-30
+
+        A função transforma para:
+
+        30/07/2026
+    */
+
+    const partes =
+        data.split("-");
+
+
+    if (partes.length !== 3) {
+
+        return data;
+
+    }
+
+
+    return (
+        partes[2] +
+        "/" +
+        partes[1] +
+        "/" +
+        partes[0]
     );
+
+}
+
+
+// ============================================================
+// CARREGAR CLIENTES
+// ============================================================
+
+async function carregarClientes() {
+
+    try {
+
+        const resposta =
+            await fetch(
+                "/api/clientes"
+            );
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                "Erro ao carregar clientes."
+            );
+
+        }
+
+
+        clientes =
+            await resposta.json();
+
+
+        renderClientes();
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "Erro:",
+            erro
+        );
+
+
+        alert(
+            "Não foi possível carregar os clientes."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// PESQUISA
+// ============================================================
 
 searchInput.addEventListener(
     "input",
@@ -65,103 +344,564 @@ searchInput.addEventListener(
 
         const termo =
             searchInput.value
-            .toLowerCase();
+                .trim()
+                .toLowerCase();
+
 
         const filtrados =
-            clientes.filter(cliente =>
-                cliente.nome
-                .toLowerCase()
-                .includes(termo)
+            clientes.filter(
+                cliente => {
+
+                    const nome =
+                        (
+                            cliente.nome || ""
+                        ).toLowerCase();
+
+
+                    const telefone =
+                        (
+                            cliente.telefone || ""
+                        ).toLowerCase();
+
+
+                    const endereco =
+                        (
+                            cliente.endereco || ""
+                        ).toLowerCase();
+
+
+                    const id =
+                        String(
+                            cliente.id || ""
+                        );
+
+
+                    return (
+                        nome.includes(termo) ||
+                        telefone.includes(termo) ||
+                        endereco.includes(termo) ||
+                        id.includes(termo)
+                    );
+
+                }
             );
 
-        renderClientes(filtrados);
+
+        renderClientes(
+            filtrados
+        );
+
     }
 );
 
-const createModal =
-    document.getElementById(
-        "createModal"
+
+// ============================================================
+// ABRIR MODAL DE CRIAÇÃO
+// ============================================================
+
+document
+    .getElementById("btnNovoCliente")
+    .addEventListener(
+        "click",
+        () => {
+
+            document
+                .getElementById("createForm")
+                .reset();
+
+
+            createModal.classList.add(
+                "active"
+            );
+
+
+            document
+                .getElementById("createNome")
+                .focus();
+
+        }
     );
 
-document
-.getElementById("btnNovoCliente")
-.addEventListener("click", () => {
 
-    createModal.classList.add("active");
-
-});
+// ============================================================
+// CREATE — CADASTRAR CLIENTE
+// ============================================================
 
 document
-.getElementById("createForm")
-.addEventListener("submit", (e) => {
+    .getElementById("createForm")
+    .addEventListener(
+        "submit",
+        async (e) => {
 
-    e.preventDefault();
-    if (clientes.length >0){
-        idV=clientes[clientes.length - 1].id +1
-    }else{idV = 1}
-    const novoCliente = {
-        id: idV,
-        nome: document.getElementById("createNome").value,
-        telefone: document.getElementById("createTelefone").value,
-        endereco: document.getElementById("createEndereco").value,
-        dataCadastro: new Date().toLocaleDateString("pt-BR")
-    };
+            e.preventDefault();
 
-    fetch("/pegar_cliente", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(novoCliente)
-    })
-    .then(response => response.json())
-    .then(retorno => {
-        console.log(retorno);
-    })
-    .catch(err => console.error(err));
 
-    clientes.push(novoCliente);
-    console.log(clientes)
-    renderClientes();
+            // ----------------------------------------
+            // Coleta os dados
+            // ----------------------------------------
 
-    createModal.classList.remove("active");
+            const dados = {
 
-    e.target.reset();
+                nome:
+                    document
+                        .getElementById("createNome")
+                        .value
+                        .trim(),
 
-});
+                telefone:
+                    document
+                        .getElementById("createTelefone")
+                        .value
+                        .trim(),
 
-function openEditModal(id){
+                endereco:
+                    document
+                        .getElementById("createEndereco")
+                        .value
+                        .trim()
+
+            };
+
+
+            // ----------------------------------------
+            // Validação básica
+            // ----------------------------------------
+
+            if (
+                !dados.nome ||
+                !dados.telefone ||
+                !dados.endereco
+            ) {
+
+                alert(
+                    "Preencha todos os campos."
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                // ------------------------------------
+                // Envia para o Flask
+                // ------------------------------------
+
+                const resposta =
+                    await fetch(
+                        "/pegar_cliente",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    dados
+                                )
+
+                        }
+                    );
+
+
+                // ------------------------------------
+                // Lê resposta
+                // ------------------------------------
+
+                const retorno =
+                    await resposta.json();
+
+
+                // ------------------------------------
+                // Verifica erro
+                // ------------------------------------
+
+                if (
+                    !resposta.ok ||
+                    !retorno.success
+                ) {
+
+                    alert(
+                        retorno.erro ||
+                        "Erro ao cadastrar cliente."
+                    );
+
+                    return;
+
+                }
+
+
+                // ------------------------------------
+                // Sucesso
+                // ------------------------------------
+
+                closeCreateModal();
+
+
+                document
+                    .getElementById("createForm")
+                    .reset();
+
+
+                // Recarrega os dados do banco
+
+                await carregarClientes();
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "Erro ao cadastrar:",
+                    erro
+                );
+
+
+                alert(
+                    "Erro de comunicação com o servidor."
+                );
+
+            }
+
+        }
+    );
+
+
+// ============================================================
+// ABRIR MODAL DE EDIÇÃO
+// ============================================================
+
+function openEditModal(id) {
 
     const cliente =
         clientes.find(
-            c => c.id === id
+            c => Number(c.id) === Number(id)
         );
 
-    document
-    .getElementById("editId")
-    .value = cliente.id;
+
+    if (!cliente) {
+
+        alert(
+            "Cliente não encontrado."
+        );
+
+        return;
+
+    }
+
+
+    // ----------------------------------------
+    // Preenche os campos
+    // ----------------------------------------
 
     document
-    .getElementById("editNome")
-    .value = cliente.nome;
+        .getElementById("editId")
+        .value =
+            cliente.id;
+
 
     document
-    .getElementById("editTelefone")
-    .value = cliente.telefone;
+        .getElementById("editNome")
+        .value =
+            cliente.nome || "";
+
 
     document
-    .getElementById("editEndereco")
-    .value = cliente.endereco;
+        .getElementById("editTelefone")
+        .value =
+            cliente.telefone || "";
+
 
     document
-    .getElementById("editModal")
-    .classList.add("active");
+        .getElementById("editEndereco")
+        .value =
+            cliente.endereco || "";
+
+
+    // ----------------------------------------
+    // Abre modal
+    // ----------------------------------------
+
+    editModal.classList.add(
+        "active"
+    );
+
+
+    document
+        .getElementById("editNome")
+        .focus();
+
 }
 
-const editModal =
-    document.getElementById(
-        "editModal"
+
+// ============================================================
+// UPDATE — EDITAR CLIENTE
+// ============================================================
+
+document
+    .getElementById("editForm")
+    .addEventListener(
+        "submit",
+        async (e) => {
+
+            e.preventDefault();
+
+
+            // ----------------------------------------
+            // ID
+            // ----------------------------------------
+
+            const id =
+                Number(
+                    document
+                        .getElementById("editId")
+                        .value
+                );
+
+
+            // ----------------------------------------
+            // Dados
+            // ----------------------------------------
+
+            const dados = {
+
+                id: id,
+
+                nome:
+                    document
+                        .getElementById("editNome")
+                        .value
+                        .trim(),
+
+                telefone:
+                    document
+                        .getElementById("editTelefone")
+                        .value
+                        .trim(),
+
+                endereco:
+                    document
+                        .getElementById("editEndereco")
+                        .value
+                        .trim()
+
+            };
+
+
+            // ----------------------------------------
+            // Validação
+            // ----------------------------------------
+
+            if (
+                !dados.nome ||
+                !dados.telefone ||
+                !dados.endereco
+            ) {
+
+                alert(
+                    "Preencha todos os campos."
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                // ------------------------------------
+                // Envia para o Flask
+                // ------------------------------------
+
+                const resposta =
+                    await fetch(
+                        "/pegar_cliente",
+                        {
+
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    dados
+                                )
+
+                        }
+                    );
+
+
+                // ------------------------------------
+                // Resposta
+                // ------------------------------------
+
+                const retorno =
+                    await resposta.json();
+
+
+                // ------------------------------------
+                // Erro
+                // ------------------------------------
+
+                if (
+                    !resposta.ok ||
+                    !retorno.success
+                ) {
+
+                    alert(
+                        retorno.erro ||
+                        "Erro ao atualizar cliente."
+                    );
+
+                    return;
+
+                }
+
+
+                // ------------------------------------
+                // Sucesso
+                // ------------------------------------
+
+                closeEditModal();
+
+
+                // Recarrega diretamente do banco
+
+                await carregarClientes();
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "Erro ao atualizar:",
+                    erro
+                );
+
+
+                alert(
+                    "Erro de comunicação com o servidor."
+                );
+
+            }
+
+        }
     );
+
+
+// ============================================================
+// DELETE — EXCLUIR CLIENTE
+// ============================================================
+
+async function deleteClient(id) {
+
+    // ----------------------------------------
+    // Confirmação
+    // ----------------------------------------
+
+    const confirmar =
+        confirm(
+            "Deseja realmente excluir este cliente?"
+        );
+
+
+    if (!confirmar) {
+
+        return;
+
+    }
+
+
+    try {
+
+        // ------------------------------------
+        // Envia DELETE para o Flask
+        // ------------------------------------
+
+        const resposta =
+            await fetch(
+                "/pegar_cliente",
+                {
+
+                    method: "DELETE",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            id: id
+                        })
+
+                }
+            );
+
+
+        // ------------------------------------
+        // Resposta
+        // ------------------------------------
+
+        const retorno =
+            await resposta.json();
+
+
+        // ------------------------------------
+        // Erro
+        // ------------------------------------
+
+        if (
+            !resposta.ok ||
+            !retorno.success
+        ) {
+
+            alert(
+                retorno.erro ||
+                "Erro ao excluir cliente."
+            );
+
+            return;
+
+        }
+
+
+        // ------------------------------------
+        // Sucesso
+        // ------------------------------------
+
+        await carregarClientes();
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "Erro ao excluir:",
+            erro
+        );
+
+
+        alert(
+            "Erro de comunicação com o servidor."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// FECHAR MODAL DE CRIAÇÃO
+// ============================================================
 
 function closeCreateModal() {
 
@@ -171,6 +911,11 @@ function closeCreateModal() {
 
 }
 
+
+// ============================================================
+// FECHAR MODAL DE EDIÇÃO
+// ============================================================
+
 function closeEditModal() {
 
     editModal.classList.remove(
@@ -179,11 +924,31 @@ function closeEditModal() {
 
 }
 
+
+// ============================================================
+// FECHAR TODOS OS MODAIS
+// ============================================================
+
+function closeAllModals() {
+
+    closeCreateModal();
+
+    closeEditModal();
+
+}
+
+
+// ============================================================
+// CLICAR FORA DO MODAL
+// ============================================================
+
 createModal.addEventListener(
     "click",
     (e) => {
 
-        if (e.target === createModal) {
+        if (
+            e.target === createModal
+        ) {
 
             closeCreateModal();
 
@@ -192,11 +957,14 @@ createModal.addEventListener(
     }
 );
 
+
 editModal.addEventListener(
     "click",
     (e) => {
 
-        if (e.target === editModal) {
+        if (
+            e.target === editModal
+        ) {
 
             closeEditModal();
 
@@ -205,17 +973,10 @@ editModal.addEventListener(
     }
 );
 
-function closeAllModals() {
 
-    createModal.classList.remove(
-        "active"
-    );
-
-    editModal.classList.remove(
-        "active"
-    );
-
-}
+// ============================================================
+// TECLA ESC
+// ============================================================
 
 document.addEventListener(
     "keydown",
@@ -230,135 +991,9 @@ document.addEventListener(
     }
 );
 
-document
-.getElementById("editForm")
-.addEventListener("submit", async (e) => {
 
-    e.preventDefault();
-
-    const id = Number(
-        document.getElementById("editId").value
-    );
-
-    const dados = {
-
-        nome:
-            document.getElementById("editNome").value,
-
-        telefone:
-            document.getElementById("editTelefone").value,
-
-        endereco:
-            document.getElementById("editEndereco").value,
-        id:
-            Number(document.getElementById("editId").value)
-    };
-
-    try {
-        console.log(dados);
-        console.log(JSON.stringify(dados));
-        
-
-        var resposta = await fetch('/pegar_cliente', {
-            
-            
-            method: "PUT",
-            
-            headers: {
-                "Content-Type": "application/json"
-            },
-            
-            body: JSON.stringify(dados)
-
-        });
-
-        console.log(resposta);
-        
-        if (!resposta.ok) {
-            
-            alert("Erro ao atualizar cliente.");
-            return;
-
-        }
-
-        const cliente = clientes.find(c => c.id === id);
-
-        cliente.nome = dados.nome;
-        cliente.telefone = dados.telefone;
-        cliente.endereco = dados.endereco;
-
-        renderClientes();
-
-        closeEditModal();
-
-    }
-
-    catch (erro) {
-
-        console.error(erro);
-
-    }
-
-});
-function deleteClient(id){
-
-    if(
-        !confirm(
-            "Excluir cliente?"
-        )
-    ){
-        return;
-    }
-
-    clientes =
-        clientes.filter(
-            cliente =>
-                cliente.id !== id
-        );
-
-    renderClientes();
-
-    /*
-    ====================================
-    FLASK FUTURO
-    ====================================*/
-
-    fetch("/pegar_cliente", {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ id:id }) 
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Resposta do servidor:", data);
-    })
-    .catch(error => {
-        console.error("Erro na requisição:", error);
-    });
-
-}
-
-/*
-====================================
-FLASK FUTURO
-====================================*/
-
-async function carregarClientes(){
-
-    const resposta =
-        await fetch(
-            "/enviar_cliente"
-        );
-
-    clientes =await resposta.json();
-
-    renderClientes();
-}
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
 
 carregarClientes();
-
-
-
-renderClientes();

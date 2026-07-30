@@ -2,6 +2,7 @@ import flask
 import flask_cors
 from functools import wraps
 import mysql.connector
+from datetime import date
 
 
 # ============================================================
@@ -701,188 +702,6 @@ def excluir_lembrete():
         }), 500
 
 
-# ============================================================
-# CLIENTES
-# ============================================================
-
-@app.route('/pegar_cliente',
-           methods=["POST", "PUT", "DELETE"])
-@login_required
-def pegar_cliente():
-
-    # --------------------------
-    # CREATE
-    # --------------------------
-
-    if flask.request.method == "POST":
-
-        try:
-
-            dados = flask.request.get_json(force=True)
-
-            if not isinstance(dados, dict):
-
-                return flask.jsonify({
-                    "erro": "Formato inválido"
-                }), 400
-
-            id_cliente = criar(
-
-                "Cliente",
-
-                nome_cliente=dados.get("nome"),
-
-                telefone=dados.get("telefone"),
-
-                data_cadastro=dados.get("dataCadastro"),
-
-                endereco=dados.get("endereco")
-
-            )
-
-            return flask.jsonify({
-
-                "success": True,
-
-                "id": id_cliente
-
-            })
-
-        except Exception as e:
-
-            return flask.jsonify({
-
-                "erro": str(e)
-
-            }), 500
-
-
-    # --------------------------
-    # UPDATE
-    # --------------------------
-
-    if flask.request.method == "PUT":
-
-        try:
-
-            dados = flask.request.get_json(force=True)
-
-            if not isinstance(dados, dict):
-
-                return flask.jsonify({
-                    "erro": "Formato inválido"
-                }), 400
-
-            id_cliente = dados.get("id")
-
-            if not id_cliente:
-
-                return flask.jsonify({
-                    "erro": "ID do cliente não informado"
-                }), 400
-
-            quantidade = atualizar(
-
-                "Cliente",
-
-                "ID_cliente",
-
-                id_cliente,
-
-                nome_cliente=dados.get("nome"),
-
-                telefone=dados.get("telefone"),
-
-                endereco=dados.get("endereco")
-
-            )
-
-            if quantidade == 0:
-
-                return flask.jsonify({
-
-                    "success": False,
-
-                    "erro": "Cliente não encontrado"
-
-                }), 404
-
-            return flask.jsonify({
-
-                "success": True,
-
-                "mensagem": "Cliente atualizado"
-
-            })
-
-        except Exception as e:
-
-            return flask.jsonify({
-
-                "erro": str(e)
-
-            }), 500
-
-
-    # --------------------------
-    # DELETE
-    # --------------------------
-
-    if flask.request.method == "DELETE":
-
-        try:
-
-            dados = flask.request.get_json(force=True)
-
-            if not isinstance(dados, dict):
-
-                return flask.jsonify({
-                    "erro": "Formato inválido"
-                }), 400
-
-            id_cliente = dados.get("id")
-
-            if not id_cliente:
-
-                return flask.jsonify({
-                    "erro": "ID do cliente não informado"
-                }), 400
-
-            quantidade = delete(
-
-                "Cliente",
-
-                "ID_cliente",
-
-                id_cliente
-
-            )
-
-            if quantidade == 0:
-
-                return flask.jsonify({
-
-                    "success": False,
-
-                    "erro": "Cliente não encontrado"
-
-                }), 404
-
-            return flask.jsonify({
-
-                "success": True,
-
-                "mensagem": "Cliente excluído"
-
-            })
-
-        except Exception as e:
-
-            return flask.jsonify({
-
-                "erro": str(e)
-
-            }), 500
 
 
 # ============================================================
@@ -1101,7 +920,7 @@ def api_servicos():
 
 
 # ============================================================
-# CLIENTES
+# TELA DE CLIENTES
 # ============================================================
 
 @app.route('/clientes', methods=["GET"])
@@ -1141,41 +960,457 @@ def clientes():
 
     )
 
+# ============================================================
+# API DE CLIENTES
+# ============================================================
 
 @app.route('/api/clientes', methods=["GET"])
 @login_required
 def api_clientes():
 
-    clientes_db = ler("Cliente")
+    try:
 
-    clientes = []
+        clientes_db = ler("Cliente")
 
-    for cliente in clientes_db:
+        clientes = []
 
-        clientes.append({
+        for cliente in clientes_db:
 
-            "id":
-                cliente["ID_cliente"],
+            clientes.append({
 
-            "nome":
-                cliente["nome_cliente"],
+                "id":
+                    cliente["ID_cliente"],
 
-            "telefone":
-                cliente["telefone"],
+                "nome":
+                    cliente["nome_cliente"],
 
-            "endereco":
-                cliente["endereco"],
+                "telefone":
+                    cliente["telefone"],
 
-            "dataCadastro":
-                str(cliente["data_cadastro"]),
+                "endereco":
+                    cliente["endereco"],
 
-            "linkEndereco":
-                cliente["link_endereco"]
+                "dataCadastro":
+                    str(cliente["data_cadastro"]),
 
-        })
+                "linkEndereco":
+                    cliente["link_endereco"]
 
-    return flask.jsonify(clientes)
+            })
 
+        return flask.jsonify(clientes)
+
+    except Exception as e:
+
+        return flask.jsonify({
+
+            "success": False,
+
+            "erro": str(e)
+
+        }), 500
+
+
+# ============================================================
+# CLIENTES - API CRUD
+# ============================================================
+
+@app.route(
+    '/pegar_cliente',
+    methods=["POST", "PUT", "DELETE"]
+)
+@login_required
+def pegar_cliente():
+
+    # ========================================================
+    # CREATE - POST
+    # ========================================================
+
+    if flask.request.method == "POST":
+
+        try:
+
+            dados = flask.request.get_json(force=True)
+
+            if not isinstance(dados, dict):
+
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Formato inválido."
+                }), 400
+
+            nome = dados.get("nome")
+            telefone = dados.get("telefone")
+            endereco = dados.get("endereco")
+
+            # --------------------------
+            # VALIDAÇÕES
+            # --------------------------
+
+            if not nome or not nome.strip():
+
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Nome do cliente não informado."
+                }), 400
+
+            if not telefone or not telefone.strip():
+
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Telefone do cliente não informado."
+                }), 400
+
+            if not endereco or not endereco.strip():
+
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Endereço do cliente não informado."
+                }), 400
+
+            
+
+            id_cliente = criar(
+
+                "Cliente",
+
+                nome_cliente=nome.strip(),
+
+                telefone=telefone.strip(),
+
+                endereco=endereco.strip()
+
+            )
+
+            # --------------------------
+            # BUSCA O CLIENTE CRIADO
+            # --------------------------
+
+            cliente_criado = ler(
+
+                "Cliente",
+
+                ID_cliente=id_cliente
+
+            )
+
+            if not cliente_criado:
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Cliente criado, mas não foi possível recuperá-lo."
+
+                }), 500
+
+            cliente = cliente_criado[0]
+
+            return flask.jsonify({
+
+                "success": True,
+
+                "cliente": {
+
+                    "id":
+                        cliente["ID_cliente"],
+
+                    "nome":
+                        cliente["nome_cliente"],
+
+                    "telefone":
+                        cliente["telefone"],
+
+                    "endereco":
+                        cliente["endereco"],
+
+                    "dataCadastro":
+                        str(cliente["data_cadastro"])
+
+                }
+
+            }), 201
+
+        except Exception as e:
+
+            return flask.jsonify({
+
+                "success": False,
+
+                "erro": str(e)
+
+            }), 500
+
+
+    # ========================================================
+    # UPDATE - PUT
+    # ========================================================
+
+    if flask.request.method == "PUT":
+
+        try:
+
+            dados = flask.request.get_json(force=True)
+
+            if not isinstance(dados, dict):
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Formato inválido."
+
+                }), 400
+
+            id_cliente = dados.get("id")
+
+            nome = dados.get("nome")
+            telefone = dados.get("telefone")
+            endereco = dados.get("endereco")
+
+            # --------------------------
+            # VALIDAÇÕES
+            # --------------------------
+
+            if not id_cliente:
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "ID do cliente não informado."
+
+                }), 400
+
+            if not nome or not nome.strip():
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Nome do cliente não informado."
+
+                }), 400
+
+            if not telefone or not telefone.strip():
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Telefone do cliente não informado."
+
+                }), 400
+
+            if not endereco or not endereco.strip():
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Endereço do cliente não informado."
+
+                }), 400
+
+            # --------------------------
+            # VERIFICA SE EXISTE
+            # --------------------------
+
+            cliente = ler(
+
+                "Cliente",
+
+                ID_cliente=id_cliente
+
+            )
+
+            if not cliente:
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Cliente não encontrado."
+
+                }), 404
+
+            # --------------------------
+            # ATUALIZA
+            # --------------------------
+
+            quantidade = atualizar(
+
+                "Cliente",
+
+                "ID_cliente",
+
+                id_cliente,
+
+                nome_cliente=nome.strip(),
+
+                telefone=telefone.strip(),
+
+                endereco=endereco.strip()
+
+            )
+
+            if quantidade == 0:
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Nenhum dado foi alterado."
+
+                }), 400
+
+            # --------------------------
+            # BUSCA DADOS ATUALIZADOS
+            # --------------------------
+
+            cliente_atualizado = ler(
+
+                "Cliente",
+
+                ID_cliente=id_cliente
+
+            )
+
+            cliente = cliente_atualizado[0]
+
+            return flask.jsonify({
+
+                "success": True,
+
+                "mensagem": "Cliente atualizado com sucesso.",
+
+                "cliente": {
+
+                    "id":
+                        cliente["ID_cliente"],
+
+                    "nome":
+                        cliente["nome_cliente"],
+
+                    "telefone":
+                        cliente["telefone"],
+
+                    "endereco":
+                        cliente["endereco"],
+
+                    "dataCadastro":
+                        str(cliente["data_cadastro"])
+
+                }
+
+            })
+
+        except Exception as e:
+
+            return flask.jsonify({
+
+                "success": False,
+
+                "erro": str(e)
+
+            }), 500
+
+
+    # ========================================================
+    # DELETE - DELETE
+    # ========================================================
+
+    if flask.request.method == "DELETE":
+
+        try:
+
+            dados = flask.request.get_json(force=True)
+
+            if not isinstance(dados, dict):
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Formato inválido."
+
+                }), 400
+
+            id_cliente = dados.get("id")
+
+            if not id_cliente:
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "ID do cliente não informado."
+
+                }), 400
+
+            # --------------------------
+            # VERIFICA SE EXISTE
+            # --------------------------
+
+            cliente = ler(
+
+                "Cliente",
+
+                ID_cliente=id_cliente
+
+            )
+
+            if not cliente:
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Cliente não encontrado."
+
+                }), 404
+
+            # --------------------------
+            # EXCLUI
+            # --------------------------
+
+            quantidade = delete(
+
+                "Cliente",
+
+                "ID_cliente",
+
+                id_cliente
+
+            )
+
+            if quantidade == 0:
+
+                return flask.jsonify({
+
+                    "success": False,
+
+                    "erro": "Cliente não encontrado."
+
+                }), 404
+
+            return flask.jsonify({
+
+                "success": True,
+
+                "mensagem": "Cliente excluído com sucesso."
+
+            })
+
+        except Exception as e:
+
+            return flask.jsonify({
+
+                "success": False,
+
+                "erro": str(e)
+
+            }), 500
 
 # ============================================================
 # LOGIN

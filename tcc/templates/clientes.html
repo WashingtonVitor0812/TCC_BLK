@@ -1,20 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>BLK - Clientes</title>
 
-    <link rel="stylesheet" href="{{url_for('static', filename='css/clientes.css')}}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/clientes.css') }}"
+    >
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
 </head>
+
 <body>
 
 <div id="app">
 
-    <!-- HEADER -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <header class="topbar">
 
@@ -23,30 +39,65 @@
         </div>
 
         <nav>
-            <a href="{{url_for('agenda') }}">Agenda</a>
-            <a class="active" href="#">Clientes</a>
-            <a href="{{url_for('atendimentos') }}">Atendimentos</a>
-            <a href="{{url_for('servicos') }}">Serviços</a>
+
+            <a href="{{ url_for('agenda') }}">
+                Agenda
+            </a>
+
+            <a
+                class="active"
+                href="#"
+            >
+                Clientes
+            </a>
+
+            <a href="{{ url_for('atendimentos') }}">
+                Atendimentos
+            </a>
+
+            <a href="{{ url_for('servicos') }}">
+                Serviços
+            </a>
+
         </nav>
 
     </header>
 
-    <!-- SUB HEADER -->
+
+    <!-- =====================================================
+         SUB HEADER
+    ====================================================== -->
 
     <section class="page-header">
 
-        <h1>Clientes</h1>
+        <h1>
+            Clientes
+        </h1>
 
-        <button id="btnNovoCliente" class="new-btn">
+        <button
+            id="btnNovoCliente"
+            class="new-btn"
+            type="button"
+        >
+
             Novo Cliente
-            <span>+</span>
+
+            <span>
+                +
+            </span>
+
         </button>
 
     </section>
 
-    <!-- CONTEÚDO -->
+
+    <!-- =====================================================
+         CONTEÚDO
+    ====================================================== -->
 
     <main class="page-content">
+
+        <!-- PESQUISA -->
 
         <div class="search-container">
 
@@ -56,15 +107,24 @@
                     id="searchInput"
                     type="text"
                     placeholder="Pesquisar Clientes"
+                    autocomplete="off"
                 >
 
-                <button type="button">
+                <button
+                    type="button"
+                    aria-label="Pesquisar"
+                >
+
                     <i class="fa-solid fa-magnifying-glass"></i>
+
                 </button>
 
             </div>
 
         </div>
+
+
+        <!-- TABELA -->
 
         <div class="table-wrapper">
 
@@ -72,29 +132,45 @@
 
                 <thead>
 
-                <tr>
-                    <th>Nome</th>
-                    <th>Telefone</th>
-                    <th>Data de cadastro</th>
-                    <th>Endereço</th>
-                    <th>ID</th>
-                    <th>Ações</th>
-                </tr>
+                    <tr>
+
+                        <th>
+                            Nome
+                        </th>
+
+                        <th>
+                            Telefone
+                        </th>
+
+                        <th>
+                            Data de cadastro
+                        </th>
+
+                        <th>
+                            Endereço
+                        </th>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            Ações
+                        </th>
+
+                    </tr>
 
                 </thead>
 
+
                 <tbody id="clientesTableBody">
 
-                <!--
-                    FLASK FUTURO
+                    <!--
+                        Os clientes são carregados
+                        pelo JavaScript através de:
 
-                    Os clientes poderão ser
-                    carregados do backend
-                    ou renderizados via JS.
-
-                    {% for cliente in clientes %}
-                    {% endfor %}
-                -->
+                        GET /api/clientes
+                    -->
 
                 </tbody>
 
@@ -106,44 +182,61 @@
 
 </div>
 
-<!-- MODAL CADASTRO -->
 
-<div id="createModal" class="modal-overlay">
+<!-- =========================================================
+     MODAL — CADASTRAR CLIENTE
+========================================================= -->
+
+<div
+    id="createModal"
+    class="modal-overlay"
+>
 
     <div class="modal">
 
-        <button class="close-btn"
-                onclick="closeCreateModal()">
+        <button
+            class="close-btn"
+            type="button"
+            onclick="closeCreateModal()"
+            aria-label="Fechar"
+        >
             &times;
         </button>
 
-        <h2>CADASTRAR CLIENTE</h2>
 
-        <form id="createForm" method="POST">
+        <h2>
+            CADASTRAR CLIENTE
+        </h2>
+
+
+        <form id="createForm">
 
             <input
                 type="text"
                 id="createNome"
                 placeholder="Nome*"
-                name="nome"
+                autocomplete="name"
                 required
             >
+
 
             <input
                 type="text"
                 id="createTelefone"
                 placeholder="Telefone*"
-                name="telefone"
+                autocomplete="tel"
                 required
             >
+
 
             <input
                 type="text"
                 id="createEndereco"
                 placeholder="Endereço*"
-                name="endereco"
+                autocomplete="street-address"
                 required
             >
+
 
             <button
                 type="submit"
@@ -158,49 +251,67 @@
 
 </div>
 
-<!-- MODAL EDIÇÃO -->
 
-<div id="editModal" class="modal-overlay">
+<!-- =========================================================
+     MODAL — EDITAR CLIENTE
+========================================================= -->
+
+<div
+    id="editModal"
+    class="modal-overlay"
+>
 
     <div class="modal">
 
-        <button class="close-btn"
-                onclick="closeEditModal()">
+        <button
+            class="close-btn"
+            type="button"
+            onclick="closeEditModal()"
+            aria-label="Fechar"
+        >
             &times;
         </button>
 
-        <h2>EDITAR CLIENTE</h2>
 
-        <form id="editForm" method="POST">
+        <h2>
+            EDITAR CLIENTE
+        </h2>
+
+
+        <form id="editForm">
 
             <input
                 type="hidden"
                 id="editId"
             >
 
+
             <input
                 type="text"
                 id="editNome"
                 placeholder="Nome*"
-                name="nome2"
+                autocomplete="name"
                 required
             >
+
 
             <input
                 type="text"
                 id="editTelefone"
                 placeholder="Telefone*"
-                name="telefone2"
+                autocomplete="tel"
                 required
             >
+
 
             <input
                 type="text"
                 id="editEndereco"
                 placeholder="Endereço*"
-                name="endereco2"
+                autocomplete="street-address"
                 required
             >
+
 
             <button
                 type="submit"
@@ -210,14 +321,20 @@
             </button>
 
         </form>
-        {% if mensagem %}
-        <p><strong>{{ mensagem }}</strong></p>
-        {% endif %}
+
     </div>
 
 </div>
 
-<script src="{{url_for('static', filename='js/clientes.js')}}"></script>
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script
+    src="{{ url_for('static', filename='js/clientes.js') }}"
+></script>
 
 </body>
+
 </html>
