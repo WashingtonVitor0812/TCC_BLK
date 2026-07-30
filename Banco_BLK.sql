@@ -122,3 +122,99 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- 1. Adiciona a coluna "valor" na tabela Atendimento_Servico
+ALTER TABLE Atendimento_Servico
+ADD COLUMN valor DECIMAL(10,2) NOT NULL DEFAULT 0;
+
+-- 2. Remove as triggers antigas
+DROP TRIGGER IF EXISTS trg_calcular_valor_total_insert;
+DROP TRIGGER IF EXISTS trg_calcular_valor_total_update;
+DROP TRIGGER IF EXISTS trg_calcular_valor_total_delete;
+
+DELIMITER $$
+
+-- ==========================================
+-- INSERT
+-- Calcula o valor do serviço e o valor total
+-- ==========================================
+CREATE TRIGGER trg_calcular_valor_total_insert
+BEFORE INSERT ON Atendimento_Servico
+FOR EACH ROW
+BEGIN
+    DECLARE v_valor_base DECIMAL(10,2);
+
+    SELECT valor_base
+    INTO v_valor_base
+    FROM Servico
+    WHERE ID_servico = NEW.ID_servico;
+
+    SET NEW.valor = v_valor_base * NEW.quantidade;
+END$$
+
+CREATE TRIGGER trg_atualizar_total_insert
+AFTER INSERT ON Atendimento_Servico
+FOR EACH ROW
+BEGIN
+    UPDATE Atendimento
+    SET valor_total = (
+        SELECT IFNULL(SUM(valor),0)
+        FROM Atendimento_Servico
+        WHERE ID_atendimento = NEW.ID_atendimento
+    )
+    WHERE ID_atendimento = NEW.ID_atendimento;
+END$$
+
+-- ==========================================
+-- UPDATE
+-- ==========================================
+CREATE TRIGGER trg_calcular_valor_total_update
+BEFORE UPDATE ON Atendimento_Servico
+FOR EACH ROW
+BEGIN
+    DECLARE v_valor_base DECIMAL(10,2);
+
+    SELECT valor_base
+    INTO v_valor_base
+    FROM Servico
+    WHERE ID_servico = NEW.ID_servico;
+
+    SET NEW.valor = v_valor_base * NEW.quantidade;
+END$$
+
+CREATE TRIGGER trg_atualizar_total_update
+AFTER UPDATE ON Atendimento_Servico
+FOR EACH ROW
+BEGIN
+    UPDATE Atendimento
+    SET valor_total = (
+        SELECT IFNULL(SUM(valor),0)
+        FROM Atendimento_Servico
+        WHERE ID_atendimento = NEW.ID_atendimento
+    )
+    WHERE ID_atendimento = NEW.ID_atendimento;
+END$$
+
+-- ==========================================
+-- DELETE
+-- ==========================================
+CREATE TRIGGER trg_calcular_valor_total_delete
+AFTER DELETE ON Atendimento_Servico
+FOR EACH ROW
+BEGIN
+    UPDATE Atendimento
+    SET valor_total = (
+        SELECT IFNULL(SUM(valor),0)
+        FROM Atendimento_Servico
+        WHERE ID_atendimento = OLD.ID_atendimento
+    )
+    WHERE ID_atendimento = OLD.ID_atendimento;
+END$$
+
+DELIMITER ;
+
+ALTER TABLE Lembrete
+ADD COLUMN ID_atendimento INT NULL,
+ADD CONSTRAINT fk_lembrete_atendimento
+    FOREIGN KEY (ID_atendimento)
+    REFERENCES Atendimento(ID_atendimento);
