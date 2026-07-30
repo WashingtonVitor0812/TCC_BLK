@@ -34,6 +34,50 @@ TABELAS_PERMITIDAS = {
 }
 
 
+def garantir_colunas_atendimento():
+    """Atualiza bancos existentes com os campos do atendimento."""
+
+    conexao = conecta()
+    cursor = conexao.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'Atendimento'
+        """)
+
+        colunas = {
+            registro[0]
+            for registro in cursor.fetchall()
+        }
+
+        if "nome_atendimento" not in colunas:
+            cursor.execute("""
+                ALTER TABLE Atendimento
+                ADD COLUMN nome_atendimento VARCHAR(150) NULL
+                AFTER ID_cliente
+            """)
+
+        if "descricao" not in colunas:
+            cursor.execute("""
+                ALTER TABLE Atendimento
+                ADD COLUMN descricao TEXT NULL
+                AFTER nome_atendimento
+            """)
+
+        conexao.commit()
+
+    except Exception:
+        conexao.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conexao.close()
+
+
 def validar_dados_servico(dados):
     nome = dados.get("nome")
     descricao = dados.get("descricao")
@@ -357,6 +401,8 @@ def agenda():
 @login_required
 def api_atendimentos():
 
+    garantir_colunas_atendimento()
+
     conexao = conecta()
     cursor = conexao.cursor(dictionary=True)
 
@@ -366,6 +412,8 @@ def api_atendimentos():
             SELECT
                 a.ID_atendimento,
                 a.ID_cliente,
+                a.nome_atendimento,
+                a.descricao,
                 a.status,
                 a.data_atendimento,
                 a.data_conclusao,
@@ -392,6 +440,8 @@ def api_atendimentos():
             GROUP BY
                 a.ID_atendimento,
                 a.ID_cliente,
+                a.nome_atendimento,
+                a.descricao,
                 a.status,
                 a.data_atendimento,
                 a.data_conclusao,
@@ -431,6 +481,12 @@ def api_atendimentos():
 
                 "cliente":
                     nome_cliente,
+
+                "nome":
+                    atendimento["nome_atendimento"],
+
+                "descricao":
+                    atendimento["descricao"] or "",
 
                 "servicos":
                     servicos,
@@ -488,6 +544,8 @@ def api_atendimentos():
 @login_required
 def atendimento_por_id(id_atendimento):
 
+    garantir_colunas_atendimento()
+
     if flask.request.method == "GET":
         conexao = conecta()
         cursor = conexao.cursor(dictionary=True)
@@ -497,6 +555,8 @@ def atendimento_por_id(id_atendimento):
                 SELECT
                     a.ID_atendimento,
                     a.ID_cliente,
+                    a.nome_atendimento,
+                    a.descricao,
                     a.status,
                     a.data_atendimento,
                     a.data_conclusao,
@@ -550,6 +610,8 @@ def atendimento_por_id(id_atendimento):
                 "atendimento": {
                     "id": atendimento["ID_atendimento"],
                     "id_cliente": atendimento["ID_cliente"],
+                    "nome": atendimento["nome_atendimento"],
+                    "descricao": atendimento["descricao"] or "",
                     "cliente": atendimento["nome_cliente"],
                     "status": atendimento["status"],
                     "data_atendimento": str(atendimento["data_atendimento"]),
@@ -1771,6 +1833,8 @@ def atendimentos():
 
 def criar_atendimento_completo():
 
+    garantir_colunas_atendimento()
+
     dados = flask.request.get_json(force=True)
 
     if not isinstance(dados, dict):
@@ -1779,13 +1843,39 @@ def criar_atendimento_completo():
             "erro": "Formato invalido."
         }), 400
 
+    id_cliente = None
+    nome_cliente = dados.get("cliente_nome")
+
     try:
         id_cliente = int(dados.get("id_cliente"))
     except (TypeError, ValueError):
+        pass
+
+    if not id_cliente and (
+        not isinstance(nome_cliente, str) or not nome_cliente.strip()
+    ):
         return flask.jsonify({
             "success": False,
             "erro": "Cliente nao informado."
         }), 400
+
+    nome_atendimento = dados.get("nome")
+    descricao = dados.get("descricao")
+
+    if not isinstance(nome_atendimento, str) or not nome_atendimento.strip():
+        return flask.jsonify({
+            "success": False,
+            "erro": "Nome do atendimento nao informado."
+        }), 400
+
+    if descricao is not None and not isinstance(descricao, str):
+        return flask.jsonify({
+            "success": False,
+            "erro": "Descricao do atendimento invalida."
+        }), 400
+
+    nome_atendimento = nome_atendimento.strip()
+    descricao = descricao.strip() if isinstance(descricao, str) else None
 
     status = str(dados.get("status", "PENDENTE")).strip().upper()
     status = status.replace(" ", "_")
@@ -1852,16 +1942,41 @@ def criar_atendimento_completo():
     cursor = conexao.cursor(dictionary=True)
 
     try:
-        cursor.execute(
-            "SELECT ID_cliente FROM Cliente WHERE ID_cliente = %s",
-            (id_cliente,)
-        )
+        if id_cliente:
+            cursor.execute(
+                "SELECT ID_cliente FROM Cliente WHERE ID_cliente = %s",
+                (id_cliente,)
+            )
+            cliente = cursor.fetchone()
+        else:
+            cursor.execute(
+                """
+                    SELECT ID_cliente
+                    FROM Cliente
+                    WHERE LOWER(TRIM(nome_cliente)) = LOWER(TRIM(%s))
+                """,
+                (nome_cliente.strip(),)
+            )
+            clientes_encontrados = cursor.fetchall()
 
-        if not cursor.fetchone():
+            if len(clientes_encontrados) > 1:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Mais de um cliente possui este nome. Selecione-o na lista."
+                }), 400
+
+            cliente = (
+                clientes_encontrados[0]
+                if clientes_encontrados else None
+            )
+
+        if not cliente:
             return flask.jsonify({
                 "success": False,
                 "erro": "Cliente nao encontrado."
             }), 404
+
+        id_cliente = cliente["ID_cliente"]
 
         placeholders = ", ".join(["%s"] * len(ids_servicos))
         cursor.execute(
@@ -1882,10 +1997,16 @@ def criar_atendimento_completo():
         cursor.execute(
             """
                 INSERT INTO Atendimento
-                    (ID_cliente, status, data_atendimento)
-                VALUES (%s, %s, %s)
+                    (ID_cliente, nome_atendimento, descricao, status, data_atendimento)
+                VALUES (%s, %s, %s, %s, %s)
             """,
-            (id_cliente, status, data_atendimento)
+            (
+                id_cliente,
+                nome_atendimento,
+                descricao,
+                status,
+                data_atendimento
+            )
         )
         id_atendimento = cursor.lastrowid
 

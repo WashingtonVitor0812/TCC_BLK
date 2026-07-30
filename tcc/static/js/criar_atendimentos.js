@@ -812,6 +812,28 @@ function atualizarTabela() {
 
             servicosTableBody.appendChild(row);
 
+            const action = document.createElement("div");
+
+            action.className =
+                "attendance-service-action";
+
+            action.innerHTML = `
+                <button
+                    type="button"
+                    title="Remover serviço"
+                    aria-label="Remover serviço"
+                >
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+
+            action.querySelector("button")
+                .addEventListener("click", () => {
+                    removerServico(index);
+                });
+
+            attendanceServiceActions.appendChild(action);
+
         }
     );
 
@@ -825,27 +847,6 @@ function atualizarTabela() {
     atualizarCampoServicos();
 
 }
-
-const action = document.createElement("div");
-
-action.className =
-    "attendance-service-action";
-
-action.innerHTML = `
-    <button
-        type="button"
-        title="Remover serviço"
-    >
-        <i class="fa-solid fa-trash"></i>
-    </button>
-`;
-
-action.querySelector("button")
-    .addEventListener("click", () => {
-        removerServico(index);
-    });
-
-attendanceServiceActions.appendChild(action);
 
 /*
    Configura os eventos dos campos editáveis.
@@ -1265,6 +1266,7 @@ async function salvarAtendimento(event) {
         atendimentoCriado = {
             id: resultado.id,
             ...dadosAtendimento,
+            titulo: `${dadosAtendimento.cliente_nome} — ${dadosAtendimento.servicos.map(servico => servico.nome).join(", ")}`,
             valor_total: resultado.valor_total
         };
 

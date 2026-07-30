@@ -3560,13 +3560,23 @@ function verificarNovoLembrete() {
             );
 
 
+        if (reminderDescription) {
+            reminderDescription.value =
+                atendimento.descricao || "";
+        }
+
+
         if (
             appointment &&
-            atendimento.nome
+            atendimento.id
         ) {
 
+            const titulo =
+                atendimento.titulo ||
+                `Atendimento #${atendimento.id}`;
+
             appointment.value =
-                atendimento.nome;
+                titulo;
 
 
             appointment.dataset.atendimentoId =
@@ -3574,7 +3584,7 @@ function verificarNovoLembrete() {
 
 
             appointment.dataset.valorSelecionado =
-                atendimento.nome;
+                titulo;
 
         }
 

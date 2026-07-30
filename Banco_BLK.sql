@@ -19,6 +19,8 @@ CREATE TABLE Cliente (
 CREATE TABLE Atendimento (
     ID_atendimento INT AUTO_INCREMENT PRIMARY KEY,
     ID_cliente INT NOT NULL,
+    nome_atendimento VARCHAR(150),
+    descricao TEXT,
     valor_total DECIMAL(10,2),
     status ENUM('PENDENTE', 'EM_ANDAMENTO', 'CONCLUIDO', 'CANCELADO'),
     data_conclusao DATE,
@@ -28,6 +30,39 @@ CREATE TABLE Atendimento (
         FOREIGN KEY (ID_cliente)
         REFERENCES Cliente(ID_cliente)
 );
+
+-- Migração para bancos criados antes dos campos acima.
+SET @tem_nome_atendimento = (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'Atendimento'
+      AND COLUMN_NAME = 'nome_atendimento'
+);
+SET @sql_nome_atendimento = IF(
+    @tem_nome_atendimento = 0,
+    'ALTER TABLE Atendimento ADD COLUMN nome_atendimento VARCHAR(150) NULL AFTER ID_cliente',
+    'SELECT 1'
+);
+PREPARE stmt_nome_atendimento FROM @sql_nome_atendimento;
+EXECUTE stmt_nome_atendimento;
+DEALLOCATE PREPARE stmt_nome_atendimento;
+
+SET @tem_descricao_atendimento = (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'Atendimento'
+      AND COLUMN_NAME = 'descricao'
+);
+SET @sql_descricao_atendimento = IF(
+    @tem_descricao_atendimento = 0,
+    'ALTER TABLE Atendimento ADD COLUMN descricao TEXT NULL AFTER nome_atendimento',
+    'SELECT 1'
+);
+PREPARE stmt_descricao_atendimento FROM @sql_descricao_atendimento;
+EXECUTE stmt_descricao_atendimento;
+DEALLOCATE PREPARE stmt_descricao_atendimento;
 
 -- =========================
 -- TABELA: Serviço

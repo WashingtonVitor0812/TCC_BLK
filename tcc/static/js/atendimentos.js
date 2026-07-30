@@ -72,13 +72,14 @@ function renderAtendimentos(lista = atendimentos) {
     if (lista.length === 0) {
         const linha = tbody.insertRow();
         const celula = linha.insertCell();
-        celula.colSpan = 6;
+        celula.colSpan = 7;
         celula.textContent = "Nenhum atendimento encontrado.";
         return;
     }
 
     lista.forEach((atendimento) => {
         const linha = tbody.insertRow();
+        linha.insertCell().textContent = atendimento.nome || `Atendimento #${atendimento.id}`;
         linha.insertCell().textContent = atendimento.servicos || "Sem serviço informado";
         linha.insertCell().textContent = formatarMoeda(atendimento.valor_total);
         linha.insertCell().textContent = formatarData(atendimento.data_atendimento);
@@ -113,10 +114,7 @@ function filtrarAtendimentos() {
     const lista = atendimentos.filter((atendimento) => {
         const servicos = (atendimento.servicos || "").toLowerCase();
         const cliente = (atendimento.cliente || "").toLowerCase();
-        const status = textoStatus(atendimento.status).toLowerCase();
-
         if (filtro === "cliente") return cliente.includes(termo);
-        if (filtro === "status") return status.includes(termo);
         return servicos.includes(termo);
     });
 
@@ -186,7 +184,7 @@ async function obterAtendimento(id) {
 async function visualizarAtendimento(id) {
     try {
         const atendimento = await obterAtendimento(id);
-        document.getElementById("viewNome").textContent = "Serviços do atendimento";
+        document.getElementById("viewNome").textContent = atendimento.nome || `Atendimento #${atendimento.id}`;
         document.getElementById("viewCliente").textContent = atendimento.cliente;
         document.getElementById("viewData").textContent = formatarData(atendimento.data_atendimento);
         document.getElementById("viewStatus").textContent = textoStatus(atendimento.status);
