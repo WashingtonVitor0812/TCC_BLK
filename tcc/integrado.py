@@ -481,6 +481,210 @@ def api_atendimentos():
 # CRIAR LEMBRETE
 # ============================================================
 
+@app.route(
+    '/api/atendimentos/<int:id_atendimento>',
+    methods=["GET", "PUT", "DELETE"]
+)
+@login_required
+def atendimento_por_id(id_atendimento):
+
+    if flask.request.method == "GET":
+        conexao = conecta()
+        cursor = conexao.cursor(dictionary=True)
+
+        try:
+            cursor.execute("""
+                SELECT
+                    a.ID_atendimento,
+                    a.ID_cliente,
+                    a.status,
+                    a.data_atendimento,
+                    a.data_conclusao,
+                    a.valor_total,
+                    c.nome_cliente
+                FROM Atendimento a
+                JOIN Cliente c ON c.ID_cliente = a.ID_cliente
+                WHERE a.ID_atendimento = %s
+            """, (id_atendimento,))
+
+            atendimento = cursor.fetchone()
+
+            if not atendimento:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Atendimento não encontrado."
+                }), 404
+
+            cursor.execute("""
+                SELECT
+                    ats.ID_servico,
+                    s.nome_servico,
+                    ats.quantidade,
+                    s.valor_base,
+                    ats.valor
+                FROM Atendimento_Servico ats
+                JOIN Servico s ON s.ID_servico = ats.ID_servico
+                WHERE ats.ID_atendimento = %s
+                ORDER BY s.nome_servico
+            """, (id_atendimento,))
+
+            servicos = []
+
+            for servico in cursor.fetchall():
+                quantidade = servico["quantidade"]
+                valor_unitario = float(servico["valor_base"])
+                valor = servico["valor"]
+
+                servicos.append({
+                    "id": servico["ID_servico"],
+                    "nome": servico["nome_servico"],
+                    "quantidade": quantidade,
+                    "valorUnitario": valor_unitario,
+                    "valor": float(valor) if valor is not None else (
+                        valor_unitario * quantidade
+                    )
+                })
+
+            return flask.jsonify({
+                "success": True,
+                "atendimento": {
+                    "id": atendimento["ID_atendimento"],
+                    "id_cliente": atendimento["ID_cliente"],
+                    "cliente": atendimento["nome_cliente"],
+                    "status": atendimento["status"],
+                    "data_atendimento": str(atendimento["data_atendimento"]),
+                    "data_conclusao": (
+                        str(atendimento["data_conclusao"])
+                        if atendimento["data_conclusao"] else None
+                    ),
+                    "valor_total": float(atendimento["valor_total"] or 0),
+                    "servicos": servicos
+                }
+            })
+
+        finally:
+            cursor.close()
+            conexao.close()
+
+    if flask.request.method == "PUT":
+        try:
+            dados = flask.request.get_json(force=True)
+
+            if not isinstance(dados, dict):
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Formato inválido."
+                }), 400
+
+            id_cliente = dados.get("id_cliente")
+            status = dados.get("status")
+            data_atendimento = dados.get("data_atendimento")
+            data_conclusao = dados.get("data_conclusao") or None
+
+            status_permitidos = {
+                "PENDENTE",
+                "EM_ANDAMENTO",
+                "CONCLUIDO",
+                "CANCELADO"
+            }
+
+            if not id_cliente:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Cliente não informado."
+                }), 400
+
+            if not isinstance(status, str) or status.strip().upper() not in status_permitidos:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Status inválido."
+                }), 400
+
+            if not data_atendimento:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Data do atendimento não informada."
+                }), 400
+
+            if not ler("Atendimento", ID_atendimento=id_atendimento):
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Atendimento não encontrado."
+                }), 404
+
+            if not ler("Cliente", ID_cliente=id_cliente):
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Cliente não encontrado."
+                }), 404
+
+            atualizar(
+                "Atendimento",
+                "ID_atendimento",
+                id_atendimento,
+                ID_cliente=id_cliente,
+                status=status.strip().upper(),
+                data_atendimento=data_atendimento,
+                data_conclusao=data_conclusao
+            )
+
+            return flask.jsonify({
+                "success": True,
+                "mensagem": "Atendimento atualizado com sucesso."
+            })
+
+        except Exception as e:
+            return flask.jsonify({
+                "success": False,
+                "erro": str(e)
+            }), 500
+
+    conexao = conecta()
+    cursor = conexao.cursor()
+
+    try:
+        cursor.execute(
+            "SELECT 1 FROM Atendimento WHERE ID_atendimento = %s",
+            (id_atendimento,)
+        )
+
+        if not cursor.fetchone():
+            return flask.jsonify({
+                "success": False,
+                "erro": "Atendimento não encontrado."
+            }), 404
+
+        cursor.execute(
+            "DELETE FROM Lembrete WHERE ID_atendimento = %s",
+            (id_atendimento,)
+        )
+        cursor.execute(
+            "DELETE FROM Atendimento_Servico WHERE ID_atendimento = %s",
+            (id_atendimento,)
+        )
+        cursor.execute(
+            "DELETE FROM Atendimento WHERE ID_atendimento = %s",
+            (id_atendimento,)
+        )
+        conexao.commit()
+
+        return flask.jsonify({
+            "success": True,
+            "mensagem": "Atendimento excluído com sucesso."
+        })
+
+    except Exception as e:
+        conexao.rollback()
+        return flask.jsonify({
+            "success": False,
+            "erro": str(e)
+        }), 500
+
+    finally:
+        cursor.close()
+        conexao.close()
+
+
 @app.route('/pegar_dados', methods=["POST"])
 @login_required
 def pegar_dados():

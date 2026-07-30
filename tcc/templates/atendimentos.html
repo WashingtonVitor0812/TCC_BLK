@@ -1,393 +1,122 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>BLK • Atendimentos</title>
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="..\static\css\atendimentos.css">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
+    <title>BLK - Atendimentos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atendimentos.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
-
 <body>
-
     <div id="app">
-
-        <!-- ===================================================== -->
-        <!-- HEADER -->
-        <!-- ===================================================== -->
-
         <header class="topbar">
-
-            <div class="logo">
-                BLK
-            </div>
-
+            <div class="logo">BLK</div>
             <nav>
-
-                <a href="{{url_for('agenda') }}">Agenda</a>
-                <a href="{{url_for('clientes') }}">Clientes</a>
+                <a href="{{ url_for('agenda') }}">Agenda</a>
+                <a href="{{ url_for('clientes') }}">Clientes</a>
                 <a class="active" href="#">Atendimentos</a>
-                <a href="{{url_for('servicos') }}">Serviços</a>
-
+                <a href="{{ url_for('servicos') }}">Serviços</a>
             </nav>
-
         </header>
 
-        <!-- ===================================================== -->
-        <!-- TÍTULO -->
-        <!-- ===================================================== -->
-
         <section class="page-header">
-
-            <h1>
-                Atendimentos
-            </h1>
-
-            <button
-                type="button"
-                class="new-btn"
-                onclick="window.location.href='{{ url_for('criar_atendimento') }}'"
-            >
-                Criar atendimento
-
-                <span>
-                    +
-                </span>
-
+            <h1>Atendimentos</h1>
+            <button type="button" class="new-btn" onclick="window.location.href='{{ url_for('criar_atendimento') }}'">
+                Criar atendimento <span>+</span>
             </button>
-
         </section>
 
-        <!-- ===================================================== -->
-        <!-- CONTEÚDO -->
-        <!-- ===================================================== -->
-
         <main class="page-content">
-
-            <!-- Barra de pesquisa -->
-
             <div class="toolbar">
-
                 <div class="search-box">
-
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Pesquisar atendimentos">
-
-                    <button>
-
-                        <i class="fa-solid fa-magnifying-glass"></i>
-
-                    </button>
-
+                    <input type="text" id="searchInput" placeholder="Pesquisar atendimentos" autocomplete="off">
+                    <button type="button" aria-label="Pesquisar"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
 
-                <!-- ============================= -->
-                <!-- FILTROS -->
-                <!-- ============================= -->
-
-                <select id="filterType">
-
-                    <option value="nome">
-                        Nome
-                    </option>
-
-                    <option value="cliente">
-                        Cliente
-                    </option>
-
-                    <option value="status">
-                        Status
-                    </option>
-
+                <select id="filterType" aria-label="Filtrar atendimentos por campo">
+                    <option value="nome">Serviço</option>
+                    <option value="cliente">Cliente</option>
+                    <option value="status">Status</option>
                 </select>
-
             </div>
-
-            <!-- ===================================================== -->
-            <!-- TABELA -->
-            <!-- ===================================================== -->
 
             <div class="table-wrapper">
-
                 <table>
-
                     <thead>
-
                         <tr>
-
-                            <th>Nome</th>
-
+                            <th>Serviços</th>
                             <th>Valor total</th>
-
                             <th>Data</th>
-
                             <th>Cliente</th>
-
                             <th>Status</th>
-
                             <th>Ações</th>
-
                         </tr>
-
                     </thead>
-
-                    <tbody id="atendimentosTableBody">
-
-                        <!--
-
-                        ====================================================
-
-                        FLASK FUTURO
-
-                        GET /atendimentos
-
-                        Renderização poderá ser feita
-                        via fetch() ou Jinja.
-
-                        ====================================================
-
-                        -->
-
-                    </tbody>
-
+                    <tbody id="atendimentosTableBody"></tbody>
                 </table>
-
             </div>
-
         </main>
-
     </div>
 
-    <!-- ===================================================== -->
-    <!-- MODAL DE VISUALIZAÇÃO -->
-    <!-- ===================================================== -->
-
-    <div
-        id="viewModal"
-        class="modal-overlay">
-
+    <div id="viewModal" class="modal-overlay">
         <div class="modal large">
-
-            <button
-                class="close-btn"
-                onclick="closeViewModal()">
-
-                &times;
-
-            </button>
-
-            <h2>
-
-                VISUALIZAR ATENDIMENTO
-
-            </h2>
-
+            <button type="button" class="close-btn" onclick="closeViewModal()" aria-label="Fechar">&times;</button>
+            <h2>VISUALIZAR ATENDIMENTO</h2>
             <div class="details-grid">
-
-                <div class="detail">
-
-                    <label>
-                        Nome
-                    </label>
-
-                    <span id="viewNome"></span>
-
-                </div>
-
-                <div class="detail">
-
-                    <label>
-                        Cliente
-                    </label>
-
-                    <span id="viewCliente"></span>
-
-                </div>
-
-                <div class="detail">
-
-                    <label>
-                        Data
-                    </label>
-
-                    <span id="viewData"></span>
-
-                </div>
-
-                <div class="detail">
-
-                    <label>
-                        Status
-                    </label>
-
-                    <span id="viewStatus"></span>
-
-                </div>
-
-                <div class="detail full">
-
-                    <label>
-                        Descrição
-                    </label>
-
-                    <span id="viewDescricao"></span>
-
-                </div>
-
+                <div class="detail"><label>Atendimento</label><span id="viewNome"></span></div>
+                <div class="detail"><label>Cliente</label><span id="viewCliente"></span></div>
+                <div class="detail"><label>Data</label><span id="viewData"></span></div>
+                <div class="detail"><label>Status</label><span id="viewStatus"></span></div>
+                <div class="detail full"><label>Conclusão</label><span id="viewDescricao"></span></div>
             </div>
 
-            <!-- ===================================================== -->
-            <!-- SERVIÇOS -->
-            <!-- ===================================================== -->
-
-            <h3>
-
-                Serviços
-
-            </h3>
-
+            <h3>Serviços</h3>
             <table>
-
                 <thead>
-
-                    <tr>
-
-                        <th>Serviço</th>
-
-                        <th>Quantidade</th>
-
-                        <th>Valor Unit.</th>
-
-                        <th>Total</th>
-
-                    </tr>
-
+                    <tr><th>Serviço</th><th>Quantidade</th><th>Valor unit.</th><th>Total</th></tr>
                 </thead>
-
-                <tbody id="viewServices">
-
-                    <!--
-
-                    FLASK FUTURO
-
-                    GET /atendimentos/<id>
-
-                    Retornar também a lista
-                    completa dos serviços.
-
-                    -->
-
-                </tbody>
-
+                <tbody id="viewServices"></tbody>
             </table>
-
-            <div class="total-area">
-
-                <strong>
-
-                    Total:
-
-                </strong>
-
-                <span id="viewTotal"></span>
-
-            </div>
-
+            <div class="total-area"><strong>Total:</strong><span id="viewTotal"></span></div>
         </div>
-
     </div>
 
-    <!-- ===================================================== -->
-    <!-- MODAL CONFIRMAÇÃO -->
-    <!-- ===================================================== -->
-
-    <div
-        id="deleteModal"
-        class="modal-overlay">
-
+    <div id="editModal" class="modal-overlay">
         <div class="modal small">
-
-            <h2>
-
-                EXCLUIR ATENDIMENTO?
-
-            </h2>
-
-            <p style="text-align:center">
-
-                Esta ação não poderá ser desfeita.
-
-            </p>
-
-            <div class="modal-buttons">
-
-                <button
-                    class="cancel-btn"
-                    onclick="closeDeleteModal()">
-
-                    Cancelar
-
-                </button>
-
-                <button
-                    class="submit-btn"
-                    id="confirmDelete">
-
-                    Excluir
-
-                </button>
-
-            </div>
-
+            <button type="button" class="close-btn" onclick="closeEditModal()" aria-label="Fechar">&times;</button>
+            <h2>EDITAR ATENDIMENTO</h2>
+            <form id="editForm">
+                <input id="editAtendimentoId" type="hidden">
+                <label for="editCliente">Cliente</label>
+                <select id="editCliente" required></select>
+                <label for="editDataAtendimento">Data do atendimento</label>
+                <input id="editDataAtendimento" type="date" required>
+                <label for="editStatus">Status</label>
+                <select id="editStatus" required>
+                    <option value="PENDENTE">Pendente</option>
+                    <option value="EM_ANDAMENTO">Em andamento</option>
+                    <option value="CONCLUIDO">Concluído</option>
+                    <option value="CANCELADO">Cancelado</option>
+                </select>
+                <label for="editDataConclusao">Data de conclusão</label>
+                <input id="editDataConclusao" type="date">
+                <button type="submit" class="submit-btn">Salvar</button>
+            </form>
         </div>
-
     </div>
 
-    <!-- ===================================================== -->
-    <!-- PDF -->
-    <!-- ===================================================== -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal small">
+            <button type="button" class="close-btn" onclick="closeDeleteModal()" aria-label="Fechar">&times;</button>
+            <h2>EXCLUIR ATENDIMENTO?</h2>
+            <p style="text-align:center">Os serviços e lembretes vinculados a este atendimento também serão removidos.</p>
+            <div class="modal-buttons">
+                <button type="button" class="cancel-btn" onclick="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="submit-btn" id="confirmDelete">Excluir</button>
+            </div>
+        </div>
+    </div>
 
-    <!--
-
-    Biblioteca sugerida:
-
-    https://pdfmake.github.io/docs/
-
-    Vantagens:
-
-    • totalmente em JavaScript
-    • funciona muito bem com Flask
-    • gera PDFs complexos
-    • suporta tabelas
-    • não depende do navegador
-
-    -->
-
-    <!-- ===================================================== -->
-    <!-- JS -->
-    <!-- ===================================================== -->
-
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
-    </script>
-
-    <script
-        src="{{ url_for('static', filename='js/criar_atendimento.js') }}">
-    </script>
-
-    <script src="..\static\js\atendimentos.js"></script>
-
+    <script src="{{ url_for('static', filename='js/atendimentos.js') }}"></script>
 </body>
-
 </html>

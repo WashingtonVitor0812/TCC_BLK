@@ -4,6 +4,7 @@ const createModal = document.getElementById("createModal");
 const editModal = document.getElementById("editModal");
 const tabelaServicos = document.getElementById("servicosTableBody");
 const searchInput = document.getElementById("searchInput");
+const filterType = document.getElementById("filterType");
 
 function formatarMoeda(valor) {
     return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -69,10 +70,22 @@ async function carregarServicos() {
 
 function filtrarServicos() {
     const termo = searchInput.value.trim().toLowerCase();
-    renderServicos(servicos.filter((servico) =>
-        servico.nome.toLowerCase().includes(termo) ||
-        (servico.descricao || "").toLowerCase().includes(termo)
-    ));
+    const filtro = filterType.value;
+
+    renderServicos(servicos.filter((servico) => {
+        const nome = servico.nome.toLowerCase();
+        const descricao = (servico.descricao || "").toLowerCase();
+        const valorBase = formatarMoeda(servico.valorBase).toLowerCase();
+        const id = String(servico.id);
+
+        if (filtro === "nome") return nome.includes(termo);
+        if (filtro === "descricao") return descricao.includes(termo);
+        if (filtro === "valorBase") return valorBase.includes(termo);
+        if (filtro === "id") return id.includes(termo);
+
+        return nome.includes(termo) || descricao.includes(termo) ||
+            valorBase.includes(termo) || id.includes(termo);
+    }));
 }
 
 function dadosFormulario(prefixo) {
@@ -167,5 +180,6 @@ document.addEventListener("keydown", (evento) => {
     }
 });
 searchInput.addEventListener("input", filtrarServicos);
+filterType.addEventListener("change", filtrarServicos);
 
 carregarServicos();

@@ -109,7 +109,31 @@ body {
     padding: 10px;
 }
 
-.search-container { flex-shrink: 0; }
+.search-container {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 12px;
+}
+
+.search-container select {
+    width: 190px;
+    height: 44px;
+    padding: 0 34px 0 12px;
+    border: 1px solid #cfd5dd;
+    border-radius: 8px;
+    outline: 0;
+    background: #fff;
+    color: #0d3d8c;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.search-container select:focus {
+    border-color: #0b4dad;
+    box-shadow: 0 0 0 2px rgba(11, 77, 173, .12);
+}
 
 .search-box {
     display: flex;
@@ -359,6 +383,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     .new-btn span { margin-left: 8px; padding: 0 10px; font-size: 22px; }
     .page-content { min-height: calc(100vh - 135px); padding: 8px; gap: 8px; }
     .search-box { width: 100%; max-width: none; height: 42px; }
+    .search-container { align-items: stretch; flex-direction: column; }
+    .search-container select { width: 100%; height: 42px; }
     .table-wrapper { min-height: 450px; padding: 8px; }
     .modal-overlay { padding: 15px; }
     .modal { width: 100%; padding: 30px 20px; }

@@ -15,6 +15,9 @@ let clientes = [];
 const searchInput =
     document.getElementById("searchInput");
 
+const filterType =
+    document.getElementById("filterType");
+
 const createModal =
     document.getElementById("createModal");
 
@@ -347,6 +350,9 @@ searchInput.addEventListener(
                 .trim()
                 .toLowerCase();
 
+        const filtro =
+            filterType.value;
+
 
         const filtrados =
             clientes.filter(
@@ -376,12 +382,35 @@ searchInput.addEventListener(
                         );
 
 
-                    return (
-                        nome.includes(termo) ||
+                    if (filtro === "nome") {
+                        return nome.includes(termo);
+                    }
+
+                    if (filtro === "telefone") {
+                        return telefone.includes(termo);
+                    }
+
+                    if (filtro === "dataCadastro") {
+                        return formatarData(cliente.dataCadastro)
+                            .toLowerCase()
+                            .includes(termo);
+                    }
+
+                    if (filtro === "endereco") {
+                        return endereco.includes(termo);
+                    }
+
+                    if (filtro === "id") {
+                        return id.includes(termo);
+                    }
+
+                    return nome.includes(termo) ||
                         telefone.includes(termo) ||
                         endereco.includes(termo) ||
-                        id.includes(termo)
-                    );
+                        id.includes(termo) ||
+                        formatarData(cliente.dataCadastro)
+                            .toLowerCase()
+                            .includes(termo);
 
                 }
             );
@@ -392,6 +421,11 @@ searchInput.addEventListener(
         );
 
     }
+);
+
+filterType.addEventListener(
+    "change",
+    () => searchInput.dispatchEvent(new Event("input"))
 );
 
 

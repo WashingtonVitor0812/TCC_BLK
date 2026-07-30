@@ -1,1225 +1,310 @@
-// ======================================================
-// DADOS TEMPORÁRIOS
-// ======================================================
-//
-// REMOVER QUANDO O FLASK ESTIVER PRONTO
-//
-// GET /clientes
-// GET /servicos
-// GET /atendimentos
-//
-// ======================================================
-
-let atendimentos = [
-    {
-        id: 1,
-        nome: "Higienização de Sofá",
-        cliente: "José Silva",
-        data: "08/07/2026",
-        valorTotal: 250.00,
-        status: "Pendente",
-        descricao: "Realizar limpeza completa com impermeabilização.",
-
-        servicos: [
-            {
-                nome: "Limpeza de Sofá",
-                quantidade: 1,
-                valorUnitario: 150.00
-            },
-            {
-                nome: "Impermeabilização",
-                quantidade: 1,
-                valorUnitario: 100.00
-            }
-        ]
-    },
-
-    {
-        id: 2,
-        nome: "Limpeza de Colchão",
-        cliente: "Maria Oliveira",
-        data: "09/07/2026",
-        valorTotal: 180.00,
-        status: "Em andamento",
-        descricao: "Colchão Queen Size.",
-
-        servicos: [
-            {
-                nome: "Limpeza de Colchão",
-                quantidade: 1,
-                valorUnitario: 180.00
-            }
-        ]
-    },
-
-    {
-        id: 3,
-        nome: "Limpeza Automotiva",
-        cliente: "Carlos Henrique",
-        data: "10/07/2026",
-        valorTotal: 320.00,
-        status: "Concluído",
-        descricao: "Interior completo.",
-
-        servicos: [
-            {
-                nome: "Banco",
-                quantidade: 2,
-                valorUnitario: 80
-            },
-            {
-                nome: "Carpete",
-                quantidade: 1,
-                valorUnitario: 160
-            }
-        ]
-    },
-
-    {
-        id: 4,
-        nome: "Impermeabilização",
-        cliente: "Ana Paula",
-        data: "12/07/2026",
-        valorTotal: 150,
-        status: "Cancelado",
-        descricao: "Cliente desistiu.",
-
-        servicos: [
-            {
-                nome: "Impermeabilização",
-                quantidade: 1,
-                valorUnitario: 150
-            }
-        ]
-    }
-
-];
-
-// ======================================================
-// REFERÊNCIAS DA PÁGINA
-// ======================================================
-
-const tbody =
-    document.getElementById(
-        "atendimentosTableBody"
-    );
-
-const searchInput =
-    document.getElementById(
-        "searchInput"
-    );
-
-const filterType =
-    document.getElementById(
-        "filterType"
-    );
-
-// ======================================================
-// UTILITÁRIOS
-// ======================================================
-
-function formatarMoeda(valor){
-
-    return Number(valor)
-        .toLocaleString(
-            "pt-BR",
-            {
-                style: "currency",
-                currency: "BRL"
-            }
-        );
-
-}
-
-function obterClasseStatus(status){
-
-    switch(status){
-
-        case "Pendente":
-            return "status-pendente";
-
-        case "Em andamento":
-            return "status-andamento";
-
-        case "Concluído":
-            return "status-concluido";
-
-        case "Cancelado":
-            return "status-cancelado";
-
-        default:
-            return "";
-
-    }
-
-}
-
-// ======================================================
-// RENDERIZAÇÃO DA TABELA
-// ======================================================
-
-function renderAtendimentos(
-    lista = atendimentos
-){
-
-    tbody.innerHTML = "";
-
-    lista.forEach(atendimento => {
-
-        tbody.innerHTML += `
-
-            <tr>
-
-                <td>
-
-                    ${atendimento.nome}
-
-                </td>
-
-                <td>
-
-                    ${formatarMoeda(
-                        atendimento.valorTotal
-                    )}
-
-                </td>
-
-                <td>
-
-                    ${atendimento.data}
-
-                </td>
-
-                <td>
-
-                    ${atendimento.cliente}
-
-                </td>
-
-                <td>
-
-                    <select
-
-                        class="status-select ${obterClasseStatus(atendimento.status)}"
-
-                        onchange="alterarStatus(${atendimento.id}, this)"
-
-                    >
-
-                        <option
-                            value="Pendente"
-                            ${atendimento.status==="Pendente"?"selected":""}
-                        >
-
-                            Pendente
-
-                        </option>
-
-                        <option
-                            value="Em andamento"
-                            ${atendimento.status==="Em andamento"?"selected":""}
-                        >
-
-                            Em andamento
-
-                        </option>
-
-                        <option
-                            value="Concluído"
-                            ${atendimento.status==="Concluído"?"selected":""}
-                        >
-
-                            Concluído
-
-                        </option>
-
-                        <option
-                            value="Cancelado"
-                            ${atendimento.status==="Cancelado"?"selected":""}
-                        >
-
-                            Cancelado
-
-                        </option>
-
-                    </select>
-
-                </td>
-
-                <td>
-
-                    <div class="actions">
-
-                        <button
-                            onclick="editarAtendimento(${atendimento.id})"
-                            title="Editar">
-
-                            <i class="fa-solid fa-pen"></i>
-
-                        </button>
-
-                        <button
-                            onclick="gerarPDF(${atendimento.id})"
-                            title="PDF">
-
-                            <i class="fa-solid fa-file-pdf"></i>
-
-                        </button>
-
-                        <button
-                            onclick="visualizarAtendimento(${atendimento.id})"
-                            title="Visualizar">
-
-                            <i class="fa-solid fa-eye"></i>
-
-                        </button>
-
-                        <button
-                            onclick="confirmarExclusao(${atendimento.id})"
-                            title="Excluir">
-
-                            <i class="fa-solid fa-trash"></i>
-
-                        </button>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-        `;
-
-    });
-
-}
-
-// ======================================================
-// INICIALIZAÇÃO
-// ======================================================
-
-renderAtendimentos();
-
-// ======================================================
-// PESQUISA E FILTROS
-// ======================================================
-
-function filtrarAtendimentos() {
-
-    const termo =
-        searchInput.value
-        .trim()
-        .toLowerCase();
-
-    const filtro =
-        filterType.value;
-
-    const listaFiltrada =
-        atendimentos.filter(atendimento => {
-
-            switch (filtro) {
-
-                case "nome":
-
-                    return atendimento.nome
-                        .toLowerCase()
-                        .includes(termo);
-
-                case "cliente":
-
-                    return atendimento.cliente
-                        .toLowerCase()
-                        .includes(termo);
-
-                case "status":
-
-                    return atendimento.status
-                        .toLowerCase()
-                        .includes(termo);
-
-                default:
-
-                    return true;
-
-            }
-
-        });
-
-    renderAtendimentos(listaFiltrada);
-
-}
-
-// ======================================================
-// EVENTOS DA PESQUISA
-// ======================================================
-
-searchInput.addEventListener(
-
-    "input",
-
-    filtrarAtendimentos
-
-);
-
-filterType.addEventListener(
-
-    "change",
-
-    filtrarAtendimentos
-
-);
-
-// ======================================================
-// ALTERAÇÃO DE STATUS
-// ======================================================
-
-function alterarStatus(id, select){
-
-    const atendimento =
-
-        atendimentos.find(
-
-            atendimento => atendimento.id === id
-
-        );
-
-    if(!atendimento){
-
-        return;
-
-    }
-
-    atendimento.status =
-
-        select.value;
-
-    select.className =
-
-        `status-select ${obterClasseStatus(atendimento.status)}`;
-
-    /*
-    =====================================================
-
-    FLASK FUTURO
-
-    PUT /atendimentos/<id>/status
-
-    fetch(`/atendimentos/${id}/status`,{
-
-        method:"PUT",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-            status: atendimento.status
-
-        })
-
-    });
-
-    =====================================================
-    */
-
-}
-
-// ======================================================
-// BOTÃO NOVO ATENDIMENTO
-// ======================================================
-
-const btnNovoAtendimento =
-
-    document.getElementById(
-
-        "btnNovoAtendimento"
-
-    );
-
-btnNovoAtendimento.addEventListener(
-
-    "click",
-
-    () => {
-
-        /*
-        ===============================================
-
-        FLASK FUTURO
-
-        window.location.href="/atendimentos/novo";
-
-        ===============================================
-        */
-
-        window.location.href =
-            "criarAtendimento.html";
-
-    }
-
-);
-
-// ======================================================
-// FUNÇÕES PLACEHOLDER
-// (SERÃO IMPLEMENTADAS NAS PRÓXIMAS PARTES)
-// ======================================================
-
-function visualizarAtendimento(id){
-
-    console.log(
-
-        "Visualizar atendimento",
-
-        id
-
-    );
-
-}
-
-function editarAtendimento(id){
-
-    console.log(
-
-        "Editar atendimento",
-
-        id
-
-    );
-
-    /*
-    ===============================================
-
-    FLASK FUTURO
-
-    window.location.href=
-
-    `/editarAtendimento?id=${id}`;
-
-    ===============================================
-    */
-
-}
-
-function gerarPDF(id){
-
-    console.log(
-
-        "Gerar PDF",
-
-        id
-
-    );
-
-    /*
-    ===============================================
-
-    BIBLIOTECA SUGERIDA
-
-    pdfmake
-
-    https://pdfmake.github.io/docs/
-
-    ===============================================
-    */
-
-}
-
-function confirmarExclusao(id){
-
-    console.log(
-
-        "Excluir",
-
-        id
-
-    );
-
-}
-
-// ======================================================
-// REFERÊNCIAS DOS MODAIS
-// ======================================================
-
-const viewModal =
-    document.getElementById(
-        "viewModal"
-    );
-
-const deleteModal =
-    document.getElementById(
-        "deleteModal"
-    );
-
-const confirmDelete =
-    document.getElementById(
-        "confirmDelete"
-    );
-
+let atendimentos = [];
+let clientes = [];
 let atendimentoSelecionado = null;
 
-// ======================================================
-// VISUALIZAÇÃO
-// ======================================================
+const tbody = document.getElementById("atendimentosTableBody");
+const searchInput = document.getElementById("searchInput");
+const filterType = document.getElementById("filterType");
+const viewModal = document.getElementById("viewModal");
+const editModal = document.getElementById("editModal");
+const deleteModal = document.getElementById("deleteModal");
+const confirmDelete = document.getElementById("confirmDelete");
 
-function visualizarAtendimento(id){
+const STATUS = {
+    PENDENTE: "Pendente",
+    EM_ANDAMENTO: "Em andamento",
+    CONCLUIDO: "Concluído",
+    CANCELADO: "Cancelado"
+};
 
-    atendimentoSelecionado =
-        atendimentos.find(
-            atendimento => atendimento.id === id
-        );
+function formatarMoeda(valor) {
+    return Number(valor || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+}
 
-    if(!atendimentoSelecionado){
+function formatarData(data) {
+    if (!data) return "—";
+    const [ano, mes, dia] = data.split("-");
+    return ano && mes && dia ? `${dia}/${mes}/${ano}` : data;
+}
 
-        return;
+function textoStatus(status) {
+    return STATUS[status] || status || "—";
+}
 
-    }
+function obterClasseStatus(status) {
+    return {
+        PENDENTE: "status-pendente",
+        EM_ANDAMENTO: "status-andamento",
+        CONCLUIDO: "status-concluido",
+        CANCELADO: "status-cancelado"
+    }[status] || "";
+}
 
-    document
-    .getElementById("viewNome")
-    .textContent =
-        atendimentoSelecionado.nome;
+function criarBotao(icone, titulo, aoClicar) {
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.title = titulo;
+    botao.setAttribute("aria-label", titulo);
+    botao.innerHTML = `<i class="fa-solid ${icone}"></i>`;
+    botao.addEventListener("click", aoClicar);
+    return botao;
+}
 
-    document
-    .getElementById("viewCliente")
-    .textContent =
-        atendimentoSelecionado.cliente;
+function criarSelectStatus(status, aoAlterar) {
+    const select = document.createElement("select");
+    select.className = `status-select ${obterClasseStatus(status)}`;
 
-    document
-    .getElementById("viewData")
-    .textContent =
-        atendimentoSelecionado.data;
+    Object.entries(STATUS).forEach(([valor, texto]) => {
+        const opcao = new Option(texto, valor, false, valor === status);
+        select.add(opcao);
+    });
 
-    document
-    .getElementById("viewStatus")
-    .textContent =
-        atendimentoSelecionado.status;
+    select.addEventListener("change", aoAlterar);
+    return select;
+}
 
-    document
-    .getElementById("viewDescricao")
-    .textContent =
-        atendimentoSelecionado.descricao;
-
-    document
-    .getElementById("viewTotal")
-    .textContent =
-        formatarMoeda(
-            atendimentoSelecionado.valorTotal
-        );
-
-    const tbody =
-        document.getElementById(
-            "viewServices"
-        );
-
+function renderAtendimentos(lista = atendimentos) {
     tbody.innerHTML = "";
 
-    atendimentoSelecionado.servicos.forEach(
+    if (lista.length === 0) {
+        const linha = tbody.insertRow();
+        const celula = linha.insertCell();
+        celula.colSpan = 6;
+        celula.textContent = "Nenhum atendimento encontrado.";
+        return;
+    }
 
-        servico => {
+    lista.forEach((atendimento) => {
+        const linha = tbody.insertRow();
+        linha.insertCell().textContent = atendimento.servicos || "Sem serviço informado";
+        linha.insertCell().textContent = formatarMoeda(atendimento.valor_total);
+        linha.insertCell().textContent = formatarData(atendimento.data_atendimento);
+        linha.insertCell().textContent = atendimento.cliente || "Cliente não encontrado";
 
-            tbody.innerHTML += `
+        const status = linha.insertCell();
+        status.appendChild(criarSelectStatus(atendimento.status, async (evento) => {
+            await atualizarAtendimento(atendimento.id, {
+                id_cliente: atendimento.id_cliente,
+                status: evento.target.value,
+                data_atendimento: atendimento.data_atendimento,
+                data_conclusao: atendimento.data_conclusao
+            });
+        }));
 
-                <tr>
+        const acoes = linha.insertCell();
+        const grupo = document.createElement("div");
+        grupo.className = "actions";
+        grupo.append(
+            criarBotao("fa-pen", "Editar", () => abrirEdicao(atendimento.id)),
+            criarBotao("fa-eye", "Visualizar", () => visualizarAtendimento(atendimento.id)),
+            criarBotao("fa-trash", "Excluir", () => confirmarExclusao(atendimento.id))
+        );
+        acoes.appendChild(grupo);
+    });
+}
 
-                    <td>
+function filtrarAtendimentos() {
+    const termo = searchInput.value.trim().toLowerCase();
+    const filtro = filterType.value;
 
-                        ${servico.nome}
+    const lista = atendimentos.filter((atendimento) => {
+        const servicos = (atendimento.servicos || "").toLowerCase();
+        const cliente = (atendimento.cliente || "").toLowerCase();
+        const status = textoStatus(atendimento.status).toLowerCase();
 
-                    </td>
+        if (filtro === "cliente") return cliente.includes(termo);
+        if (filtro === "status") return status.includes(termo);
+        return servicos.includes(termo);
+    });
 
-                    <td>
+    renderAtendimentos(lista);
+}
 
-                        ${servico.quantidade}
+async function carregarAtendimentos() {
+    try {
+        const resposta = await fetch("/api/atendimentos");
+        if (!resposta.ok) throw new Error("Não foi possível carregar os atendimentos.");
 
-                    </td>
+        const dados = await resposta.json();
+        if (!Array.isArray(dados)) throw new Error("A resposta do servidor é inválida.");
 
-                    <td>
+        atendimentos = dados;
+        filtrarAtendimentos();
+    } catch (erro) {
+        console.error("Erro ao carregar atendimentos:", erro);
+        alert(erro.message);
+    }
+}
 
-                        ${formatarMoeda(
-                            servico.valorUnitario
-                        )}
+async function carregarClientes() {
+    const resposta = await fetch("/api/clientes");
+    if (!resposta.ok) throw new Error("Não foi possível carregar os clientes.");
 
-                    </td>
+    const dados = await resposta.json();
+    if (!Array.isArray(dados)) throw new Error("A resposta de clientes é inválida.");
 
-                    <td>
+    clientes = dados;
+}
 
-                        ${formatarMoeda(
-                            servico.quantidade *
-                            servico.valorUnitario
-                        )}
+async function atualizarAtendimento(id, dados) {
+    try {
+        const resposta = await fetch(`/api/atendimentos/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dados)
+        });
+        const retorno = await resposta.json();
 
-                    </td>
-
-                </tr>
-
-            `;
-
+        if (!resposta.ok || !retorno.success) {
+            throw new Error(retorno.erro || "Não foi possível atualizar o atendimento.");
         }
 
-    );
-
-    viewModal.classList.add(
-        "active"
-    );
-
+        await carregarAtendimentos();
+        return true;
+    } catch (erro) {
+        console.error("Erro ao atualizar atendimento:", erro);
+        alert(erro.message);
+        await carregarAtendimentos();
+        return false;
+    }
 }
 
-// ======================================================
-// FECHAR VISUALIZAÇÃO
-// ======================================================
+async function obterAtendimento(id) {
+    const resposta = await fetch(`/api/atendimentos/${id}`);
+    const retorno = await resposta.json();
 
-function closeViewModal(){
+    if (!resposta.ok || !retorno.success) {
+        throw new Error(retorno.erro || "Não foi possível carregar o atendimento.");
+    }
 
-    viewModal.classList.remove(
-        "active"
-    );
-
+    return retorno.atendimento;
 }
 
-// ======================================================
-// EXCLUSÃO
-// ======================================================
+async function visualizarAtendimento(id) {
+    try {
+        const atendimento = await obterAtendimento(id);
+        document.getElementById("viewNome").textContent = "Serviços do atendimento";
+        document.getElementById("viewCliente").textContent = atendimento.cliente;
+        document.getElementById("viewData").textContent = formatarData(atendimento.data_atendimento);
+        document.getElementById("viewStatus").textContent = textoStatus(atendimento.status);
+        document.getElementById("viewDescricao").textContent = atendimento.data_conclusao
+            ? `Conclusão: ${formatarData(atendimento.data_conclusao)}`
+            : "Sem data de conclusão.";
+        document.getElementById("viewTotal").textContent = formatarMoeda(atendimento.valor_total);
 
-function confirmarExclusao(id){
+        const tabelaServicos = document.getElementById("viewServices");
+        tabelaServicos.innerHTML = "";
 
-    atendimentoSelecionado =
-        id;
+        atendimento.servicos.forEach((servico) => {
+            const linha = tabelaServicos.insertRow();
+            linha.insertCell().textContent = servico.nome;
+            linha.insertCell().textContent = servico.quantidade;
+            linha.insertCell().textContent = formatarMoeda(servico.valorUnitario);
+            linha.insertCell().textContent = formatarMoeda(servico.valor);
+        });
 
-    deleteModal.classList.add(
-        "active"
-    );
+        if (atendimento.servicos.length === 0) {
+            const linha = tabelaServicos.insertRow();
+            const celula = linha.insertCell();
+            celula.colSpan = 4;
+            celula.textContent = "Nenhum serviço vinculado.";
+        }
 
+        viewModal.classList.add("active");
+    } catch (erro) {
+        console.error("Erro ao visualizar atendimento:", erro);
+        alert(erro.message);
+    }
 }
 
-function closeDeleteModal(){
+async function abrirEdicao(id) {
+    try {
+        const atendimento = await obterAtendimento(id);
+        const clienteSelect = document.getElementById("editCliente");
+        clienteSelect.innerHTML = "";
 
-    deleteModal.classList.remove(
-        "active"
-    );
+        clientes.forEach((cliente) => {
+            clienteSelect.add(new Option(cliente.nome, cliente.id, false,
+                Number(cliente.id) === Number(atendimento.id_cliente)));
+        });
 
+        document.getElementById("editAtendimentoId").value = atendimento.id;
+        document.getElementById("editDataAtendimento").value = atendimento.data_atendimento;
+        document.getElementById("editStatus").value = atendimento.status;
+        document.getElementById("editDataConclusao").value = atendimento.data_conclusao || "";
+        editModal.classList.add("active");
+    } catch (erro) {
+        console.error("Erro ao abrir edição:", erro);
+        alert(erro.message);
+    }
 }
 
-confirmDelete.addEventListener(
+document.getElementById("editForm").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
 
-    "click",
+    const id = Number(document.getElementById("editAtendimentoId").value);
+    const atualizado = await atualizarAtendimento(id, {
+        id_cliente: Number(document.getElementById("editCliente").value),
+        status: document.getElementById("editStatus").value,
+        data_atendimento: document.getElementById("editDataAtendimento").value,
+        data_conclusao: document.getElementById("editDataConclusao").value || null
+    });
 
-    () => {
+    if (atualizado) closeEditModal();
+});
 
-        atendimentos =
-            atendimentos.filter(
+function confirmarExclusao(id) {
+    atendimentoSelecionado = id;
+    deleteModal.classList.add("active");
+}
 
-                atendimento =>
+async function excluirAtendimento() {
+    if (!atendimentoSelecionado) return;
 
-                    atendimento.id !==
-                    atendimentoSelecionado
+    try {
+        const resposta = await fetch(`/api/atendimentos/${atendimentoSelecionado}`, {
+            method: "DELETE"
+        });
+        const retorno = await resposta.json();
 
-            );
-
-        renderAtendimentos();
+        if (!resposta.ok || !retorno.success) {
+            throw new Error(retorno.erro || "Não foi possível excluir o atendimento.");
+        }
 
         closeDeleteModal();
-
-        /*
-        ===============================================
-
-        FLASK FUTURO
-
-        DELETE
-
-        /atendimentos/<id>
-
-        ===============================================
-
-        fetch(
-
-            `/atendimentos/${atendimentoSelecionado}`,
-
-            {
-
-                method:"DELETE"
-
-            }
-
-        );
-
-        */
-
+        await carregarAtendimentos();
+    } catch (erro) {
+        console.error("Erro ao excluir atendimento:", erro);
+        alert(erro.message);
     }
-
-);
-
-// ======================================================
-// EDIÇÃO
-// ======================================================
-
-function editarAtendimento(id){
-
-    /*
-    ===============================================
-
-    FLASK FUTURO
-
-    Redirecionar para
-
-    /editar-atendimento/<id>
-
-    ===============================================
-
-    */
-
-    window.location.href =
-        `editarAtendimento.html?id=${id}`;
-
 }
 
-// ======================================================
-// FECHAMENTO DOS MODAIS
-// ======================================================
+function closeViewModal() { viewModal.classList.remove("active"); }
+function closeEditModal() { editModal.classList.remove("active"); }
+function closeDeleteModal() { deleteModal.classList.remove("active"); }
 
-viewModal.addEventListener(
+searchInput.addEventListener("input", filtrarAtendimentos);
+filterType.addEventListener("change", filtrarAtendimentos);
+confirmDelete.addEventListener("click", excluirAtendimento);
 
-    "click",
+[viewModal, editModal, deleteModal].forEach((modal) => {
+    modal.addEventListener("click", (evento) => {
+        if (evento.target === modal) modal.classList.remove("active");
+    });
+});
 
-    (e)=>{
-
-        if(
-
-            e.target===viewModal
-
-        ){
-
-            closeViewModal();
-
-        }
-
+document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape") {
+        closeViewModal();
+        closeEditModal();
+        closeDeleteModal();
     }
-
-);
-
-deleteModal.addEventListener(
-
-    "click",
-
-    (e)=>{
-
-        if(
-
-            e.target===deleteModal
-
-        ){
-
-            closeDeleteModal();
-
-        }
-
-    }
-
-);
-
-// ======================================================
-// ESC
-// ======================================================
-
-document.addEventListener(
-
-    "keydown",
-
-    (e)=>{
-
-        if(
-
-            e.key==="Escape"
-
-        ){
-
-            closeViewModal();
-
-            closeDeleteModal();
-
-        }
-
-    }
-
-);
-
-// ======================================================
-// PDF
-// ======================================================
-//
-// Biblioteca sugerida:
-//
-// pdfmake
-// https://pdfmake.github.io/docs/
-//
-// ou
-//
-// jsPDF + AutoTable
-//
-// https://github.com/simonbengtsson/jsPDF-AutoTable
-//
-// ======================================================
-
-function gerarPDF(id){
-
-    const atendimento =
-
-        atendimentos.find(
-
-            atendimento => atendimento.id === id
-
-        );
-
-    if(!atendimento){
-
-        return;
-
-    }
-
-    /*
-    =====================================================
-
-    FLASK FUTURO
-
-    Caso queira gerar PDFs pelo servidor:
-
-    GET
-
-    /atendimentos/<id>/pdf
-
-    window.open(
-        `/atendimentos/${id}/pdf`
-    );
-
-    =====================================================
-    */
-
-    alert(
-
-        "A geração de PDF será implementada futuramente utilizando pdfmake."
-
-    );
-
-}
-
-// ======================================================
-// MODAL COMPLETO
-// ======================================================
-
-function preencherModalCompleto(atendimento){
-
-    document
-    .getElementById("viewNome")
-    .textContent =
-        atendimento.nome;
-
-    document
-    .getElementById("viewCliente")
-    .textContent =
-        atendimento.cliente;
-
-    document
-    .getElementById("viewData")
-    .textContent =
-        atendimento.data;
-
-    document
-    .getElementById("viewStatus")
-    .textContent =
-        atendimento.status;
-
-    document
-    .getElementById("viewDescricao")
-    .textContent =
-        atendimento.descricao;
-
-    document
-    .getElementById("viewTotal")
-    .textContent =
-        formatarMoeda(
-            atendimento.valorTotal
-        );
-
-    const tbody =
-        document.getElementById(
-            "viewServices"
-        );
-
-    tbody.innerHTML = "";
-
-    atendimento.servicos.forEach(
-
-        servico=>{
-
-            tbody.innerHTML += `
-
-            <tr>
-
-                <td>${servico.nome}</td>
-
-                <td>${servico.quantidade}</td>
-
-                <td>
-
-                    ${formatarMoeda(
-
-                        servico.valorUnitario
-
-                    )}
-
-                </td>
-
-                <td>
-
-                    ${formatarMoeda(
-
-                        servico.valorUnitario *
-
-                        servico.quantidade
-
-                    )}
-
-                </td>
-
-            </tr>
-
-            `;
-
-        }
-
-    );
-
-}
-
-// ======================================================
-// FLASK
-// ======================================================
-//
-// Quando o backend estiver pronto,
-// basta substituir o array temporário.
-//
-// ======================================================
-
-/*
-
-async function carregarAtendimentos(){
-
-    const resposta =
-
-        await fetch(
-
-            "/atendimentos"
-
-        );
-
-    atendimentos =
-
-        await resposta.json();
-
-    renderAtendimentos();
-
-}
-
-window.onload =
-
-    carregarAtendimentos;
-
-*/
-
-// ======================================================
-// FLASK
-// CADASTRO
-// ======================================================
-
-/*
-
-fetch(
-
-    "/atendimentos",
-
-    {
-
-        method:"POST",
-
-        headers:{
-
-            "Content-Type":
-
-            "application/json"
-
-        },
-
-        body:JSON.stringify(
-
-            novoAtendimento
-
-        )
-
-    }
-
-);
-
-*/
-
-// ======================================================
-// FLASK
-// EDIÇÃO
-// ======================================================
-
-/*
-
-fetch(
-
-    `/atendimentos/${id}`,
-
-    {
-
-        method:"PUT",
-
-        headers:{
-
-            "Content-Type":
-
-            "application/json"
-
-        },
-
-        body:JSON.stringify(
-
-            atendimento
-
-        )
-
-    }
-
-);
-
-*/
-
-// ======================================================
-// FLASK
-// EXCLUSÃO
-// ======================================================
-
-/*
-
-fetch(
-
-    `/atendimentos/${id}`,
-
-    {
-
-        method:"DELETE"
-
-    }
-
-);
-
-*/
-
-// ======================================================
-// FLASK
-// STATUS
-// ======================================================
-
-/*
-
-fetch(
-
-    `/atendimentos/${id}/status`,
-
-    {
-
-        method:"PUT",
-
-        headers:{
-
-            "Content-Type":
-
-            "application/json"
-
-        },
-
-        body:JSON.stringify({
-
-            status:status
-
-        })
-
-    }
-
-);
-
-*/
-
-// ======================================================
-// ORGANIZAÇÃO DOS DADOS
-// ======================================================
-//
-// A API deverá retornar:
-//
-// Atendimento
-//
-// {
-//      id,
-//      nome,
-//      cliente,
-//      telefone,
-//      endereco,
-//      data,
-//      hora,
-//      status,
-//      formaPagamento,
-//      desconto,
-//      valorEntrada,
-//      observacoes,
-//      descricao,
-//
-//      servicos:[
-//
-//          {
-//
-//              id,
-//              nome,
-//              quantidade,
-//              valorUnitario
-//
-//          }
-//
-//      ]
-//
-// }
-//
-// ======================================================
-
-// ======================================================
-// REDIRECIONAMENTO
-// ======================================================
-
-document
-
-.getElementById(
-
-    "btnNovoAtendimento"
-
-)
-
-.addEventListener(
-
-    "click",
-
-    ()=>{
-
-        window.location.href =
-
-        "criarAtendimento.html";
-
-    }
-
-);
-
-// ======================================================
-// INICIALIZAÇÃO
-// ======================================================
-
-renderAtendimentos();
+});
+
+Promise.all([carregarClientes(), carregarAtendimentos()]).catch((erro) => {
+    console.error("Erro na inicialização:", erro);
+    alert(erro.message);
+});
