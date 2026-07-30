@@ -1,185 +1,372 @@
+// ============================================================
+// ELEMENTOS DA PÁGINA
+// ============================================================
+
 const modal = document.getElementById("modalOverlay");
-const openBtn = document.getElementById("openReminderModal");
-const form = document.getElementById("reminderForm");
-const remindersList = document.getElementById("remindersList");
-const tooltip = document.getElementById("dayTooltip");
-tooltip.addEventListener("mouseleave", esconderTooltip);
+
+const openBtn = document.getElementById(
+    "openReminderModal"
+);
+
+const form = document.getElementById(
+    "reminderForm"
+);
+
+const remindersList = document.getElementById(
+    "remindersList"
+);
+
+const tooltip = document.getElementById(
+    "dayTooltip"
+);
+
+const monthYear = document.getElementById(
+    "monthYear"
+);
+
+const prevMonth = document.getElementById(
+    "prevMonth"
+);
+
+const nextMonth = document.getElementById(
+    "nextMonth"
+);
+
+const dateInput = document.getElementById(
+    "date"
+);
+
+const appointmentInput = document.getElementById(
+    "appointment"
+);
+
+const descriptionInput = document.getElementById(
+    "description"
+);
+
+const saveButton = document.querySelector(
+    ".save-btn"
+);
+
+const modalTitle = document.querySelector(
+    ".modal h2"
+);
+
+const appointmentSearchButton =
+    document.querySelector(".icon-btn");
+
+
+// ============================================================
+// ESTADO
+// ============================================================
+
 let lembreteEditando = null;
 
-// Abre modal
+let atendimentoSelecionado = null;
+
+let atendimentos = [];
+
+
+// ============================================================
+// MODAL
+// ============================================================
+
 function openModal() {
+
     modal.classList.add("active");
+
     document.body.style.overflow = "hidden";
 }
 
-// Fecha modal
+
 function closeModal() {
+
     modal.classList.remove("active");
+
     document.body.style.overflow = "auto";
+
+    fecharSelecaoAtendimento();
 }
 
-openBtn.addEventListener("click",()=>{
 
-    lembreteEditando=null;
+// ============================================================
+// NOVO LEMBRETE
+// ============================================================
+
+openBtn.addEventListener("click", () => {
+
+    lembreteEditando = null;
+
+    atendimentoSelecionado = null;
 
     form.reset();
 
-    document.querySelector(".modal h2").textContent="CRIAR LEMBRETE";
+    modalTitle.textContent =
+        "CRIAR LEMBRETE";
 
-    document.querySelector(".save-btn").textContent="Criar";
+    saveButton.textContent =
+        "Criar";
+
+    atualizarCampoAtendimento();
+
+    esconderBotaoExcluir();
 
     openModal();
 
 });
 
-// Fecha clicando fora
+
+// ============================================================
+// FECHAR MODAL CLICANDO FORA
+// ============================================================
+
 modal.addEventListener("click", (event) => {
+
     if (event.target === modal) {
+
         closeModal();
+
     }
+
 });
 
-// Fecha com ESC
+
+// ============================================================
+// ESC
+// ============================================================
+
 document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && modal.classList.contains("active")) {
+
+    if (
+        event.key === "Escape" &&
+        modal.classList.contains("active")
+    ) {
+
         closeModal();
+
     }
+
 });
+
+
+// ============================================================
+// MESES
+// ============================================================
 
 const meses = [
 
-"Janeiro",
-"Fevereiro",
-"Março",
-"Abril",
-"Maio",
-"Junho",
-"Julho",
-"Agosto",
-"Setembro",
-"Outubro",
-"Novembro",
-"Dezembro"
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro"
 
 ];
 
+
+// ============================================================
+// DATA ATUAL DO CALENDÁRIO
+// ============================================================
+
 let dataAtual = new Date();
 
-let mesAtual = dataAtual.getMonth();
+let mesAtual =
+    dataAtual.getMonth();
 
-let anoAtual = dataAtual.getFullYear();
+let anoAtual =
+    dataAtual.getFullYear();
 
-function criarCalendario(){
 
-    monthYear.innerHTML =
-        meses[mesAtual] + " " + anoAtual;
+// ============================================================
+// CALENDÁRIO
+// ============================================================
+
+function criarCalendario() {
+
+    monthYear.textContent =
+        `${meses[mesAtual]} ${anoAtual}`;
 
     const tbody =
-        document.getElementById("calendarBody");
+        document.getElementById(
+            "calendarBody"
+        );
 
-    tbody.innerHTML="";
+    tbody.innerHTML = "";
 
     const primeiroDia =
-        new Date(anoAtual,mesAtual,1).getDay();
+        new Date(
+            anoAtual,
+            mesAtual,
+            1
+        ).getDay();
 
     const ultimoDia =
-        new Date(anoAtual,mesAtual+1,0).getUTCDate();
+        new Date(
+            anoAtual,
+            mesAtual + 1,
+            0
+        ).getDate();
 
-    let linha=document.createElement("tr");
+    let linha =
+        document.createElement("tr");
 
-    for(let i=0;i<primeiroDia;i++){
 
-        linha.appendChild(document.createElement("td"));
+    // Espaços antes do primeiro dia
+
+    for (
+        let i = 0;
+        i < primeiroDia;
+        i++
+    ) {
+
+        linha.appendChild(
+            document.createElement("td")
+        );
 
     }
 
-    for(let dia=1;dia<=ultimoDia;dia++){
 
-        if(linha.children.length===7){
+    // Dias do mês
+
+    for (
+        let dia = 1;
+        dia <= ultimoDia;
+        dia++
+    ) {
+
+        if (
+            linha.children.length === 7
+        ) {
 
             tbody.appendChild(linha);
 
-            linha=document.createElement("tr");
+            linha =
+                document.createElement("tr");
 
         }
 
-        const td=document.createElement("td");
+        const td =
+            document.createElement("td");
 
-        td.innerHTML=dia;
+        td.textContent = dia;
 
-        const hoje=new Date();
 
-        if(
+        // ----------------------------
+        // DIA ATUAL
+        // ----------------------------
 
-            dia===hoje.getUTCDate()
+        const hoje = new Date();
+
+        if (
+
+            dia === hoje.getDate()
 
             &&
 
-            mesAtual===hoje.getMonth()
+            mesAtual === hoje.getMonth()
 
             &&
 
-            anoAtual===hoje.getFullYear()
+            anoAtual === hoje.getFullYear()
 
-        ){
+        ) {
 
             td.classList.add("today");
 
         }
 
-        const possuiEvento = lembretes.some(item=>{
 
-            const d=new Date(item.data);
+        // ----------------------------
+        // EXISTE LEMBRETE?
+        // ----------------------------
 
-            return(
+        const possuiEvento =
+            lembretes.some(item => {
 
-                d.getUTCDate()===dia
-                &&
+                const data =
+                    new Date(
+                        `${item.data}T00:00:00Z`
+                    );
 
-                d.getUTCMonth()===mesAtual
+                return (
 
-                &&
+                    data.getUTCDate() === dia
 
-                d.getFullYear()===anoAtual
+                    &&
 
-            );
+                    data.getUTCMonth() ===
+                        mesAtual
 
-        });
+                    &&
 
-        if(possuiEvento){
+                    data.getUTCFullYear() ===
+                        anoAtual
+
+                );
+
+            });
+
+
+        if (possuiEvento) {
 
             td.classList.add("event");
 
-            td.addEventListener("mouseenter",()=>{
 
-                mostrarTooltip(td,dia);
+            td.addEventListener(
+                "mouseenter",
+                () => {
 
-            });
+                    mostrarTooltip(
+                        td,
+                        dia
+                    );
 
-            td.addEventListener("mouseleave",()=>{
+                }
+            );
 
-                setTimeout(()=>{
 
-                    if(!tooltip.matches(":hover")){
+            td.addEventListener(
+                "mouseleave",
+                () => {
 
-                        esconderTooltip();
+                    setTimeout(() => {
 
-                    }
+                        if (
+                            !tooltip.matches(":hover")
+                        ) {
 
-                },100);
+                            esconderTooltip();
 
-            });
+                        }
+
+                    }, 100);
+
+                }
+            );
 
         }
 
         linha.appendChild(td);
-        
 
     }
 
-    while(linha.children.length<7){
 
-        linha.appendChild(document.createElement("td"));
+    // Completa a última semana
+
+    while (
+        linha.children.length < 7
+    ) {
+
+        linha.appendChild(
+            document.createElement("td")
+        );
 
     }
 
@@ -187,276 +374,1024 @@ function criarCalendario(){
 
 }
 
-function carregarLembretes(){
+
+// ============================================================
+// LISTA DE LEMBRETES
+// ============================================================
+
+function carregarLembretes() {
 
     remindersList.innerHTML = "";
 
-    const lembretesDoMes = lembretes
-        .filter(item => {
+    const lembretesDoMes =
+        lembretes
 
-            const data = new Date(item.data);
+            .filter(item => {
 
-            return (
-                data.getUTCMonth() === mesAtual &&
-                data.getUTCFullYear() === anoAtual
-            );
+                const data =
+                    new Date(
+                        `${item.data}T00:00:00Z`
+                    );
 
-        })
-        .sort((a,b) => new Date(a.data) - new Date(b.data));
+                return (
+
+                    data.getUTCMonth() ===
+                        mesAtual
+
+                    &&
+
+                    data.getUTCFullYear() ===
+                        anoAtual
+
+                );
+
+            })
+
+            .sort((a, b) => {
+
+                return (
+                    new Date(
+                        `${a.data}T00:00:00Z`
+                    )
+                    -
+                    new Date(
+                        `${b.data}T00:00:00Z`
+                    )
+                );
+
+            });
+
 
     lembretesDoMes.forEach(item => {
 
-        const data = new Date(item.data);
+        const data =
+            new Date(
+                `${item.data}T00:00:00Z`
+            );
 
-        const reminder = document.createElement("div");
+        const reminder =
+            document.createElement("div");
 
-        reminder.classList.add("reminder-item");
+        reminder.classList.add(
+            "reminder-item"
+        );
+
 
         reminder.innerHTML = `
+
             <div class="day-circle">
-                ${String(data.getUTCDate()).padStart(2,"0")}
+                ${String(
+                    data.getUTCDate()
+                ).padStart(2, "0")}
             </div>
 
             <div class="reminder-card">
-                <h3>${item.titulo}</h3>
-                <p>${item.descricao ?? ""}</p>
+
+                <h3>
+                    ${escaparHTML(
+                        item.atendimento ||
+                        "Atendimento não informado"
+                    )}
+                </h3>
+
+                <p>
+                    ${escaparHTML(
+                        item.descricao || ""
+                    )}
+                </p>
+
             </div>
+
         `;
 
-        remindersList.appendChild(reminder);
+        remindersList.appendChild(
+            reminder
+        );
 
     });
 
 }
 
-function mostrarTooltip(td, dia){
 
-    const lembretesDia = lembretes.filter(item=>{
+// ============================================================
+// TOOLTIP
+// ============================================================
 
-        const data = new Date(item.data);
+function mostrarTooltip(td, dia) {
 
-        return (
+    const lembretesDia =
+        lembretes.filter(item => {
 
-            data.getUTCDate()==dia &&
+            const data =
+                new Date(
+                    `${item.data}T00:00:00Z`
+                );
 
-            data.getUTCMonth()==mesAtual &&
+            return (
 
-            data.getUTCFullYear()==anoAtual
+                data.getUTCDate() === dia
 
-        );
+                &&
 
-    });
+                data.getUTCMonth() ===
+                    mesAtual
 
-    if(lembretesDia.length==0) return;
+                &&
 
-    tooltip.innerHTML="";
+                data.getUTCFullYear() ===
+                    anoAtual
 
-    lembretesDia.forEach(item=>{
+            );
 
-        const div=document.createElement("div");
+        });
 
-        div.className="tooltip-item";
 
-        div.innerHTML=`
+    if (
+        lembretesDia.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    tooltip.innerHTML = "";
+
+
+    lembretesDia.forEach(item => {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "tooltip-item";
+
+
+        div.innerHTML = `
 
             <div class="tooltip-circle"></div>
 
-            <span>${item.titulo}</span>
+            <span>
+                ${escaparHTML(
+                    item.atendimento ||
+                    "Atendimento não informado"
+                )}
+            </span>
 
         `;
 
-        div.onclick=()=>abrirEdicao(item);
+
+        div.addEventListener(
+            "click",
+            () => {
+
+                abrirEdicao(item);
+
+            }
+        );
+
 
         tooltip.appendChild(div);
 
     });
 
-    const rect = td.getBoundingClientRect();
 
-    tooltip.classList.remove("hidden");
+    const rect =
+        td.getBoundingClientRect();
+
+    tooltip.classList.remove(
+        "hidden"
+    );
+
 
     tooltip.style.left =
-        (window.scrollX + rect.left + rect.width/2 - tooltip.offsetWidth/2) + "px";
+        (
+            window.scrollX
+            +
+            rect.left
+            +
+            rect.width / 2
+            -
+            tooltip.offsetWidth / 2
+        ) + "px";
+
 
     tooltip.style.top =
-        (window.scrollY + rect.top - tooltip.offsetHeight - 8) + "px";
+        (
+            window.scrollY
+            +
+            rect.top
+            -
+            tooltip.offsetHeight
+            -
+            8
+        ) + "px";
 
 }
 
-function esconderTooltip(){
 
-    tooltip.classList.add("hidden");
+function esconderTooltip() {
+
+    tooltip.classList.add(
+        "hidden"
+    );
 
 }
 
-prevMonth.onclick=()=>{
 
-    mesAtual--;
+tooltip.addEventListener(
+    "mouseleave",
+    esconderTooltip
+);
 
-    if(mesAtual<0){
 
-        mesAtual=11;
+// ============================================================
+// MUDAR MÊS
+// ============================================================
 
-        anoAtual--;
+prevMonth.addEventListener(
+    "click",
+    () => {
+
+        mesAtual--;
+
+        if (mesAtual < 0) {
+
+            mesAtual = 11;
+
+            anoAtual--;
+
+        }
+
+        criarCalendario();
+
+        carregarLembretes();
+
+    }
+);
+
+
+nextMonth.addEventListener(
+    "click",
+    () => {
+
+        mesAtual++;
+
+        if (mesAtual > 11) {
+
+            mesAtual = 0;
+
+            anoAtual++;
+
+        }
+
+        criarCalendario();
+
+        carregarLembretes();
+
+    }
+);
+
+
+// ============================================================
+// BUSCAR ATENDIMENTOS
+// ============================================================
+
+async function carregarAtendimentos() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/atendimentos"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Não foi possível carregar os atendimentos."
+            );
+
+        }
+
+
+        atendimentos =
+            await response.json();
 
     }
 
-    criarCalendario();
-    carregarLembretes();
+    catch (erro) {
 
-};
-
-
-
-nextMonth.onclick=()=>{
-
-    mesAtual++;
-
-    if(mesAtual>11){
-
-        mesAtual=0;
-
-        anoAtual++;
+        console.error(
+            erro
+        );
 
     }
 
-    criarCalendario();
-    carregarLembretes();
+}
 
-};
 
-criarCalendario();
-carregarLembretes();
+// ============================================================
+// INTERFACE DE SELEÇÃO DE ATENDIMENTO
+// ============================================================
 
-// Submit
-form.addEventListener("submit", (event) => {
+let listaAtendimentosElement = null;
 
-    event.preventDefault();
 
-    const date = document.getElementById("date").value;
-    const appointment = document.getElementById("appointment").value;
-    const description = document.getElementById("description").value;
-    const dados={data:date,atendimento:appointment,descricao:description}
+function criarListaAtendimentos() {
 
-    if (!date) {
-        alert("Selecione uma data.");
+    if (
+        listaAtendimentosElement
+    ) {
+
         return;
-    }
-    console.log(date)
-    console.log(Date(date))
-    const day = new Date(date).getUTCDate();
-
-    // Simulação visual até integrar com Flask
-    const reminder = document.createElement("div");
-
-    reminder.classList.add("reminder-item");
-
-    console.log(String(day).padStart(2, '0'))
-    reminder.innerHTML = `
-        <div class="day-circle">
-            ${String(day).padStart(2, '0')}
-        </div>
-
-        <div class="reminder-card">
-            <h3>${appointment || "Novo Lembrete"}</h3>
-            <p>${description || "Sem descrição."}</p>
-        </div>
-    `;
-
-    remindersList.prepend(reminder);
-
-    /*
-    ==========================
-    INTEGRAÇÃO FLASK FUTURA
-    ==========================*/
-    if(lembreteEditando){
-
-        fetch("/editar_lembrete", {
-
-            method: "PUT",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-
-                id: lembreteEditando.id,
-                data: date,
-                atendimento: appointment,
-                descricao: description
-
-            })
-
-        })
-        .then(response => response.json())
-        .then(retorno => {
-
-            lembreteEditando.data = date;
-            lembreteEditando.titulo = appointment;
-            lembreteEditando.descricao = description;
-
-            carregarLembretes();
-            criarCalendario();
-
-            console.log("Resposta do servidor:", retorno);
-
-        })
-        .catch(err => console.error("Erro:", err));
-
-    }else{
-
-        fetch("/pegar_dados",{
-
-            method:"POST",
-
-            headers:{
-                "Content-Type":"application/json"
-            },
-
-            body:JSON.stringify(dados)
-
-        })
-        .then(response => response.json())
-        .then(retorno => {
-
-            lembretes.push({
-
-                id: retorno.id,
-                data: date,
-                titulo: appointment,
-                descricao: description
-
-            });
-
-            carregarLembretes();
-            criarCalendario();
-
-        })
-        .catch(err => console.error("Erro:", err));
 
     }
 
-    
-    form.reset();
-    closeModal()})
 
-function abrirEdicao(item){
+    listaAtendimentosElement =
+        document.createElement("div");
 
-    lembreteEditando = item;
+    listaAtendimentosElement.id =
+        "listaAtendimentos";
+
+
+    appointmentInput.parentElement
+        .appendChild(
+            listaAtendimentosElement
+        );
+
+}
+
+
+function mostrarSelecaoAtendimento() {
+
+    criarListaAtendimentos();
+
+    listaAtendimentosElement.innerHTML =
+        "";
+
+
+    if (
+        atendimentos.length === 0
+    ) {
+
+        listaAtendimentosElement.innerHTML = `
+
+            <div>
+                Nenhum atendimento cadastrado.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    atendimentos.forEach(
+        atendimento => {
+
+            const item =
+                document.createElement("button");
+
+            item.type = "button";
+
+
+            item.textContent =
+                atendimento.titulo;
+
+
+            item.addEventListener(
+                "click",
+                () => {
+
+                    selecionarAtendimento(
+                        atendimento
+                    );
+
+                }
+            );
+
+
+            listaAtendimentosElement
+                .appendChild(item);
+
+        }
+    );
+
+}
+
+
+function selecionarAtendimento(
+    atendimento
+) {
+
+    atendimentoSelecionado =
+        atendimento;
+
+
+    appointmentInput.value =
+        atendimento.titulo;
+
+
+    appointmentInput.dataset.id =
+        atendimento.id;
+
+
+    fecharSelecaoAtendimento();
+
+}
+
+
+function fecharSelecaoAtendimento() {
+
+    if (
+        listaAtendimentosElement
+    ) {
+
+        listaAtendimentosElement.remove();
+
+        listaAtendimentosElement =
+            null;
+
+    }
+
+}
+
+
+function atualizarCampoAtendimento() {
+
+    if (
+        atendimentoSelecionado
+    ) {
+
+        appointmentInput.value =
+            atendimentoSelecionado.titulo;
+
+        appointmentInput.dataset.id =
+            atendimentoSelecionado.id;
+
+    }
+
+    else {
+
+        appointmentInput.value = "";
+
+        delete appointmentInput.dataset.id;
+
+    }
+
+}
+
+
+// ============================================================
+// BOTÃO DE BUSCA
+// ============================================================
+
+if (
+    appointmentSearchButton
+) {
+
+    appointmentSearchButton.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                atendimentos.length === 0
+            ) {
+
+                await carregarAtendimentos();
+
+            }
+
+            mostrarSelecaoAtendimento();
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// IMPEDIR DIGITAÇÃO MANUAL DO ATENDIMENTO
+// ============================================================
+
+appointmentInput.readOnly = true;
+
+
+// ============================================================
+// SALVAR LEMBRETE
+// ============================================================
+
+form.addEventListener(
+    "submit",
+    async (event) => {
+
+        event.preventDefault();
+
+
+        const date =
+            dateInput.value;
+
+        const description =
+            descriptionInput.value;
+
+
+        if (!date) {
+
+            alert(
+                "Selecione uma data."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !atendimentoSelecionado
+        ) {
+
+            alert(
+                "Selecione um atendimento."
+            );
+
+            return;
+
+        }
+
+
+        const dados = {
+
+            data: date,
+
+            id_atendimento:
+                atendimentoSelecionado.id,
+
+            descricao: description
+
+        };
+
+
+        try {
+
+            let response;
+
+
+            // ==================================================
+            // EDITAR
+            // ==================================================
+
+            if (lembreteEditando) {
+
+                response =
+                    await fetch(
+                        "/editar_lembrete",
+                        {
+
+                            method: "PUT",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    id:
+                                        lembreteEditando.id,
+
+                                    data:
+                                        date,
+
+                                    id_atendimento:
+                                        atendimentoSelecionado.id,
+
+                                    descricao:
+                                        description
+
+                                })
+
+                        }
+                    );
+
+            }
+
+            // ==================================================
+            // CRIAR
+            // ==================================================
+
+            else {
+
+                response =
+                    await fetch(
+                        "/pegar_dados",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    dados
+                                )
+
+                        }
+                    );
+
+            }
+
+
+            const retorno =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    retorno.erro ||
+                    "Erro ao salvar lembrete."
+                );
+
+            }
+
+
+            // ==================================================
+            // ATUALIZA OBJETO LOCAL
+            // ==================================================
+
+            if (lembreteEditando) {
+
+                lembreteEditando.data =
+                    date;
+
+                lembreteEditando.id_atendimento =
+                    atendimentoSelecionado.id;
+
+                lembreteEditando.atendimento =
+                    atendimentoSelecionado.titulo;
+
+                lembreteEditando.descricao =
+                    description;
+
+            }
+
+            else {
+
+                lembretes.push({
+
+                    id:
+                        retorno.id,
+
+                    id_atendimento:
+                        atendimentoSelecionado.id,
+
+                    data:
+                        date,
+
+                    atendimento:
+                        atendimentoSelecionado.titulo,
+
+                    descricao:
+                        description
+
+                });
+
+            }
+
+
+            // ==================================================
+            // ATUALIZA INTERFACE
+            // ==================================================
+
+            criarCalendario();
+
+            carregarLembretes();
+
+
+            form.reset();
+
+            lembreteEditando =
+                null;
+
+            atendimentoSelecionado =
+                null;
+
+            atualizarCampoAtendimento();
+
+            esconderBotaoExcluir();
+
+            closeModal();
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "Erro:",
+                erro
+            );
+
+            alert(
+                erro.message ||
+                "Não foi possível salvar o lembrete."
+            );
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// EDITAR LEMBRETE
+// ============================================================
+
+function abrirEdicao(item) {
+
+    lembreteEditando =
+        item;
+
+
+    atendimentoSelecionado = {
+
+        id:
+            item.id_atendimento,
+
+        titulo:
+            item.atendimento
+
+    };
+
 
     openModal();
 
-    tooltip.classList.add("hidden");
+    tooltip.classList.add(
+        "hidden"
+    );
 
-    document.querySelector(".modal h2").textContent="EDITAR LEMBRETE";
 
-    document.querySelector(".save-btn").textContent="Salvar";
+    modalTitle.textContent =
+        "EDITAR LEMBRETE";
 
-    date.value=item.data;
 
-    appointment.value=item.titulo;
+    saveButton.textContent =
+        "Salvar";
 
-    description.value=item.descricao;
+
+    dateInput.value =
+        item.data;
+
+
+    descriptionInput.value =
+        item.descricao || "";
+
+
+    atualizarCampoAtendimento();
+
+    mostrarBotaoExcluir();
 
 }
+
+
+// ============================================================
+// BOTÃO DE EXCLUSÃO
+// ============================================================
+
+let deleteButton = null;
+
+
+function criarBotaoExcluir() {
+
+    if (deleteButton) {
+
+        return;
+
+    }
+
+
+    deleteButton =
+        document.createElement("button");
+
+    deleteButton.type =
+        "button";
+
+    deleteButton.textContent =
+        "Excluir";
+
+    deleteButton.className =
+        "delete-reminder-btn";
+
+
+
+    saveButton.parentElement
+        .insertBefore(
+            deleteButton,
+            saveButton
+        );
+
+
+    deleteButton.addEventListener(
+        "click",
+        excluirLembrete
+    );
+
+}
+
+
+function mostrarBotaoExcluir() {
+
+    criarBotaoExcluir();
+
+    deleteButton.style.display =
+        "inline-block";
+
+}
+
+
+function esconderBotaoExcluir() {
+
+    if (
+        deleteButton
+    ) {
+
+        deleteButton.style.display =
+            "none";
+
+    }
+
+}
+
+
+// ============================================================
+// EXCLUIR LEMBRETE
+// ============================================================
+
+async function excluirLembrete() {
+
+    if (
+        !lembreteEditando
+    ) {
+
+        return;
+
+    }
+
+
+    const confirmar =
+        confirm(
+            "Deseja realmente excluir este lembrete?"
+        );
+
+
+    if (!confirmar) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/excluir_lembrete",
+                {
+
+                    method: "DELETE",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            id:
+                                lembreteEditando.id
+
+                        })
+
+                }
+            );
+
+
+        const retorno =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                retorno.erro ||
+                "Não foi possível excluir o lembrete."
+            );
+
+        }
+
+
+        const indice =
+            lembretes.findIndex(
+                item =>
+                    String(item.id) ===
+                    String(
+                        lembreteEditando.id
+                    )
+            );
+
+
+        if (indice !== -1) {
+
+            lembretes.splice(
+                indice,
+                1
+            );
+
+        }
+
+
+        criarCalendario();
+
+        carregarLembretes();
+
+
+        lembreteEditando =
+            null;
+
+        atendimentoSelecionado =
+            null;
+
+
+        form.reset();
+
+        atualizarCampoAtendimento();
+
+        esconderBotaoExcluir();
+
+        closeModal();
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            erro
+        );
+
+        alert(
+            erro.message ||
+            "Não foi possível excluir o lembrete."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// ESCAPAR HTML
+// ============================================================
+
+function escaparHTML(valor) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        valor ?? "";
+
+    return div.innerHTML;
+
+}
+
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+
+async function inicializarAgenda() {
+
+    await carregarAtendimentos();
+
+    criarCalendario();
+
+    carregarLembretes();
+
+}
+
+
+inicializarAgenda();
