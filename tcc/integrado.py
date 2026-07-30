@@ -381,6 +381,7 @@ def api_atendimentos():
 
         atendimentos = []
 
+
         for atendimento in atendimentos_db:
 
             nome_cliente = (
@@ -388,10 +389,12 @@ def api_atendimentos():
                 or "Cliente não encontrado"
             )
 
+
             servicos = (
                 atendimento["servicos"]
                 or "Sem serviço informado"
             )
+
 
             atendimentos.append({
 
@@ -411,7 +414,8 @@ def api_atendimentos():
                     f"{nome_cliente} — {servicos}",
 
                 "status":
-                    atendimento["status"],
+                    atendimento["status"]
+                    or "SEM STATUS",
 
                 "data_atendimento":
                     str(
@@ -433,9 +437,14 @@ def api_atendimentos():
                     )
                     if atendimento["valor_total"] is not None
                     else None
+
             })
 
-        return flask.jsonify(atendimentos)
+
+        return flask.jsonify(
+            atendimentos
+        )
+
 
     finally:
 

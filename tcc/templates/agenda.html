@@ -12,278 +12,378 @@
 
     <title>BLK - Agenda</title>
 
+
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/agenda.css') }}"
     >
 
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
 </head>
+
 
 <body>
 
-    <div id="app">
 
-        <!-- =====================================================
-             HEADER
-        ====================================================== -->
-
-        <header class="topbar">
-
-            <div class="logo">
-                BLK
-            </div>
-
-            <nav>
-
-                <a
-                    href="#"
-                    class="active"
-                >
-                    Agenda
-                </a>
-
-                <a href="{{ url_for('clientes') }}">
-                    Clientes
-                </a>
-
-                <a href="{{ url_for('atendimentos') }}">
-                    Atendimentos
-                </a>
-
-                <a href="{{ url_for('servicos') }}">
-                    Serviços
-                </a>
-
-            </nav>
-
-        </header>
+<div id="app">
 
 
-        <!-- =====================================================
-             CABEÇALHO DA AGENDA
-        ====================================================== -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-        <section class="agenda-header">
+    <header class="topbar">
 
-            <div class="left-info">
-
-                <h1 style="font-family: luciole;">
-                    Agenda
-                </h1>
-
-                <div class="legend">
-
-                    <strong>
-                        Legenda:
-                    </strong>
-
-                    <div class="legend-item">
-
-                        <span class="event-circle"></span>
-
-                        Atendimento
-
-                    </div>
-
-                </div>
-
-            </div>
+        <div class="logo">
+            BLK
+        </div>
 
 
-            <button
-                id="openReminderModal"
-                class="create-btn"
-                type="button"
+        <nav>
+
+            <a
+                class="active"
+                href="{{ url_for('agenda') }}"
             >
-
-                Criar Lembrete
-
-                <span>
-                    +
-                </span>
-
-            </button>
-
-        </section>
+                Agenda
+            </a>
 
 
-        <!-- =====================================================
-             CONTEÚDO PRINCIPAL
-        ====================================================== -->
-
-        <main class="content">
+            <a href="{{ url_for('clientes') }}">
+                Clientes
+            </a>
 
 
-            <!-- =================================================
-                 PAINEL DE LEMBRETES
-            ================================================== -->
+            <a href="{{ url_for('atendimentos') }}">
+                Atendimentos
+            </a>
 
-            <aside class="reminders-panel">
+
+            <a href="{{ url_for('servicos') }}">
+                Serviços
+            </a>
+
+        </nav>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         SUB HEADER
+    ====================================================== -->
+
+    <section class="page-header">
+
+        <h1>
+            Agenda
+        </h1>
+
+
+        <button
+            type="button"
+            id="openReminderModal"
+            class="new-btn"
+        >
+
+            Novo Lembrete
+
+            <span>
+                +
+            </span>
+
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         CONTEÚDO
+    ====================================================== -->
+
+    <main class="page-content">
+
+
+        <!-- =================================================
+             PAINEL DE LEMBRETES
+        ================================================== -->
+
+        <section class="reminders-panel">
+
+
+            <div class="reminders-header">
 
                 <h2>
                     Lembretes
                 </h2>
 
-                <div
-                    id="remindersList"
-                    class="reminders-list"
-                >
-                </div>
-
-            </aside>
+            </div>
 
 
-            <!-- =================================================
-                 CALENDÁRIO
-            ================================================== -->
 
-            <section class="calendar-panel">
-
-                <div class="calendar-header">
-
-                    <button
-                        id="prevMonth"
-                        class="nav-btn"
-                        type="button"
-                    >
-                        &#10094;
-                    </button>
-
-
-                    <h2 id="monthYear"></h2>
-
-
-                    <button
-                        id="nextMonth"
-                        class="nav-btn"
-                        type="button"
-                    >
-                        &#10095;
-                    </button>
-
-                </div>
-
-
-                <table class="calendar">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                Dom
-                            </th>
-
-                            <th>
-                                Seg
-                            </th>
-
-                            <th>
-                                Ter
-                            </th>
-
-                            <th>
-                                Qua
-                            </th>
-
-                            <th>
-                                Qui
-                            </th>
-
-                            <th>
-                                Sex
-                            </th>
-
-                            <th>
-                                Sáb
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="calendarBody">
-                    </tbody>
-
-                </table>
-
-            </section>
-
-        </main>
-
-    </div>
-
-
-    <!-- =========================================================
-         MODAL DE CRIAÇÃO / EDIÇÃO DE LEMBRETE
-    ========================================================== -->
-
-    <div
-        id="modalOverlay"
-        class="modal-overlay"
-    >
-
-        <div class="modal">
-
-            <h2>
-                CRIAR LEMBRETE
-            </h2>
-
-
-            <form
-                id="reminderForm"
-                method="post"
-                action="{{ url_for('pegar_dados') }}"
+            <div
+                id="remindersList"
+                class="reminders-list"
             >
 
 
-                <!-- =============================================
-                     DATA
-                ============================================== -->
+                <!-- =========================================
+                     JINJA2
 
-                <div class="input-group">
+                     Os lembretes são renderizados pelo Flask.
 
-                    <input
-                        type="date"
-                        id="date"
-                        name="data"
-                        required
+                     O JavaScript NÃO precisa criar os itens
+                     dessa lista.
+                ========================================== -->
+
+                {% for dado in dados %}
+
+                    <div
+                        class="reminder-item"
+                        data-id="{{ dado.id }}"
+                        data-date="{{ dado.data }}"
                     >
 
-                </div>
+
+                        <div class="reminder-date">
+
+                            {{ dado.dataservico }}
+
+                        </div>
 
 
-                <!-- =============================================
-                     ATENDIMENTO
-                ============================================== -->
+                        <div class="reminder-info">
 
-                <div class="input-group">
+                            <strong>
 
-                    <!--
-                        O campo "Atendimento" possui duas funções:
+                                {{ dado.atendimento or "Sem atendimento" }}
 
-                        1. Identificar o atendimento relacionado
-                           ao lembrete;
+                            </strong>
 
-                        2. Servir como título exibido no lembrete.
 
-                        A busca de atendimentos será integrada
-                        posteriormente.
-                    -->
+                            <span>
+
+                                {{ dado.descricao or "Sem descrição" }}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="reminder-actions">
+
+
+                            <button
+                                type="button"
+                                class="edit-reminder-btn"
+                                title="Editar lembrete"
+                                data-id="{{ dado.id }}"
+                            >
+
+                                <i class="fa-solid fa-pen"></i>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="delete-reminder-btn"
+                                title="Excluir lembrete"
+                                data-id="{{ dado.id }}"
+                            >
+
+                                <i class="fa-solid fa-trash"></i>
+
+                            </button>
+
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="reminders-empty">
+
+                        Nenhum lembrete cadastrado.
+
+                    </div>
+
+                {% endfor %}
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CALENDÁRIO
+        ================================================== -->
+
+        <section class="calendar-panel">
+
+
+            <div class="calendar-header">
+
+
+                <button
+                    type="button"
+                    id="prevMonth"
+                    class="calendar-nav-btn"
+                    title="Mês anterior"
+                >
+
+                    <i class="fa-solid fa-chevron-left"></i>
+
+                </button>
+
+
+                <h2 id="monthYear"></h2>
+
+
+                <button
+                    type="button"
+                    id="nextMonth"
+                    class="calendar-nav-btn"
+                    title="Próximo mês"
+                >
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </button>
+
+
+            </div>
+
+
+
+            <table class="calendar">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Dom</th>
+                        <th>Seg</th>
+                        <th>Ter</th>
+                        <th>Qua</th>
+                        <th>Qui</th>
+                        <th>Sex</th>
+                        <th>Sáb</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="calendarBody">
+
+                </tbody>
+
+            </table>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL — CRIAÇÃO DE LEMBRETE
+========================================================= -->
+
+<div
+    id="modalOverlay"
+    class="modal-overlay"
+    aria-hidden="true"
+>
+
+
+    <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reminderModalTitle"
+    >
+
+
+        <button
+            type="button"
+            id="closeReminderModal"
+            class="close-btn"
+            title="Fechar"
+        >
+
+            &times;
+
+        </button>
+
+
+        <h2 id="reminderModalTitle">
+
+            NOVO LEMBRETE
+
+        </h2>
+
+
+
+        <form
+            id="reminderForm"
+            method="POST"
+        >
+
+
+            <!-- =============================================
+                 DATA
+            ============================================== -->
+
+            <input
+                type="date"
+                id="reminderDate"
+                name="data"
+                required
+            >
+
+
+
+            <!-- =============================================
+                 ATENDIMENTO
+
+                 A lista é construída pelo Jinja2.
+
+                 O JS somente filtra os itens.
+            ============================================== -->
+
+            <div class="attendance-search-group">
+
+                <div class="search-field">
 
                     <input
                         type="text"
                         id="appointment"
                         name="atendimento"
-                        placeholder="Atendimento"
+                        placeholder="Pesquisar Atendimento"
+                        autocomplete="off"
                     >
-
 
                     <button
                         type="button"
-                        class="icon-btn"
-                        title="Buscar atendimento"
+                        id="btnPesquisarAtendimento"
+                        class="search-button"
+                        title="Pesquisar atendimento"
                     >
 
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -293,86 +393,310 @@
                 </div>
 
 
-                <!-- =============================================
-                     DESCRIÇÃO
-                ============================================== -->
+                <div
+                    id="appointmentResultados"
+                    class="search-results"
+                >
 
-                <div class="input-group">
-
-                    <textarea
-                        id="description"
-                        name="descricao"
-                        placeholder="Descrição"
-                    ></textarea>
+                    <div class="search-result-empty">
+                        Carregando atendimentos...
+                    </div>
 
                 </div>
 
+            </div>
 
-                <!-- =============================================
-                     AÇÕES DO MODAL
-                ============================================== -->
 
-                <div class="modal-actions">
 
-                    <button
-                        type="submit"
-                        class="save-btn"
-                    >
-                        Criar
-                    </button>
+            <!-- =============================================
+                 DESCRIÇÃO
+            ============================================== -->
 
-                </div>
+            <textarea
+                id="reminderDescription"
+                name="descricao"
+                placeholder="Descrição"
+            ></textarea>
 
-            </form>
 
-        </div>
+
+            <!-- =============================================
+                 BOTÃO
+            ============================================== -->
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+
+                Salvar
+
+            </button>
+
+
+        </form>
+
 
     </div>
 
+</div>
 
-    <!-- =========================================================
-         TOOLTIP DOS DIAS
-    ========================================================== -->
+
+
+<!-- =========================================================
+     MODAL — EDIÇÃO DE LEMBRETE
+========================================================= -->
+
+<div
+    id="editModal"
+    class="modal-overlay"
+    aria-hidden="true"
+>
+
 
     <div
-        id="dayTooltip"
-        class="day-tooltip hidden"
-    ></div>
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editReminderModalTitle"
+    >
 
 
-    <!-- =========================================================
-         DADOS INICIAIS DOS LEMBRETES
-    ==========================================================
+        <button
+            type="button"
+            id="closeEditModal"
+            class="close-btn"
+            title="Fechar"
+        >
 
-         O Flask fornece os lembretes existentes no banco através
-         da variável "dados".
+            &times;
 
-         O JavaScript transforma esses dados em objetos e passa
-         a controlar a agenda no navegador.
-
-         Exemplo gerado:
-
-         {
-             id: 1,
-             data: "2026-07-29",
-             titulo: "Atendimento João",
-             descricao: "Limpeza..."
-         }
-
-    ========================================================== -->
-
-    <script>
-        const lembretes = {{ dados | tojson }};
-    </script>
+        </button>
 
 
-    <!-- =========================================================
-         JAVASCRIPT DA AGENDA
-    ========================================================== -->
+        <h2 id="editReminderModalTitle">
 
-    <script
-        src="{{ url_for('static', filename='js/agenda.js') }}"
-    ></script>
+            EDITAR LEMBRETE
+
+        </h2>
+
+
+
+        <form
+            id="editReminderForm"
+            method="POST"
+        >
+
+
+            <!-- =============================================
+                 ID DO LEMBRETE
+
+                 Não é exibido para o usuário.
+            ============================================== -->
+
+            <input
+                type="hidden"
+                id="editReminderId"
+                name="id"
+            >
+
+
+
+            <!-- =============================================
+                 DATA
+            ============================================== -->
+
+            <input
+                type="date"
+                id="editReminderDate"
+                name="data"
+                required
+            >
+
+
+
+            <!-- =============================================
+                 ATENDIMENTO
+            ============================================== -->
+
+            <div class="attendance-search-group">
+
+
+                <div class="search-field">
+
+
+                    <input
+                        type="text"
+                        id="editAppointment"
+                        name="atendimento"
+                        placeholder="Pesquisar Atendimento"
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="btnPesquisarAtendimentoEdicao"
+                        class="search-button"
+                        title="Pesquisar atendimento"
+                    >
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                    </button>
+
+
+                </div>
+
+
+
+                <div
+                    id="editAppointmentResultados"
+                    class="search-results"
+                >
+
+                    <div class="search-result-empty">
+                        Carregando atendimentos...
+                    </div>
+
+
+                    {% for atendimento in atendimentos %}
+
+
+                        <button
+                            type="button"
+                            class="search-result-item edit-appointment-result"
+                            data-id="{{ atendimento.id }}"
+                            data-name="{{ atendimento.nome }}"
+                        >
+
+
+                            <div class="search-result-info">
+
+
+                                <span class="search-result-name">
+
+                                    {{ atendimento.nome }}
+
+                                </span>
+
+
+                                <span class="search-result-detail">
+
+                                    {% if atendimento.cliente_nome %}
+
+                                        {{ atendimento.cliente_nome }}
+
+                                    {% else %}
+
+                                        Atendimento
+
+                                    {% endif %}
+
+                                </span>
+
+
+                            </div>
+
+
+                            <i
+                                class="fa-solid fa-chevron-right search-result-icon"
+                            ></i>
+
+
+                        </button>
+
+
+                    {% else %}
+
+
+                        <div class="search-result-empty">
+
+                            Nenhum atendimento cadastrado.
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =============================================
+                 DESCRIÇÃO
+            ============================================== -->
+
+            <textarea
+                id="editReminderDescription"
+                name="descricao"
+                placeholder="Descrição"
+            ></textarea>
+
+
+
+            <!-- =============================================
+                 BOTÃO
+            ============================================== -->
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+
+                Salvar
+
+            </button>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     TOOLTIP DOS DIAS
+========================================================= -->
+
+<div
+    id="dayTooltip"
+    class="day-tooltip"
+></div>
+
+
+
+<!-- =========================================================
+     DADOS DO FLASK → JAVASCRIPT
+     
+     Apenas os dados necessários para a lógica do calendário
+     são enviados ao JS.
+     
+     A interface dos lembretes e atendimentos permanece
+     renderizada pelo Jinja2.
+========================================================= -->
+
+<script>
+
+    const dadosAgenda =
+        {{ dados | tojson }};
+
+
+</script>
+
+
+
+<script
+    src="{{ url_for('static', filename='js/agenda.js') }}"
+></script>
+
 
 </body>
 
