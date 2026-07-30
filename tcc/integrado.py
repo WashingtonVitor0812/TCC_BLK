@@ -3,7 +3,8 @@ import flask_cors
 from functools import wraps
 import mysql.connector
 from datetime import date
-import flask.flash
+from decimal import Decimal, InvalidOperation
+
 
 
 # ============================================================
@@ -31,6 +32,28 @@ TABELAS_PERMITIDAS = {
     "Atendimento_Servico",
     "Lembrete"
 }
+
+
+def validar_dados_servico(dados):
+    nome = dados.get("nome")
+    descricao = dados.get("descricao")
+
+    if not isinstance(nome, str) or not nome.strip():
+        return None, "Nome do serviço não informado."
+
+    try:
+        valor_base = Decimal(str(dados.get("valorBase")))
+    except (InvalidOperation, TypeError, ValueError):
+        return None, "Valor base inválido."
+
+    if valor_base < 0:
+        return None, "O valor base não pode ser negativo."
+
+    return {
+        "nome": nome.strip(),
+        "valorBase": valor_base,
+        "descricao": descricao.strip() if isinstance(descricao, str) else None
+    }, None
 
 
 # ============================================================
@@ -730,15 +753,23 @@ def pegar_servico():
                     "erro": "Formato inválido"
                 }), 400
 
+            servico, erro = validar_dados_servico(dados)
+
+            if erro:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": erro
+                }), 400
+
             id_servico = criar(
 
                 "Servico",
 
-                nome_servico=dados.get("nome"),
+                nome_servico=servico["nome"],
 
-                valor_base=dados.get("valorBase"),
+                valor_base=servico["valorBase"],
 
-                descricao=dados.get("descricao")
+                descricao=servico["descricao"]
 
             )
 
@@ -783,6 +814,20 @@ def pegar_servico():
                     "erro": "ID do serviço não informado"
                 }), 400
 
+            servico, erro = validar_dados_servico(dados)
+
+            if erro:
+                return flask.jsonify({
+                    "success": False,
+                    "erro": erro
+                }), 400
+
+            if not ler("Servico", ID_servico=id_servico):
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Serviço não encontrado."
+                }), 404
+
             quantidade = atualizar(
 
                 "Servico",
@@ -791,15 +836,15 @@ def pegar_servico():
 
                 id_servico,
 
-                nome_servico=dados.get("nome"),
+                nome_servico=servico["nome"],
 
-                valor_base=dados.get("valorBase"),
+                valor_base=servico["valorBase"],
 
-                descricao=dados.get("descricao")
+                descricao=servico["descricao"]
 
             )
 
-            if quantidade == 0:
+            if quantidade == 0 and not ler("Servico", ID_servico=id_servico):
 
                 return flask.jsonify({
 
@@ -849,6 +894,18 @@ def pegar_servico():
                 return flask.jsonify({
                     "erro": "ID do serviço não informado"
                 }), 400
+
+            if not ler("Servico", ID_servico=id_servico):
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Serviço não encontrado."
+                }), 404
+
+            if ler("Atendimento_Servico", ID_servico=id_servico):
+                return flask.jsonify({
+                    "success": False,
+                    "erro": "Este serviço está vinculado a atendimentos e não pode ser excluído."
+                }), 409
 
             quantidade = delete(
 
