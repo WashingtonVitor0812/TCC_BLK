@@ -1,318 +1,1245 @@
+/* ===========================================================
+   CLIENTES — BLK HIGIENIZAÇÃO
+   CSS COMPLETO
+=========================================================== */
+
+
+/* ===========================================================
+   FONTE
+=========================================================== */
 
 @font-face {
+
     font-family: Luciole;
-    src: url(fonts/Luciole/Luciole-Regular.ttf) format('truetype');
+
+    src: url(fonts/Luciole/Luciole-Regular.ttf)
+         format('truetype');
+
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: Luciole;
+
+/* ===========================================================
+   RESET
+=========================================================== */
+
+* {
+
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+    font-family: Luciole, sans-serif;
+
 }
 
-body{
-    background:#ececec;
-    overflow:hidden;
+
+html,
+body {
+
+    width: 100%;
+
+    height: 100%;
+
 }
 
-/* HEADER */
 
-.topbar{
-    height:60px;
-    background:#003f97;
+/* ===========================================================
+   BODY
+=========================================================== */
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+body {
 
-    padding:0 25px;
+    background: #ececec;
+
+    color: #0d3d8c;
+
+    overflow: hidden;
+
 }
 
-.logo{
-    color:white;
-    font-size:42px;
-    font-weight:bold;
+
+/* ===========================================================
+   APP
+=========================================================== */
+
+#app {
+
+    width: 100%;
+
+    min-height: 100vh;
+
 }
 
-nav{
-    display:flex;
-    gap:50px;
-}
 
-nav a:hover{
+/* ===========================================================
+   HEADER PRINCIPAL
+=========================================================== */
 
-    color:#ff7417;
-}
+.topbar {
 
-nav a{
-    color:white;
-    text-decoration:none;
-    font-size:18px;
-    font-weight:600;
-}
+    height: 60px;
 
-nav a.active{
-    color:#ff6d1a;
-}
+    background: #003f97;
 
-/* SUB HEADER */
+    display: flex;
 
-.page-header{
-    height:85px;
-    background:#0b4dad;
+    justify-content: space-between;
 
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:0 20px;
-}
-
-.page-header h1{
-    color:white;
-    font-size:52px;
-    font-weight:300;
-}
-
-.new-btn{
-    background:white;
-    border:none;
-
-    display:flex;
-    align-items:center;
-
-    padding:0px 20px;
-
-    color:#003f97;
-
-    font-size:18px;
-    border-radius:6px;
-
-    cursor:pointer;
-}
-
-.new-btn span{
-    padding:15px;
-    border-left:1px solid #d5d5d5;
     align-items: center;
-    margin-left:15px;
+
+    padding: 0 25px;
+
 }
 
-/* CONTEÚDO */
 
-.page-content{
-    padding:10px;
+/* ===========================================================
+   LOGO
+=========================================================== */
+
+.logo {
+
+    color: white;
+
+    font-size: 42px;
+
+    font-weight: bold;
+
+    line-height: 1;
+
 }
 
-.search-container{
-    margin-bottom:12px;
+
+/* ===========================================================
+   NAVEGAÇÃO
+=========================================================== */
+
+.topbar nav {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 50px;
+
 }
 
-.search-box{
-    width:355px;
-    display:flex;
+
+.topbar nav a {
+
+    color: white;
+
+    text-decoration: none;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    transition:
+        color .15s ease;
+
 }
 
-.search-box input{
-    flex:1;
 
-    height:40px;
+.topbar nav a:hover {
 
-    border:1px solid #0b4dad;
-    border-right:none;
+    color: #ff7417;
 
-    border-radius:6px 0 0 6px;
-
-    padding:0 12px;
-    font-size:18px;
 }
 
-.search-box button{
-    width:50px;
 
-    border:1px solid #0b4dad;
-    background:white;
+.topbar nav a.active {
 
-    border-radius:0 6px 6px 0;
+    color: #ff6d1a;
 
-    cursor:pointer;
-
-    color:#0b4dad;
 }
 
-/* TABELA */
 
-.table-wrapper{
-    background:#ffffff;
-    border-radius:8px;
+/* ===========================================================
+   SUB HEADER
+=========================================================== */
 
-    height:calc(100vh - 180px);
+.page-header {
 
-    overflow-y:auto;
+    height: 85px;
 
-    padding:10px;
+    background: #0b4dad;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 20px;
+
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+
+.page-header h1 {
+
+    color: white;
+
+    font-size: 52px;
+
+    font-weight: 300;
+
+    line-height: 1;
+
 }
 
-thead th{
-    background:#0b4dad;
-    color:white;
 
-    padding:14px;
-    font-size:20px;
+/* ===========================================================
+   BOTÃO NOVO CLIENTE
+=========================================================== */
+
+.new-btn {
+
+    height: 48px;
+
+    background: white;
+
+    border: none;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 0 0 20px;
+
+    color: #003f97;
+
+    font-size: 18px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    transition:
+        background .15s ease,
+        box-shadow .15s ease;
+
 }
 
-tbody td{
-    border:1px solid #d5d5d5;
-    text-align:center;
-    padding:10px;
-    font-size:18px;
+
+.new-btn:hover {
+
+    background: #f5f7fb;
+
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, .12);
+
 }
 
-tbody tr:hover{
-    background:#fafafa;
+
+.new-btn span {
+
+    height: 100%;
+
+    padding: 0 15px;
+
+    border-left: 1px solid #d5d5d5;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-left: 15px;
+
+    font-size: 26px;
+
 }
+
+
+/* ===========================================================
+   CONTEÚDO PRINCIPAL
+=========================================================== */
+
+.page-content {
+
+    width: 100%;
+
+    height: calc(100vh - 145px);
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    padding: 10px;
+
+}
+
+
+/* ===========================================================
+   ÁREA DE PESQUISA
+=========================================================== */
+
+.search-container {
+
+    width: 100%;
+
+    flex-shrink: 0;
+
+}
+
+
+.search-box {
+
+    display: flex;
+
+    align-items: center;
+
+    width: 355px;
+
+    height: 44px;
+
+    border: 1px solid #cfd5dd;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    background: white;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
+
+}
+
+
+.search-box:focus-within {
+
+    border-color: #0b4dad;
+
+    box-shadow:
+        0 0 0 2px rgba(11, 77, 173, .12);
+
+}
+
+
+/* ===========================================================
+   INPUT DA PESQUISA
+=========================================================== */
+
+.search-box input {
+
+    flex: 1;
+
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    padding: 0 12px;
+
+    background: white;
+
+    color: #0d3d8c;
+
+    font-size: 16px;
+
+}
+
+
+.search-box input::placeholder {
+
+    color: #999;
+
+}
+
+
+.search-box input:focus {
+
+    border: none;
+
+    box-shadow: none;
+
+}
+
+
+/* ===========================================================
+   BOTÃO DA LUPA
+=========================================================== */
+
+.search-box button {
+
+    width: 48px;
+
+    height: 100%;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-left: 1px solid #d5d5d5;
+
+    background: white;
+
+    color: #b6b6b6;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition:
+        color .15s ease,
+        background .15s ease;
+
+}
+
+
+.search-box button:hover {
+
+    color: #0b4dad;
+
+    background: #f7f7f7;
+
+}
+
+
+/* ===========================================================
+   PAINEL DA TABELA
+=========================================================== */
+
+.table-wrapper {
+
+    flex: 1;
+
+    min-height: 0;
+
+    width: 100%;
+
+    background: white;
+
+    border-radius: 8px;
+
+    padding: 10px;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+    box-shadow:
+        0 1px 4px rgba(0, 0, 0, .08);
+
+}
+
+
+/* ===========================================================
+   TABELA
+=========================================================== */
+
+table {
+
+    width: 100%;
+
+    min-width: 800px;
+
+    border-collapse: collapse;
+
+    table-layout: auto;
+
+}
+
+
+/* ===========================================================
+   CABEÇALHO DA TABELA
+=========================================================== */
+
+thead {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 10;
+
+}
+
+
+thead th {
+
+    background: #0b4dad;
+
+    color: white;
+
+    border: 1px solid #0b4dad;
+
+    padding: 12px 10px;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ===========================================================
+   CORPO DA TABELA
+=========================================================== */
+
+tbody td {
+
+    height: 48px;
+
+    padding: 10px;
+
+    border: 1px solid #d9d9d9;
+
+    background: white;
+
+    color: #333;
+
+    font-size: 15px;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+}
+
+
+tbody tr {
+
+    transition:
+        background .12s ease;
+
+}
+
+
+tbody tr:hover td {
+
+    background: #f1f5fb;
+
+}
+
+
+/* ===========================================================
+   COLUNA DE NOME
+=========================================================== */
+
+tbody td:first-child {
+
+    text-align: left;
+
+    font-weight: 600;
+
+    color: #0d3d8c;
+
+}
+
+
+/* ===========================================================
+   COLUNA DE ENDEREÇO
+=========================================================== */
+
+tbody td:nth-child(4) {
+
+    text-align: left;
+
+}
+
+
+/* ===========================================================
+   COLUNA ID
+=========================================================== */
+
+tbody td:nth-child(5) {
+
+    color: #777;
+
+    font-size: 14px;
+
+}
+
+
+/* ===========================================================
+   COLUNA DE AÇÕES
+=========================================================== */
+
+tbody td:last-child {
+
+    white-space: nowrap;
+
+    width: 110px;
+
+}
+
+
+/* ===========================================================
+   BOTÕES DE AÇÃO
+=========================================================== */
 
 .edit-btn,
-.delete-btn{
-    background:none;
-    border:none;
+.delete-btn {
 
-    cursor:pointer;
+    width: 32px;
 
-    font-size:26px;
+    height: 32px;
 
-    margin:0 5px;
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 5px;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
+
 }
 
-.edit-btn{
-    color:#003f97;
+
+.edit-btn,
+.delete-btn {
+
+    color: #003f97;
+
 }
 
-.delete-btn{
-    color:#003f97;
+
+.edit-btn:hover,
+.delete-btn:hover {
+
+    color: #ff7417;
+
+    background: #fff2ea;
+
 }
 
-/* MODAL */
 
-.modal-overlay{
+/* ===========================================================
+   SCROLL DA TABELA
+=========================================================== */
 
-    position:fixed;
-    inset:0;
+.table-wrapper::-webkit-scrollbar {
 
-    background:rgba(0,0,0,.45);
+    width: 7px;
 
-    display:none;
+    height: 7px;
 
-    justify-content:center;
-    align-items:center;
-
-    z-index:1000;
 }
 
-.modal-overlay.active{
-    display:flex;
+
+.table-wrapper::-webkit-scrollbar-track {
+
+    background: #f1f1f1;
+
 }
 
-.modal{
 
-    position:relative;
+.table-wrapper::-webkit-scrollbar-thumb {
 
-    width:450px;
+    background: #c4c4c4;
 
-    background:#f5f5f5;
+    border-radius: 10px;
 
-    border-radius:12px;
-
-    padding:35px;
-
-    animation:modalOpen .2s ease;
 }
 
-@keyframes modalOpen{
 
-    from{
-        opacity:0;
-        transform:translateY(-15px);
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+
+    background: #999;
+
+}
+
+
+/* ===========================================================
+   MODAIS
+=========================================================== */
+
+.modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, .45);
+
+    z-index: 1000;
+
+}
+
+
+.modal-overlay.active {
+
+    display: flex;
+
+}
+
+
+/* ===========================================================
+   CAIXA DO MODAL
+=========================================================== */
+
+.modal {
+
+    position: relative;
+
+    width: min(640px, 95vw);
+
+    max-height: 90vh;
+
+    padding: 35px;
+
+    overflow-y: auto;
+
+    border-radius: 12px;
+
+    background: white;
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, .25);
+
+    animation:
+        modalOpen .2s ease;
+
+}
+
+
+@keyframes modalOpen {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(-15px);
+
     }
 
-    to{
-        opacity:1;
-        transform:translateY(0);
+    to {
+
+        opacity: 1;
+
+        transform: translateY(0);
+
     }
+
 }
 
-.close-btn{
 
-    position:absolute;
+/* ===========================================================
+   BOTÃO FECHAR MODAL
+=========================================================== */
 
-    top:10px;
-    right:15px;
+.close-btn {
 
-    background:none;
-    border:none;
+    position: absolute;
 
-    font-size:32px;
+    top: 10px;
 
-    cursor:pointer;
+    right: 15px;
 
-    color:#003f97;
+    width: 35px;
+
+    height: 35px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: none;
+
+    border: none;
+
+    color: #003f97;
+
+    font-size: 32px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        color .15s ease;
+
 }
 
-.modal h2{
 
-    color:#003f97;
+.close-btn:hover {
 
-    text-align:center;
+    color: #ff7417;
 
-    font-size:32px;
-
-    margin-bottom:25px;
 }
 
-.modal form{
 
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+/* ===========================================================
+   TÍTULO DO MODAL
+=========================================================== */
+
+.modal h2 {
+
+    color: #003f97;
+
+    text-align: center;
+
+    font-size: 30px;
+
+    font-weight: 600;
+
+    margin-bottom: 25px;
+
 }
 
-.modal input{
 
-    height:42px;
+/* ===========================================================
+   FORMULÁRIO
+=========================================================== */
 
-    border:1px solid #ccc;
-    border-radius:6px;
+.modal form {
 
-    padding:0 12px;
+    display: flex;
 
-    font-size:18px;
+    flex-direction: column;
+
+    gap: 12px;
+
 }
 
-.submit-btn{
 
-    width:180px;
-    height:42px;
+/* ===========================================================
+   INPUTS
+=========================================================== */
 
-    margin:10px auto 0;
+.modal input {
 
-    border:none;
-    border-radius:6px;
+    width: 100%;
 
-    background:#ff6d1a;
-    color:white;
+    height: 42px;
 
-    font-size:18px;
-    font-weight:600;
+    border: 1px solid #ccc;
 
-    cursor:pointer;
+    border-radius: 6px;
+
+    padding: 0 12px;
+
+    background: white;
+
+    color: #0d3d8c;
+
+    font-size: 17px;
+
+    outline: none;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
+
 }
 
-.submit-btn:hover{
-    opacity:.9;
+
+.modal input:focus {
+
+    border-color: #0b4dad;
+
+    box-shadow:
+        0 0 0 2px rgba(11, 77, 173, .12);
+
+}
+
+
+.modal input::placeholder {
+
+    color: #999;
+
+}
+
+
+/* ===========================================================
+   BOTÃO SALVAR / CADASTRAR
+=========================================================== */
+
+.submit-btn {
+
+    width: 180px;
+
+    height: 42px;
+
+    margin: 10px auto 0;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #ff6d1a;
+
+    color: white;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        transform .1s ease;
+
+}
+
+
+.submit-btn:hover {
+
+    background: #e85e0d;
+
+}
+
+
+.submit-btn:active {
+
+    transform: scale(.98);
+
+}
+
+
+/* ===========================================================
+   ESTADO DE FOCO DOS ELEMENTOS
+=========================================================== */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+
+    outline: 2px solid #0b4dad;
+
+    outline-offset: 2px;
+
+}
+
+
+/* ===========================================================
+   RESPONSIVIDADE — ATÉ 900px
+=========================================================== */
+
+@media (max-width: 900px) {
+
+    body {
+
+        overflow: auto;
+
+    }
+
+
+    .page-content {
+
+        height: auto;
+
+        min-height: calc(100vh - 145px);
+
+        overflow: visible;
+
+    }
+
+
+    .table-wrapper {
+
+        min-height: 500px;
+
+    }
+
+
+    .search-box {
+
+        width: 100%;
+
+        max-width: 355px;
+
+    }
+
+
+    table {
+
+        min-width: 750px;
+
+    }
+
+}
+
+
+/* ===========================================================
+   RESPONSIVIDADE — ATÉ 600px
+=========================================================== */
+
+@media (max-width: 600px) {
+
+    .topbar {
+
+        height: auto;
+
+        min-height: 60px;
+
+        padding: 10px 15px;
+
+        gap: 15px;
+
+    }
+
+
+    .logo {
+
+        font-size: 34px;
+
+    }
+
+
+    .topbar nav {
+
+        gap: 12px;
+
+        flex-wrap: wrap;
+
+        justify-content: flex-end;
+
+    }
+
+
+    .topbar nav a {
+
+        font-size: 13px;
+
+    }
+
+
+    .page-header {
+
+        height: 75px;
+
+        padding: 0 15px;
+
+    }
+
+
+    .page-header h1 {
+
+        font-size: 38px;
+
+    }
+
+
+    .new-btn {
+
+        height: 42px;
+
+        padding-left: 12px;
+
+        font-size: 14px;
+
+    }
+
+
+    .new-btn span {
+
+        padding: 0 10px;
+
+        margin-left: 8px;
+
+        font-size: 22px;
+
+    }
+
+
+    .page-content {
+
+        height: auto;
+
+        min-height: calc(100vh - 135px);
+
+        padding: 8px;
+
+        gap: 8px;
+
+    }
+
+
+    .search-box {
+
+        width: 100%;
+
+        max-width: none;
+
+        height: 42px;
+
+    }
+
+
+    .table-wrapper {
+
+        min-height: 450px;
+
+        padding: 8px;
+
+        border-radius: 8px;
+
+    }
+
+
+    table {
+
+        min-width: 700px;
+
+    }
+
+
+    thead th {
+
+        padding: 9px 8px;
+
+        font-size: 13px;
+
+    }
+
+
+    tbody td {
+
+        height: 44px;
+
+        padding: 8px;
+
+        font-size: 13px;
+
+    }
+
+
+    tbody td:nth-child(5) {
+
+        font-size: 12px;
+
+    }
+
+
+    .edit-btn,
+    .delete-btn {
+
+        width: 28px;
+
+        height: 28px;
+
+        font-size: 13px;
+
+    }
+
+
+    .modal-overlay {
+
+        padding: 15px;
+
+    }
+
+
+    .modal {
+
+        width: 100%;
+
+        max-height: 90vh;
+
+        padding: 30px 20px;
+
+    }
+
+
+    .modal h2 {
+
+        font-size: 25px;
+
+        padding-right: 20px;
+
+    }
+
+
+    .modal input {
+
+        height: 42px;
+
+        font-size: 16px;
+
+    }
+
+
+    .submit-btn {
+
+        width: 160px;
+
+        font-size: 16px;
+
+    }
+
+}
+
+
+/* ===========================================================
+   RESPONSIVIDADE — TABLET
+=========================================================== */
+
+@media (min-width: 601px) and (max-width: 900px) {
+
+    .topbar nav {
+
+        gap: 25px;
+
+    }
+
+
+    .topbar nav a {
+
+        font-size: 15px;
+
+    }
+
+
+    .page-header h1 {
+
+        font-size: 44px;
+
+    }
+
+
+    .modal {
+
+        width: 90%;
+
+        max-width: 500px;
+
+    }
+
 }

@@ -3,6 +3,7 @@ import flask_cors
 from functools import wraps
 import mysql.connector
 from datetime import date
+import flask.flash
 
 
 # ============================================================
@@ -1042,6 +1043,7 @@ def pegar_cliente():
             nome = dados.get("nome")
             telefone = dados.get("telefone")
             endereco = dados.get("endereco")
+            
 
             # --------------------------
             # VALIDAÇÕES
@@ -1077,6 +1079,8 @@ def pegar_cliente():
                 nome_cliente=nome.strip(),
 
                 telefone=telefone.strip(),
+
+                data_cadastro=date.today(),
 
                 endereco=endereco.strip()
 
