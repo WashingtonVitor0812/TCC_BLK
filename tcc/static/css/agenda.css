@@ -226,22 +226,37 @@ nav a.active{
 /* MODAL */
 
 .modal-overlay{
+
     position:fixed;
     inset:0;
 
     background:rgba(0,0,0,.4);
 
-    display:none;
+    display:flex;
 
     justify-content:center;
     align-items:center;
+
+    z-index:1000;
+
+    opacity:0;
+    visibility:hidden;
+
+    transition:
+        opacity .2s ease,
+        visibility .2s ease;
+
 }
 
 .modal-overlay.active{
-    display:flex;
+
+    opacity:1;
+    visibility:visible;
+
 }
 
 .modal{
+
     width:450px;
 
     background:#f5f5f5;
@@ -249,6 +264,22 @@ nav a.active{
     border-radius:12px;
 
     padding:35px;
+
+    animation:modalOpen .2s ease;
+
+}
+
+@keyframes modalOpen{
+
+    from{
+        opacity:0;
+        transform:translateY(-30px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
 }
 
 .modal h2{
@@ -267,15 +298,18 @@ nav a.active{
 }
 
 .input-group input,
-.input-group textarea{
-    width:100%;
+.input-group textarea {
 
-    border:1px solid #ccc;
-    border-radius:6px;
+    width: 100%;
 
-    padding:12px;
+    border: 1px solid #ccc;
 
-    font-size:18px;
+    border-radius: 6px;
+
+    padding: 12px;
+
+    font-size: 18px;
+
 }
 
 .input-group textarea{
@@ -566,3 +600,171 @@ nav a.active{
     border-radius:50%;
 
 }
+
+/* ============================================================
+   SELEÇÃO DE ATENDIMENTO
+============================================================ */
+
+#listaAtendimentos {
+
+    margin-top: 8px;
+
+    max-height: 200px;
+
+    overflow-y: auto;
+
+    width: 100%;
+
+    background: white;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    box-shadow: 0 5px 12px rgba(0, 0, 0, .12);
+
+    overflow-x: hidden;
+
+}
+
+
+#listaAtendimentos button {
+
+    display: block;
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: none;
+
+    border-bottom: 1px solid #eee;
+
+    background: white;
+
+    color: #003f97;
+
+    font-family: Luciole;
+
+    font-size: 16px;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        padding-left .15s ease;
+
+}
+
+
+#listaAtendimentos button:last-child {
+
+    border-bottom: none;
+
+}
+
+
+#listaAtendimentos button:hover {
+
+    background: #fff5ef;
+
+    padding-left: 18px;
+
+}
+
+
+#listaAtendimentos button:active {
+
+    background: #ffe8d9;
+
+}
+
+
+/* Barra de rolagem */
+
+#listaAtendimentos::-webkit-scrollbar {
+
+    width: 7px;
+
+}
+
+
+#listaAtendimentos::-webkit-scrollbar-track {
+
+    background: #f1f1f1;
+
+}
+
+
+#listaAtendimentos::-webkit-scrollbar-thumb {
+
+    background: #ccc;
+
+    border-radius: 10px;
+
+}
+
+
+#listaAtendimentos::-webkit-scrollbar-thumb:hover {
+
+    background: #aaa;
+
+}
+
+/* ============================================================
+   BOTÃO EXCLUIR LEMBRETE
+============================================================ */
+
+.delete-reminder-btn {
+
+    background: white;
+
+    color: #ff6b00;
+
+    border: 1px solid #ff6b00;
+
+    width: 160px;
+
+    height: 42px;
+
+    border-radius: 6px;
+
+    font-family: Luciole;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+    margin-right: 8px;
+
+    transition:
+        background .15s ease,
+        transform .1s ease;
+
+}
+
+
+.delete-reminder-btn:hover {
+
+    background: #ff6b00;
+    color: White;
+
+}
+
+
+.delete-reminder-btn:active {
+
+    transform: scale(.97);
+
+}
+
+#appointment {
+
+    cursor: pointer;
+
+    background: #f8f8f8;
+
+}
+

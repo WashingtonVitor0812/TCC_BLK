@@ -2,17 +2,30 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>BLK - Agenda</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='css/agenda.css')}}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/agenda.css') }}"
+    >
+
 </head>
 
 <body>
 
     <div id="app">
 
-        <!-- HEADER -->
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
 
         <header class="topbar">
 
@@ -21,91 +34,135 @@
             </div>
 
             <nav>
-                <a href="#" class="active">Agenda</a>
-                <a href="{{url_for('clientes') }}">Clientes</a>
-                <a href="{{url_for('atendimentos') }}">Atendimentos</a>
-                <a href="{{url_for('servicos') }}">Serviços</a>
+
+                <a
+                    href="#"
+                    class="active"
+                >
+                    Agenda
+                </a>
+
+                <a href="{{ url_for('clientes') }}">
+                    Clientes
+                </a>
+
+                <a href="{{ url_for('atendimentos') }}">
+                    Atendimentos
+                </a>
+
+                <a href="{{ url_for('servicos') }}">
+                    Serviços
+                </a>
+
             </nav>
 
         </header>
 
-        <!-- SUB HEADER -->
+
+        <!-- =====================================================
+             CABEÇALHO DA AGENDA
+        ====================================================== -->
 
         <section class="agenda-header">
 
             <div class="left-info">
 
-                <h1 style="font-family: luciole;">Agenda</h1>
+                <h1 style="font-family: luciole;">
+                    Agenda
+                </h1>
 
                 <div class="legend">
-                    <strong>Legenda:</strong>
+
+                    <strong>
+                        Legenda:
+                    </strong>
 
                     <div class="legend-item">
+
                         <span class="event-circle"></span>
+
                         Atendimento
+
                     </div>
+
                 </div>
 
             </div>
 
-            <button id="openReminderModal" class="create-btn">
+
+            <button
+                id="openReminderModal"
+                class="create-btn"
+                type="button"
+            >
+
                 Criar Lembrete
-                <span>+</span>
+
+                <span>
+                    +
+                </span>
+
             </button>
 
         </section>
 
-        <!-- CONTEÚDO -->
+
+        <!-- =====================================================
+             CONTEÚDO PRINCIPAL
+        ====================================================== -->
 
         <main class="content">
 
-            <!-- LEMBRETES -->
+
+            <!-- =================================================
+                 PAINEL DE LEMBRETES
+            ================================================== -->
 
             <aside class="reminders-panel">
 
-                <h2>Lembretes</h2>
+                <h2>
+                    Lembretes
+                </h2>
 
-                <div id="remindersList" class="reminders-list">
-
-                    {% for dado in dados %}
-                    <div class="reminder-item">
-                        <br>
-                        <div class="day-circle">
-                            {{dado.dataservico}}
-                        </div>
-
-                        <div class="reminder-card">
-                            <h3>{{dado.atendimento}}</h3>
-                            <p>
-                                {{dado.descricao}}
-                            </p>
-                        </div>
-
-
-                    </div>
-                    {% endfor %}
-
+                <div
+                    id="remindersList"
+                    class="reminders-list"
+                >
                 </div>
 
             </aside>
 
-            <!-- CALENDÁRIO -->
+
+            <!-- =================================================
+                 CALENDÁRIO
+            ================================================== -->
 
             <section class="calendar-panel">
 
                 <div class="calendar-header">
 
-                    <button id="prevMonth" class="nav-btn">
+                    <button
+                        id="prevMonth"
+                        class="nav-btn"
+                        type="button"
+                    >
                         &#10094;
                     </button>
 
+
                     <h2 id="monthYear"></h2>
 
-                    <button id="nextMonth" class="nav-btn">
+
+                    <button
+                        id="nextMonth"
+                        class="nav-btn"
+                        type="button"
+                    >
                         &#10095;
                     </button>
 
                 </div>
+
 
                 <table class="calendar">
 
@@ -113,20 +170,40 @@
 
                         <tr>
 
-                            <th>Dom</th>
-                            <th>Seg</th>
-                            <th>Ter</th>
-                            <th>Qua</th>
-                            <th>Qui</th>
-                            <th>Sex</th>
-                            <th>Sáb</th>
+                            <th>
+                                Dom
+                            </th>
+
+                            <th>
+                                Seg
+                            </th>
+
+                            <th>
+                                Ter
+                            </th>
+
+                            <th>
+                                Qua
+                            </th>
+
+                            <th>
+                                Qui
+                            </th>
+
+                            <th>
+                                Sex
+                            </th>
+
+                            <th>
+                                Sáb
+                            </th>
 
                         </tr>
 
                     </thead>
 
-                    <tbody id="calendarBody">
 
+                    <tbody id="calendarBody">
                     </tbody>
 
                 </table>
@@ -137,45 +214,110 @@
 
     </div>
 
-    <!-- MODAL -->
 
-    <div id="modalOverlay" class="modal-overlay">
+    <!-- =========================================================
+         MODAL DE CRIAÇÃO / EDIÇÃO DE LEMBRETE
+    ========================================================== -->
+
+    <div
+        id="modalOverlay"
+        class="modal-overlay"
+    >
 
         <div class="modal">
 
-            <h2>CRIAR LEMBRETE</h2>
+            <h2>
+                CRIAR LEMBRETE
+            </h2>
 
-            <form id="reminderForm" method="post" action="{{url_for('pegar_dados')}}">
+
+            <form
+                id="reminderForm"
+                method="post"
+                action="{{ url_for('pegar_dados') }}"
+            >
+
+
+                <!-- =============================================
+                     DATA
+                ============================================== -->
+
                 <div class="input-group">
 
-                    <input type="date" id="date" name="data" required>
+                    <input
+                        type="date"
+                        id="date"
+                        name="data"
+                        required
+                    >
 
                 </div>
+
+
+                <!-- =============================================
+                     ATENDIMENTO
+                ============================================== -->
 
                 <div class="input-group">
 
                     <!--
-                    Futuramente substituir por busca AJAX
-                    no banco de dados.
+                        O campo "Atendimento" possui duas funções:
+
+                        1. Identificar o atendimento relacionado
+                           ao lembrete;
+
+                        2. Servir como título exibido no lembrete.
+
+                        A busca de atendimentos será integrada
+                        posteriormente.
                     -->
 
-                    <input type="text" id="appointment" placeholder="Atendimento" name="atendimento">
+                    <input
+                        type="text"
+                        id="appointment"
+                        name="atendimento"
+                        placeholder="Atendimento"
+                    >
 
-                    <button type="button" class="icon-btn">
+
+                    <button
+                        type="button"
+                        class="icon-btn"
+                        title="Buscar atendimento"
+                    >
+
                         <i class="fa-solid fa-magnifying-glass"></i>
+
                     </button>
 
                 </div>
 
+
+                <!-- =============================================
+                     DESCRIÇÃO
+                ============================================== -->
+
                 <div class="input-group">
 
-                    <textarea id="description" placeholder="Descrição" name="descricao"></textarea>
+                    <textarea
+                        id="description"
+                        name="descricao"
+                        placeholder="Descrição"
+                    ></textarea>
 
                 </div>
 
+
+                <!-- =============================================
+                     AÇÕES DO MODAL
+                ============================================== -->
+
                 <div class="modal-actions">
 
-                    <button type="submit" class="save-btn" name="criar_lembrente" value="salvar">
+                    <button
+                        type="submit"
+                        class="save-btn"
+                    >
                         Criar
                     </button>
 
@@ -187,33 +329,50 @@
 
     </div>
 
-    <div id="dayTooltip" class="day-tooltip hidden"></div>
+
+    <!-- =========================================================
+         TOOLTIP DOS DIAS
+    ========================================================== -->
+
+    <div
+        id="dayTooltip"
+        class="day-tooltip hidden"
+    ></div>
+
+
+    <!-- =========================================================
+         DADOS INICIAIS DOS LEMBRETES
+    ==========================================================
+
+         O Flask fornece os lembretes existentes no banco através
+         da variável "dados".
+
+         O JavaScript transforma esses dados em objetos e passa
+         a controlar a agenda no navegador.
+
+         Exemplo gerado:
+
+         {
+             id: 1,
+             data: "2026-07-29",
+             titulo: "Atendimento João",
+             descricao: "Limpeza..."
+         }
+
+    ========================================================== -->
 
     <script>
-
-    const lembretes = [
-
-    {% for dado in dados %}
-
-    {
-
-        id: "{{ dado.id }}",
-
-        data: "{{ dado.data }}",
-
-        titulo: "{{ dado.atendimento }}",
-
-        descricao: `{{ dado.descricao }}`
-
-    },
-
-    {% endfor %}
-
-    ];
-
+        const lembretes = {{ dados | tojson }};
     </script>
 
-    <script src="{{ url_for('static', filename='js/agenda.js') }}"></script>
+
+    <!-- =========================================================
+         JAVASCRIPT DA AGENDA
+    ========================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/agenda.js') }}"
+    ></script>
 
 </body>
 
