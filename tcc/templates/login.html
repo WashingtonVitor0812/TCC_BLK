@@ -28,13 +28,13 @@
         <form method="post">
             <div class="input-group">
                 <i class="fa-solid fa-user"></i>
-                <input type="email" placeholder="Email" name="email">
+                <input type="email" placeholder="Email" name="email" autocomplete="username" required>
             </div>
 
             <div class="input-group">
                 <i class="fa-solid fa-lock"></i>
-                <input type="password" placeholder="Senha" name="senha">
-                <button, type="button" class="eye-btn">
+                <input id="senha" type="password" placeholder="Senha" name="senha" autocomplete="current-password" required>
+                <button type="button" class="eye-btn" aria-label="Mostrar senha" aria-controls="senha" aria-pressed="false">
                     <i class="fa-solid fa-eye"></i>
                 </button>
             </div>
@@ -52,5 +52,6 @@
 
     </div>
 
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>

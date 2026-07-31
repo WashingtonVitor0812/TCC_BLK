@@ -63,7 +63,7 @@ h2 {
     color: #444;
 }
 
-.input-group i:first-child {
+.input-group > i:first-child {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -76,11 +76,38 @@ h2 {
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
     border: none;
+    border-radius: 50%;
     background: transparent;
     cursor: pointer;
     color: #b3b3b3;
     font-size: 15px;
+    display: grid;
+    place-items: center;
+    transition: background-color .2s ease, color .2s ease, transform .2s ease;
+}
+
+.eye-btn:hover {
+    background: #e7edf7;
+    color: #003b88;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.eye-btn:active {
+    transform: translateY(-50%) scale(.96);
+}
+
+.eye-btn:focus-visible {
+    outline: 2px solid #ff7418;
+    outline-offset: 2px;
+}
+
+.input-group input:focus {
+    border-color: #003b88;
+    box-shadow: 0 0 0 3px rgba(0, 59, 136, .12);
+    outline: none;
 }
 
 .login-btn {

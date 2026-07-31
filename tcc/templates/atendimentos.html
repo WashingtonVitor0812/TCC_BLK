@@ -10,6 +10,7 @@
     <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/loading.css') }}">
     <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pdf.css') }}">
 </head>
 <body>
 {% include '_toast.html' %}
@@ -21,14 +22,23 @@
                 <a href="{{ url_for('web.clientes') }}">Clientes</a>
                 <a class="active" href="#">Atendimentos</a>
                 <a href="{{ url_for('web.servicos') }}">Serviços</a>
+                <form class="logout-form" action="{{ url_for('web.logout') }}" method="post">
+                    <button type="submit" class="logout-button">Logout</button>
+                </form>
             </nav>
         </header>
 
         <section class="page-header">
             <h1>Atendimentos</h1>
-            <button type="button" class="new-btn" onclick="window.location.href='{{ url_for('web.criar_atendimento') }}'">
-                Criar atendimento <span>+</span>
-            </button>
+            <div class="page-header-actions">
+                <div class="document-actions">
+                    <button type="button" id="btnGerarPDF" title="Gerar PDF dos atendimentos" aria-label="Gerar PDF dos atendimentos"><i class="fa-solid fa-file-pdf"></i></button>
+                    <button type="button" id="btnCompartilharPDF" title="Compartilhar PDF dos atendimentos" aria-label="Compartilhar PDF dos atendimentos"><i class="fa-solid fa-share"></i></button>
+                </div>
+                <button type="button" class="new-btn" onclick="window.location.href='{{ url_for('web.criar_atendimento') }}'">
+                    Criar atendimento <span>+</span>
+                </button>
+            </div>
         </section>
 
         <main class="page-content">
@@ -39,8 +49,11 @@
                 </div>
 
                 <select id="filterType" aria-label="Filtrar atendimentos por campo">
-                    <option value="cliente">Cliente</option>
+                    <option value="todos">Todos os campos</option>
+                    <option value="nome">Nome do atendimento</option>
                     <option value="servicos">Serviços</option>
+                    <option value="cliente">Cliente</option>
+                    <option value="status">Status</option>
                 </select>
             </div>
 
@@ -123,6 +136,8 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/pdf.js') }}"></script>
     <script src="{{ url_for('static', filename='js/atendimentos.js') }}"></script>
 </body>
 </html>

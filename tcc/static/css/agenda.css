@@ -407,6 +407,11 @@ body {
     gap: 7px;
 }
 
+.logout-form { margin: 0; }
+.logout-button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; border: 1px solid #ff8a43; border-radius: 7px; background: rgba(255, 116, 23, .12); box-shadow: 0 2px 0 rgba(0, 0, 0, .12); color: #fff; cursor: pointer; font: inherit; font-size: 16px; font-weight: 700; padding: 6px 15px; transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.logout-button:hover { border-color: #ff7417; background: #ff7417; box-shadow: 0 5px 12px rgba(0, 0, 0, .24); transform: translateY(-2px); }
+.logout-button:active { box-shadow: 0 1px 3px rgba(0, 0, 0, .2); transform: translateY(0) scale(.98); }
+
 .reminder-content .reminder-appointment {
     color: #003f97;
     font-size: 18px;

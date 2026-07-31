@@ -72,10 +72,14 @@ async function carregarServicos() {
 }
 
 function filtrarServicos() {
+    renderServicos(obterServicosFiltrados());
+}
+
+function obterServicosFiltrados() {
     const termo = searchInput.value.trim().toLowerCase();
     const filtro = filterType.value;
 
-    renderServicos(servicos.filter((servico) => {
+    return servicos.filter((servico) => {
         const nome = servico.nome.toLowerCase();
         const descricao = (servico.descricao || "").toLowerCase();
         const valorBase = formatarMoeda(servico.valorBase).toLowerCase();
@@ -88,7 +92,7 @@ function filtrarServicos() {
 
         return nome.includes(termo) || descricao.includes(termo) ||
             valorBase.includes(termo) || id.includes(termo);
-    }));
+    });
 }
 
 function dadosFormulario(prefixo) {
@@ -204,6 +208,43 @@ document.addEventListener("keydown", (evento) => {
         fecharConfirmacaoExclusao();
     }
 });
+
+function opcoesPdfServicos() {
+    return {
+        titulo: "Lista de serviços",
+        subtitulo: `Total de serviços exibidos: ${obterServicosFiltrados().length}`,
+        nomeArquivo: "lista_servicos.pdf",
+        colunas: [
+            { titulo: "Nome", chave: "nome", largura: 70 },
+            { titulo: "Valor base", chave: "valorBase", largura: 35 },
+            { titulo: "Descrição", chave: "descricao", largura: 148 },
+            { titulo: "ID", chave: "id", largura: 16 }
+        ],
+        linhas: obterServicosFiltrados().map(servico => ({
+            nome: servico.nome,
+            valorBase: formatarMoeda(servico.valorBase),
+            descricao: servico.descricao,
+            id: servico.id
+        }))
+    };
+}
+
+document.getElementById("btnGerarPDF").addEventListener("click", () => {
+    try {
+        window.BLKPDF.baixar(opcoesPdfServicos());
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
+
+document.getElementById("btnCompartilharPDF").addEventListener("click", async () => {
+    try {
+        await window.BLKPDF.compartilhar(opcoesPdfServicos());
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
+
 searchInput.addEventListener("input", filtrarServicos);
 filterType.addEventListener("change", filtrarServicos);
 

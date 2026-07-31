@@ -99,27 +99,53 @@ function renderAtendimentos(lista = atendimentos) {
         const acoes = linha.insertCell();
         const grupo = document.createElement("div");
         grupo.className = "actions";
+        const botaoConcluir = criarBotao("fa-circle-check", "Marcar como concluído", () => concluirAtendimento(atendimento.id));
+        if (atendimento.status === "CONCLUIDO") {
+            botaoConcluir.disabled = true;
+            botaoConcluir.title = "Atendimento já concluído";
+            botaoConcluir.setAttribute("aria-label", "Atendimento já concluído");
+        }
         grupo.append(
             criarBotao("fa-pen", "Editar", () => abrirEdicao(atendimento.id)),
             criarBotao("fa-eye", "Visualizar", () => visualizarAtendimento(atendimento.id)),
+            botaoConcluir,
             criarBotao("fa-trash", "Excluir", () => confirmarExclusao(atendimento.id))
         );
         acoes.appendChild(grupo);
     });
 }
 
-function filtrarAtendimentos() {
+function obterAtendimentosFiltrados() {
     const termo = searchInput.value.trim().toLowerCase();
     const filtro = filterType.value;
+    const ordemStatus = {
+        PENDENTE: 0,
+        EM_ANDAMENTO: 1,
+        CONCLUIDO: 2,
+        CANCELADO: 3
+    };
 
-    const lista = atendimentos.filter((atendimento) => {
+    return atendimentos.filter((atendimento) => {
+        const nome = (atendimento.nome || `Atendimento #${atendimento.id}`).toLowerCase();
         const servicos = (atendimento.servicos || "").toLowerCase();
         const cliente = (atendimento.cliente || "").toLowerCase();
+        const status = textoStatus(atendimento.status).toLowerCase();
+        if (filtro === "nome") return nome.includes(termo);
         if (filtro === "cliente") return cliente.includes(termo);
-        return servicos.includes(termo);
+        if (filtro === "servicos") return servicos.includes(termo);
+        if (filtro === "status") return status.includes(termo);
+        return nome.includes(termo) || servicos.includes(termo) ||
+            cliente.includes(termo) || status.includes(termo);
+    }).sort((primeiro, segundo) => {
+        const diferenca = (ordemStatus[primeiro.status] ?? 99) -
+            (ordemStatus[segundo.status] ?? 99);
+        if (diferenca !== 0) return diferenca;
+        return String(segundo.data_atendimento || "").localeCompare(String(primeiro.data_atendimento || ""));
     });
+}
 
-    renderAtendimentos(lista);
+function filtrarAtendimentos() {
+    renderAtendimentos(obterAtendimentosFiltrados());
 }
 
 async function carregarAtendimentos() {
@@ -168,6 +194,20 @@ async function atualizarAtendimento(id, dados) {
         alert(erro.message);
         await carregarAtendimentos();
         return false;
+    }
+}
+
+async function concluirAtendimento(id) {
+    try {
+        const resposta = await fetch(`/api/atendimentos/${id}/concluir`, { method: "POST" });
+        const retorno = await resposta.json();
+        if (!resposta.ok || !retorno.success) {
+            throw new Error(retorno.erro || "Não foi possível concluir o atendimento.");
+        }
+        await carregarAtendimentos();
+    } catch (erro) {
+        console.error("Erro ao concluir atendimento:", erro);
+        alert(erro.message);
     }
 }
 
@@ -303,6 +343,49 @@ document.addEventListener("keydown", (evento) => {
         closeViewModal();
         closeEditModal();
         closeDeleteModal();
+    }
+});
+
+function opcoesPdfAtendimentos() {
+    const listaFiltrada = obterAtendimentosFiltrados();
+    return {
+        titulo: "Lista de atendimentos",
+        subtitulo: `Total de atendimentos exibidos: ${listaFiltrada.length}`,
+        nomeArquivo: "lista_atendimentos.pdf",
+        colunas: [
+            { titulo: "Atendimento", chave: "nome", largura: 48 },
+            { titulo: "Cliente", chave: "cliente", largura: 42 },
+            { titulo: "Serviços", chave: "servicos", largura: 65 },
+            { titulo: "Desconto", chave: "desconto", largura: 27 },
+            { titulo: "Total", chave: "valorTotal", largura: 27 },
+            { titulo: "Data", chave: "data", largura: 30 },
+            { titulo: "Status", chave: "status", largura: 30 }
+        ],
+        linhas: listaFiltrada.map(atendimento => ({
+            nome: atendimento.nome || `Atendimento #${atendimento.id}`,
+            cliente: atendimento.cliente,
+            servicos: atendimento.servicos,
+            desconto: formatarMoeda(atendimento.desconto),
+            valorTotal: formatarMoeda(atendimento.valor_total),
+            data: formatarData(atendimento.data_atendimento),
+            status: textoStatus(atendimento.status)
+        }))
+    };
+}
+
+document.getElementById("btnGerarPDF").addEventListener("click", () => {
+    try {
+        window.BLKPDF.baixar(opcoesPdfAtendimentos());
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
+
+document.getElementById("btnCompartilharPDF").addEventListener("click", async () => {
+    try {
+        await window.BLKPDF.compartilhar(opcoesPdfAtendimentos());
+    } catch (erro) {
+        alert(erro.message);
     }
 });
 

@@ -16,6 +16,7 @@
     <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/loading.css') }}">
     <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pdf.css') }}">
 </head>
 <body>
 {% include '_toast.html' %}
@@ -33,6 +34,9 @@
             <a href="{{url_for('web.clientes') }}">Clientes</a>
             <a href="{{url_for('web.atendimentos') }}">Atendimentos</a>
             <a class="active" href="#">Serviços</a>
+            <form class="logout-form" action="{{ url_for('web.logout') }}" method="post">
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
         </nav>
 
     </header>
@@ -41,14 +45,21 @@
 
         <h1>Serviços</h1>
 
-        <button
-            id="btnNovoServico"
-            class="new-btn">
+        <div class="page-header-actions">
+            <div class="document-actions">
+                <button type="button" id="btnGerarPDF" title="Gerar PDF dos serviços" aria-label="Gerar PDF dos serviços"><i class="fa-solid fa-file-pdf"></i></button>
+                <button type="button" id="btnCompartilharPDF" title="Compartilhar PDF dos serviços" aria-label="Compartilhar PDF dos serviços"><i class="fa-solid fa-share"></i></button>
+            </div>
+
+            <button
+                id="btnNovoServico"
+                class="new-btn">
 
             Novo Serviço
             <span>+</span>
 
-        </button>
+            </button>
+        </div>
 
     </section>
 
@@ -225,6 +236,8 @@
             </div>
         </div>
     </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/pdf.js') }}"></script>
 <script src="{{url_for('static', filename='js/servicos.js')}}"></script>
 </body>
 </html>

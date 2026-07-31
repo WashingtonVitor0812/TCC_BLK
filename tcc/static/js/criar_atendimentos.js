@@ -1461,6 +1461,9 @@ async function inicializarEdicao() {
         document.getElementById("atendimentoId").value = atendimentoEmEdicao.id;
         nomeAtendimento.value = atendimentoEmEdicao.nome || "";
         descricaoAtendimento.value = atendimentoEmEdicao.descricao || "";
+        if (descontoAtendimento) {
+            descontoAtendimento.value = Number(atendimentoEmEdicao.desconto) || 0;
+        }
 
         const cliente = clientesDisponiveis.find(item => Number(item.id) === Number(atendimentoEmEdicao.id_cliente));
         selecionarCliente(cliente || { id: atendimentoEmEdicao.id_cliente, nome: atendimentoEmEdicao.cliente });
@@ -2113,6 +2116,182 @@ function criarDocumentoPDF(dados) {
    COLETA DOS DADOS
 =========================================================== */
 
+/*
+   Sobrescreve a versão anterior para produzir um orçamento completo.
+   Os dados são lidos diretamente dos campos atuais, portanto o PDF funciona
+   antes do primeiro salvamento e durante a edição.
+*/
+function criarDocumentoPDF(dados) {
+    if (!window.jspdf?.jsPDF) {
+        throw new Error("A biblioteca de PDF ainda não foi carregada.");
+    }
+
+    const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+    const largura = pdf.internal.pageSize.getWidth();
+    const altura = pdf.internal.pageSize.getHeight();
+    const margem = 16;
+    const larguraUtil = largura - margem * 2;
+    let pagina = 1;
+    let y = 48;
+
+    const texto = valor => String(valor ?? "").trim() || "-";
+    const desenharCabecalho = () => {
+        pdf.setFillColor(0, 63, 151);
+        pdf.rect(0, 0, largura, 26, "F");
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(20);
+        pdf.text("BLK", margem, 16);
+        pdf.setFontSize(11);
+        pdf.text("HIGIENIZAÇÃO", margem + 19, 16);
+        pdf.setTextColor(0, 63, 151);
+        pdf.setFontSize(18);
+        pdf.text("ORÇAMENTO DE ATENDIMENTO", margem, 38);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9);
+        pdf.setTextColor(95, 95, 95);
+        pdf.text(`Emissão: ${new Date().toLocaleString("pt-BR")}`, largura - margem, 38, { align: "right" });
+        y = 48;
+    };
+    const desenharRodape = () => {
+        pdf.setDrawColor(220, 220, 220);
+        pdf.line(margem, altura - 13, largura - margem, altura - 13);
+        pdf.setFontSize(8);
+        pdf.setTextColor(105, 105, 105);
+        pdf.text("Valores sujeitos à confirmação.", margem, altura - 8);
+        pdf.text(`Página ${pagina}`, largura - margem, altura - 8, { align: "right" });
+    };
+    const novaPagina = () => {
+        desenharRodape();
+        pdf.addPage();
+        pagina += 1;
+        desenharCabecalho();
+    };
+    const garantirEspaco = espaco => {
+        if (y + espaco > altura - 18) novaPagina();
+    };
+    const tituloSecao = titulo => {
+        garantirEspaco(10);
+        pdf.setFillColor(241, 245, 251);
+        pdf.rect(margem, y, larguraUtil, 8, "F");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
+        pdf.setTextColor(0, 63, 151);
+        pdf.text(titulo, margem + 3, y + 5.4);
+        y += 12;
+    };
+
+    desenharCabecalho();
+    tituloSecao("DADOS DO ATENDIMENTO");
+    const detalhes = [
+        ["Atendimento", texto(dados.nome)],
+        ["Cliente", texto(dados.cliente_nome)],
+        ["Status", texto(dados.status)],
+        ["Data do atendimento", texto(dados.data_atendimento_formatada)],
+        ["Data de conclusão", texto(dados.data_conclusao_formatada)]
+    ];
+    detalhes.forEach(([rotulo, valor]) => {
+        garantirEspaco(8);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(9);
+        pdf.setTextColor(70, 70, 70);
+        pdf.text(`${rotulo}:`, margem + 2, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(35, 35, 35);
+        pdf.text(pdf.splitTextToSize(valor, larguraUtil - 48), margem + 42, y);
+        y += 7;
+    });
+
+    tituloSecao("SERVIÇOS ORÇADOS");
+    const colunas = [margem, margem + 77, margem + 112, margem + 137, margem + 163];
+    const larguras = [77, 35, 25, 26];
+    const cabecalhoTabela = () => {
+        garantirEspaco(10);
+        pdf.setFillColor(11, 77, 173);
+        pdf.rect(margem, y, larguraUtil, 8, "F");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(8.5);
+        pdf.setTextColor(255, 255, 255);
+        ["Serviço", "Valor unit.", "Qtd.", "Total"].forEach((titulo, indice) => pdf.text(titulo, colunas[indice] + 2, y + 5.3));
+        y += 8;
+    };
+    cabecalhoTabela();
+    if (!dados.servicos.length) {
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(90, 90, 90);
+        pdf.text("Nenhum serviço adicionado.", margem + 3, y + 6);
+        y += 10;
+    }
+    dados.servicos.forEach((servico, indice) => {
+        const nomeLinhas = pdf.splitTextToSize(texto(servico.nome), larguras[0] - 4);
+        const alturaLinha = Math.max(8, nomeLinhas.length * 4.2 + 3);
+        if (y + alturaLinha > altura - 30) {
+            novaPagina();
+            tituloSecao("SERVIÇOS ORÇADOS (continuação)");
+            cabecalhoTabela();
+        }
+        pdf.setFillColor(indice % 2 ? 247 : 255, indice % 2 ? 249 : 255, indice % 2 ? 252 : 255);
+        pdf.setDrawColor(220, 220, 220);
+        pdf.rect(margem, y, larguraUtil, alturaLinha, "FD");
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8.5);
+        pdf.setTextColor(40, 40, 40);
+        pdf.text(nomeLinhas, colunas[0] + 2, y + 5, { baseline: "top" });
+        pdf.text(formatarMoeda(servico.custo_base), colunas[1] + 2, y + 5);
+        pdf.text(String(servico.quantidade), colunas[2] + 2, y + 5);
+        pdf.text(formatarMoeda(servico.valor), colunas[3] + 2, y + 5);
+        y += alturaLinha;
+    });
+
+    garantirEspaco(31);
+    const totalX = margem + 111;
+    const valorX = largura - margem - 3;
+    pdf.setFontSize(10);
+    pdf.setTextColor(70, 70, 70);
+    pdf.text("Subtotal:", totalX, y + 7);
+    pdf.text(formatarMoeda(dados.subtotal), valorX, y + 7, { align: "right" });
+    pdf.text("Desconto:", totalX, y + 14);
+    pdf.text(`- ${formatarMoeda(dados.desconto)}`, valorX, y + 14, { align: "right" });
+    pdf.setFillColor(0, 63, 151);
+    pdf.rect(totalX - 3, y + 18, largura - margem - totalX + 3, 10, "F");
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(11);
+    pdf.text("TOTAL DO ORÇAMENTO", totalX, y + 24.5);
+    pdf.text(formatarMoeda(dados.valor_total), valorX, y + 24.5, { align: "right" });
+    desenharRodape();
+    return pdf;
+}
+
+function gerarPDF() {
+    try {
+        const dados = coletarDadosAtendimento();
+        criarDocumentoPDF(dados).save(gerarNomeArquivoPDF(dados));
+    } catch (erro) {
+        alert(erro.message || "Não foi possível gerar o orçamento.");
+    }
+}
+
+async function compartilharPDF() {
+    try {
+        const dados = coletarDadosAtendimento();
+        const pdf = criarDocumentoPDF(dados);
+        const arquivo = new File([pdf.output("blob")], gerarNomeArquivoPDF(dados), { type: "application/pdf" });
+        if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+            try {
+                await navigator.share({ title: dados.nome || "Orçamento de atendimento", files: [arquivo] });
+                return;
+            } catch (erro) {
+                if (erro?.name === "AbortError") return;
+            }
+        }
+        pdf.save(gerarNomeArquivoPDF(dados));
+        alert("Seu navegador não permite compartilhar arquivos diretamente. O orçamento foi baixado.");
+    } catch (erro) {
+        alert(erro.message || "Não foi possível compartilhar o orçamento.");
+    }
+}
+
 function coletarDadosAtendimento() {
 
     return {
@@ -2162,11 +2341,38 @@ function coletarDadosAtendimento() {
         valor_total:
             calcularTotal(),
 
+        subtotal:
+            servicosSelecionados.reduce(
+                (soma, servico) => soma + (Number(servico.valor) || 0),
+                0
+            ),
+
+        desconto:
+            Number(descontoAtendimento?.value) || 0,
+
         status:
-            "Pendente"
+            atendimentoEmEdicao
+                ? (atendimentoEmEdicao.status || "PENDENTE")
+                : "PENDENTE",
+
+        data_atendimento_formatada:
+            formatarDataOrcamento(
+                atendimentoEmEdicao?.data_atendimento
+            ),
+
+        data_conclusao_formatada:
+            formatarDataOrcamento(
+                atendimentoEmEdicao?.data_conclusao
+            )
 
     };
 
+}
+
+function formatarDataOrcamento(data) {
+    if (!data) return "Não definida";
+    const partes = String(data).slice(0, 10).split("-");
+    return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : String(data);
 }
 
 

@@ -320,7 +320,7 @@ async function carregarClientes() {
             await resposta.json();
 
 
-        renderClientes();
+        filtrarClientes();
 
     }
 
@@ -345,22 +345,11 @@ async function carregarClientes() {
 // PESQUISA
 // ============================================================
 
-searchInput.addEventListener(
-    "input",
-    () => {
+function obterClientesFiltrados() {
+    const termo = searchInput.value.trim().toLowerCase();
+    const filtro = filterType.value;
 
-        const termo =
-            searchInput.value
-                .trim()
-                .toLowerCase();
-
-        const filtro =
-            filterType.value;
-
-
-        const filtrados =
-            clientes.filter(
-                cliente => {
+    return clientes.filter(cliente => {
 
                     const nome =
                         (
@@ -416,20 +405,18 @@ searchInput.addEventListener(
                             .toLowerCase()
                             .includes(termo);
 
-                }
-            );
+    });
+}
 
+function filtrarClientes() {
+    renderClientes(obterClientesFiltrados());
+}
 
-        renderClientes(
-            filtrados
-        );
-
-    }
-);
+searchInput.addEventListener("input", filtrarClientes);
 
 filterType.addEventListener(
     "change",
-    () => searchInput.dispatchEvent(new Event("input"))
+    filtrarClientes
 );
 
 
@@ -1046,5 +1033,43 @@ document.addEventListener(
 // ============================================================
 // INICIALIZAÇÃO
 // ============================================================
+
+function opcoesPdfClientes() {
+    return {
+        titulo: "Lista de clientes",
+        subtitulo: `Total de clientes exibidos: ${obterClientesFiltrados().length}`,
+        nomeArquivo: "lista_clientes.pdf",
+        colunas: [
+            { titulo: "Nome", chave: "nome", largura: 62 },
+            { titulo: "Telefone", chave: "telefone", largura: 42 },
+            { titulo: "Data de cadastro", chave: "dataCadastro", largura: 38 },
+            { titulo: "Endereço", chave: "endereco", largura: 111 },
+            { titulo: "ID", chave: "id", largura: 16 }
+        ],
+        linhas: obterClientesFiltrados().map(cliente => ({
+            nome: cliente.nome,
+            telefone: cliente.telefone,
+            dataCadastro: formatarData(cliente.dataCadastro),
+            endereco: cliente.endereco,
+            id: cliente.id
+        }))
+    };
+}
+
+document.getElementById("btnGerarPDF").addEventListener("click", () => {
+    try {
+        window.BLKPDF.baixar(opcoesPdfClientes());
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
+
+document.getElementById("btnCompartilharPDF").addEventListener("click", async () => {
+    try {
+        await window.BLKPDF.compartilhar(opcoesPdfClientes());
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
 
 carregarClientes();

@@ -58,7 +58,10 @@
 
         <a href="{{ url_for('web.atendimentos') }}">
             &lt; Retornar aos Atendimentos
-        </a>   
+        </a>
+        <form class="logout-form" action="{{ url_for('web.logout') }}" method="post">
+            <button type="submit" class="logout-button">Logout</button>
+        </form>
 
     </header>
 
@@ -782,9 +785,8 @@
     </script>
 
 
-    <script
-        src="{{ url_for('static', filename='js/criar_atendimentos.js') }}"
-    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/criar_atendimentos.js') }}"></script>
 
 
 </body>

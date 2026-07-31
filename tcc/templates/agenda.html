@@ -28,6 +28,7 @@
     <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/loading.css') }}">
     <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pdf.css') }}">
 </head>
 
 
@@ -73,6 +74,9 @@
                 Serviços
             </a>
 
+            <form class="logout-form" action="{{ url_for('web.logout') }}" method="post">
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
         </nav>
 
     </header>
@@ -90,11 +94,17 @@
         </h1>
 
 
-        <button
-            type="button"
-            id="openReminderModal"
-            class="new-btn"
-        >
+        <div class="page-header-actions">
+            <div class="document-actions">
+                <button type="button" id="btnGerarPDF" title="Gerar PDF do mês" aria-label="Gerar PDF do mês"><i class="fa-solid fa-file-pdf"></i></button>
+                <button type="button" id="btnCompartilharPDF" title="Compartilhar PDF do mês" aria-label="Compartilhar PDF do mês"><i class="fa-solid fa-share"></i></button>
+            </div>
+
+            <button
+                type="button"
+                id="openReminderModal"
+                class="new-btn"
+            >
 
             Novo Lembrete
 
@@ -102,7 +112,8 @@
                 +
             </span>
 
-        </button>
+            </button>
+        </div>
 
     </section>
 
@@ -710,9 +721,9 @@
         </div>
     </div>
 
-<script
-    src="{{ url_for('static', filename='js/agenda.js') }}"
-></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/pdf.js') }}"></script>
+<script src="{{ url_for('static', filename='js/agenda.js') }}"></script>
 </body>
 
 </html>

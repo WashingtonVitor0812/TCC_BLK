@@ -1,8 +1,10 @@
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from functools import wraps
+import os
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from sqlalchemy import func
+from werkzeug.security import check_password_hash
 from .extensions import db
 from .models import Atendimento, AtendimentoServico, Cliente, Lembrete, Servico
 
@@ -19,6 +21,21 @@ def login_required(view):
 
 def erro(message, status=400):
     return jsonify(success=False, erro=message), status
+
+
+def credenciais_login_validas(email, senha):
+    """Compara as credenciais recebidas com os hashes definidos no .env."""
+    hash_email = os.getenv("LOGIN_EMAIL_HASH", "")
+    hash_senha = os.getenv("LOGIN_PASSWORD_HASH", "")
+    if not hash_email or not hash_senha:
+        return False
+    try:
+        return (
+            check_password_hash(hash_email, str(email or "").strip().lower())
+            and check_password_hash(hash_senha, str(senha or ""))
+        )
+    except (ValueError, TypeError):
+        return False
 
 
 def cliente_json(cliente):
@@ -89,9 +106,18 @@ def login(): return render_template("login.html")
 
 @web.post("/")
 def verificar_login():
-    if request.form.get("email") == "BLK@gmail.com" and request.form.get("senha") == "12345":
+    if credenciais_login_validas(request.form.get("email"), request.form.get("senha")):
+        session.clear()
         session["logado"] = True; flash("Login realizado com sucesso!", "success"); return redirect(url_for("web.agenda"))
     flash("E-mail ou senha inválidos.", "error"); return redirect(url_for("web.login"))
+
+
+@web.post("/logout")
+@login_required
+def logout():
+    session.clear()
+    flash("Sessao encerrada com sucesso.", "success")
+    return redirect(url_for("web.login"))
 
 
 @web.get("/agenda")
@@ -187,6 +213,21 @@ def criar_atendimento_api():
         return jsonify(success=True, id=atendimento.id, desconto=float(desconto), valor_total=float(atendimento.valor_total), mensagem="Atendimento cadastrado com sucesso!"), 201
     except (ValueError, LookupError) as exc: return erro(str(exc), 400)
     except Exception as exc: db.session.rollback(); return erro(str(exc), 500)
+
+@web.post("/api/atendimentos/<int:id_atendimento>/concluir")
+@login_required
+def concluir_atendimento(id_atendimento):
+    atendimento = db.session.get(Atendimento, id_atendimento)
+    if not atendimento:
+        return erro("Atendimento não encontrado.", 404)
+    try:
+        atendimento.status = "CONCLUIDO"
+        atendimento.data_conclusao = date.today()
+        db.session.commit()
+        return jsonify(success=True, atendimento=atendimento_json(atendimento), mensagem="Atendimento concluído com sucesso!")
+    except Exception as exc:
+        db.session.rollback()
+        return erro(str(exc), 500)
 
 @web.route("/api/atendimentos/<int:id_atendimento>", methods=["GET", "PUT", "DELETE"])
 @login_required

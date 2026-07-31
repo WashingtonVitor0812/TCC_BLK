@@ -26,6 +26,7 @@
     <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/loading.css') }}">
     <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pdf.css') }}">
 </head>
 
 <body>
@@ -64,6 +65,9 @@
                 Serviços
             </a>
 
+            <form class="logout-form" action="{{ url_for('web.logout') }}" method="post">
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
         </nav>
 
     </header>
@@ -79,11 +83,17 @@
             Clientes
         </h1>
 
-        <button
-            id="btnNovoCliente"
-            class="new-btn"
-            type="button"
-        >
+        <div class="page-header-actions">
+            <div class="document-actions">
+                <button type="button" id="btnGerarPDF" title="Gerar PDF dos clientes" aria-label="Gerar PDF dos clientes"><i class="fa-solid fa-file-pdf"></i></button>
+                <button type="button" id="btnCompartilharPDF" title="Compartilhar PDF dos clientes" aria-label="Compartilhar PDF dos clientes"><i class="fa-solid fa-share"></i></button>
+            </div>
+
+            <button
+                id="btnNovoCliente"
+                class="new-btn"
+                type="button"
+            >
 
             Novo Cliente
 
@@ -91,7 +101,8 @@
                 +
             </span>
 
-        </button>
+            </button>
+        </div>
 
     </section>
 
@@ -360,9 +371,9 @@
         </div>
     </div>
 
-<script
-    src="{{ url_for('static', filename='js/clientes.js') }}"
-></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/pdf.js') }}"></script>
+<script src="{{ url_for('static', filename='js/clientes.js') }}"></script>
 </body>
 
 </html>

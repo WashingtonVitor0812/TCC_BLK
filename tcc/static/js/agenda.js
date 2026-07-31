@@ -3710,6 +3710,63 @@ function normalizarLembrete(
 
 
 /* ===========================================================
+   PDF DOS ATENDIMENTOS DO MÊS EXIBIDO
+=========================================================== */
+
+function dataPertenceAoMes(data, mes, ano) {
+    if (!data) return false;
+    const partes = String(data).slice(0, 10).split("-");
+    return partes.length === 3 && Number(partes[0]) === ano && Number(partes[1]) === mes + 1;
+}
+
+function opcoesPdfAgenda() {
+    const nomeMes = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" })
+        .format(new Date(anoAtual, mesAtual, 1));
+    const atendimentosDoMes = atendimentos.filter(atendimento =>
+        dataPertenceAoMes(atendimento.data_atendimento, mesAtual, anoAtual)
+    );
+
+    return {
+        titulo: "Agenda de atendimentos",
+        subtitulo: `Atendimentos de ${nomeMes}: ${atendimentosDoMes.length}`,
+        nomeArquivo: `agenda_atendimentos_${anoAtual}-${String(mesAtual + 1).padStart(2, "0")}.pdf`,
+        colunas: [
+            { titulo: "Data", chave: "data", largura: 30 },
+            { titulo: "Atendimento", chave: "nome", largura: 55 },
+            { titulo: "Cliente", chave: "cliente", largura: 43 },
+            { titulo: "Serviços", chave: "servicos", largura: 76 },
+            { titulo: "Status", chave: "status", largura: 34 },
+            { titulo: "Valor total", chave: "valorTotal", largura: 31 }
+        ],
+        linhas: atendimentosDoMes.map(atendimento => ({
+            data: formatarDataAtendimento(atendimento.data_atendimento),
+            nome: atendimento.nome || atendimento.titulo || `Atendimento #${atendimento.id}`,
+            cliente: atendimento.cliente,
+            servicos: atendimento.servicos,
+            status: atendimento.status,
+            valorTotal: Number(atendimento.valor_total || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+        }))
+    };
+}
+
+document.getElementById("btnGerarPDF").addEventListener("click", () => {
+    try {
+        window.BLKPDF.baixar(opcoesPdfAgenda());
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
+
+document.getElementById("btnCompartilharPDF").addEventListener("click", async () => {
+    try {
+        await window.BLKPDF.compartilhar(opcoesPdfAgenda());
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
+
+
+/* ===========================================================
    EXTRAIR LEMBRETE DA RESPOSTA DO FLASK
 =========================================================== */
 
