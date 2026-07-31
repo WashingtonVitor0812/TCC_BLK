@@ -40,9 +40,6 @@ const CONFIG = {
         atendimentos:
             "/api/atendimentos",
 
-        agenda:
-            "/agenda"
-
     }
 
 };
@@ -3863,31 +3860,6 @@ function normalizarTexto(
         )
         .toLowerCase()
         .trim();
-
-}
-
-
-/* ===========================================================
-   ESCAPE HTML
-=========================================================== */
-
-function escapeHTML(
-    texto
-) {
-
-    const div =
-        document.createElement(
-            "div"
-        );
-
-
-    div.textContent =
-        String(
-            texto ?? ""
-        );
-
-
-    return div.innerHTML;
 
 }
 

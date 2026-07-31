@@ -39,10 +39,13 @@
         href="{{ url_for('static', filename='css/criar_atendimentos.css') }}"
     >
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
+    <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 </head>
 
 
 <body class="attendance-creation-page">
+{% include '_toast.html' %}
 
 
     <!-- ==================================================

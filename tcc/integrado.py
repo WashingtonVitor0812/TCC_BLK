@@ -1,5 +1,6 @@
 import flask
 import flask_cors
+import json
 from functools import wraps
 import mysql.connector
 from datetime import date
@@ -270,6 +271,67 @@ app = flask.Flask(__name__)
 app.secret_key = "essa segurança é um bo****"
 
 flask_cors.CORS(app)
+
+
+@app.after_request
+def adicionar_notificacao_a_resposta(response):
+    """Registra flash e entrega a notificação para chamadas AJAX."""
+    if not response.is_json:
+        return response
+
+    try:
+        dados = response.get_json()
+    except Exception:
+        return response
+
+    if not isinstance(dados, dict) or "_toast" in dados:
+        return response
+
+    categoria = None
+    mensagem = None
+    if response.status_code >= 400 or dados.get("success") is False:
+        categoria = "error"
+        mensagem = dados.get("erro") or dados.get("error")
+    elif dados.get("success") is True:
+        categoria = "success"
+        mensagem = dados.get("mensagem")
+        if not mensagem and flask.request.method in {"POST", "PUT", "DELETE"}:
+            mensagens_padrao = {
+                ("/pegar_cliente", "POST"): "Cliente cadastrado com sucesso!",
+                ("/pegar_cliente", "PUT"): "Cliente atualizado com sucesso!",
+                ("/pegar_cliente", "DELETE"): "Cliente excluído com sucesso!",
+                ("/pegar_servico", "POST"): "Serviço cadastrado com sucesso!",
+                ("/pegar_servico", "PUT"): "Serviço atualizado com sucesso!",
+                ("/pegar_servico", "DELETE"): "Serviço excluído com sucesso!",
+                ("/pegar_dados", "POST"): "Lembrete cadastrado com sucesso!",
+                ("/editar_lembrete", "PUT"): "Lembrete atualizado com sucesso!",
+                ("/excluir_lembrete", "DELETE"): "Lembrete excluído com sucesso!",
+                ("/api/atendimentos", "POST"): "Atendimento cadastrado com sucesso!"
+            }
+            mensagem = mensagens_padrao.get(
+                (flask.request.path, flask.request.method),
+                "Operação realizada com sucesso!"
+            )
+
+    if not mensagem:
+        return response
+
+    quantidade_anterior = len(flask.session.get("_flashes", []))
+    flask.flash(mensagem, categoria)
+
+    # A API jÃ¡ entrega o toast na prÃ³pria resposta; remover esta
+    # mensagem da sessÃ£o evita que ela reapareÃ§a ao navegar para outra tela.
+    flashes = flask.session.get("_flashes", [])
+    del flashes[quantidade_anterior:]
+    if flashes:
+        flask.session["_flashes"] = flashes
+    else:
+        flask.session.pop("_flashes", None)
+
+    dados["_toast"] = {"category": categoria, "message": mensagem}
+    response.set_data(json.dumps(dados, ensure_ascii=False, default=str))
+    response.content_type = "application/json; charset=utf-8"
+    return response
 
 
 # ============================================================
@@ -1782,12 +1844,15 @@ def verificarLogin():
     if nome == 'BLK@gmail.com' and senha == '12345':
 
         flask.session['logado'] = True
+        flask.flash("Login realizado com sucesso!", "success")
 
         return flask.redirect(
             flask.url_for('agenda')
         )
 
     else:
+
+        flask.flash("E-mail ou senha inválidos.", "error")
 
         return flask.redirect(
             flask.url_for('login')

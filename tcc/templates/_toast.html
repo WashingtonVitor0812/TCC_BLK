@@ -1,0 +1,13 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="toast-container">
+      {% for category, message in messages %}
+        <div class="toast-card {{ 'error' if category == 'error' else '' }}">
+          <span>{{ '⚠' if category == 'error' else '✓' }}</span>
+          <span class="toast-card__message">{{ message }}</span>
+          <button class="toast-card__close" type="button" aria-label="Fechar">&times;</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
