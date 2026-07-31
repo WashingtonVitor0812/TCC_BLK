@@ -1,0 +1,47 @@
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .62);
+    cursor: wait;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .16s ease;
+}
+
+#loading-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 19px;
+    border-radius: 9px;
+    background: #fff;
+    color: #003f97;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #dce7f7;
+    border-top-color: #ff6d1a;
+    border-radius: 50%;
+    animation: loading-spin .7s linear infinite;
+}
+
+body.is-loading,
+body.is-loading * { cursor: wait !important; }
+
+@keyframes loading-spin {
+    to { transform: rotate(360deg); }
+}
