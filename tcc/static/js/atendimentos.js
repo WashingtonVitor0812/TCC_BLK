@@ -219,6 +219,9 @@ async function visualizarAtendimento(id) {
 }
 
 async function abrirEdicao(id) {
+    window.location.href = `/criar_atendimentos?editar=${encodeURIComponent(id)}`;
+    return;
+
     try {
         const atendimento = await obterAtendimento(id);
         const clienteSelect = document.getElementById("editCliente");

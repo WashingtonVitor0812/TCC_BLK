@@ -576,6 +576,15 @@ def atendimento_por_id(id_atendimento):
                 }), 404
 
             cursor.execute("""
+                SELECT ID_lembrete
+                FROM Lembrete
+                WHERE ID_atendimento = %s
+                ORDER BY ID_lembrete DESC
+                LIMIT 1
+            """, (id_atendimento,))
+            lembrete = cursor.fetchone()
+
+            cursor.execute("""
                 SELECT
                     ats.ID_servico,
                     s.nome_servico,
@@ -620,6 +629,10 @@ def atendimento_por_id(id_atendimento):
                         if atendimento["data_conclusao"] else None
                     ),
                     "valor_total": float(atendimento["valor_total"] or 0),
+                    "lembrete": (
+                        {"id": lembrete["ID_lembrete"]}
+                        if lembrete else None
+                    ),
                     "servicos": servicos
                 }
             })
@@ -637,6 +650,12 @@ def atendimento_por_id(id_atendimento):
                     "success": False,
                     "erro": "Formato inválido."
                 }), 400
+
+            if "servicos" in dados:
+                return atualizar_atendimento_completo(
+                    id_atendimento,
+                    dados
+                )
 
             id_cliente = dados.get("id_cliente")
             status = dados.get("status")
@@ -2042,6 +2061,95 @@ def criar_atendimento_completo():
     finally:
         cursor.close()
         conexao.close()
+
+def atualizar_atendimento_completo(id_atendimento, dados):
+    """Atualiza os dados e os serviços de um atendimento em uma transação."""
+
+    nome = dados.get("nome")
+    descricao = dados.get("descricao")
+    id_cliente = dados.get("id_cliente", dados.get("cliente_id"))
+    status = str(dados.get("status", "PENDENTE")).strip().upper().replace(" ", "_")
+    data_atendimento = dados.get("data_atendimento")
+    data_conclusao = dados.get("data_conclusao") or None
+    itens = dados.get("servicos")
+
+    if not isinstance(nome, str) or not nome.strip():
+        return flask.jsonify({"success": False, "erro": "Nome do atendimento não informado."}), 400
+    if descricao is not None and not isinstance(descricao, str):
+        return flask.jsonify({"success": False, "erro": "Descrição do atendimento inválida."}), 400
+    if status not in {"PENDENTE", "EM_ANDAMENTO", "CONCLUIDO", "CANCELADO"}:
+        return flask.jsonify({"success": False, "erro": "Status inválido."}), 400
+
+    try:
+        id_cliente = int(id_cliente)
+        data_atendimento = date.fromisoformat(data_atendimento)
+        data_conclusao = date.fromisoformat(data_conclusao) if data_conclusao else None
+    except (TypeError, ValueError):
+        return flask.jsonify({"success": False, "erro": "Cliente ou data inválidos."}), 400
+
+    if not isinstance(itens, list) or not itens:
+        return flask.jsonify({"success": False, "erro": "Adicione pelo menos um serviço ao atendimento."}), 400
+
+    servicos = []
+    ids_servicos = set()
+    try:
+        for item in itens:
+            id_servico = int(item.get("servico_id"))
+            quantidade = int(item.get("quantidade"))
+            if quantidade < 1 or id_servico in ids_servicos:
+                raise ValueError
+            ids_servicos.add(id_servico)
+            servicos.append((id_servico, quantidade))
+    except (AttributeError, TypeError, ValueError):
+        return flask.jsonify({"success": False, "erro": "Serviços do atendimento inválidos."}), 400
+
+    conexao = conecta()
+    cursor = conexao.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT 1 FROM Atendimento WHERE ID_atendimento = %s", (id_atendimento,))
+        if not cursor.fetchone():
+            return flask.jsonify({"success": False, "erro": "Atendimento não encontrado."}), 404
+
+        cursor.execute("SELECT 1 FROM Cliente WHERE ID_cliente = %s", (id_cliente,))
+        if not cursor.fetchone():
+            return flask.jsonify({"success": False, "erro": "Cliente não encontrado."}), 404
+
+        placeholders = ", ".join(["%s"] * len(ids_servicos))
+        cursor.execute(
+            f"SELECT ID_servico FROM Servico WHERE ID_servico IN ({placeholders})",
+            tuple(ids_servicos)
+        )
+        if {linha["ID_servico"] for linha in cursor.fetchall()} != ids_servicos:
+            return flask.jsonify({"success": False, "erro": "Um ou mais serviços não foram encontrados."}), 404
+
+        cursor.execute("""
+            UPDATE Atendimento
+            SET ID_cliente = %s, nome_atendimento = %s, descricao = %s,
+                status = %s, data_atendimento = %s, data_conclusao = %s
+            WHERE ID_atendimento = %s
+        """, (id_cliente, nome.strip(), descricao.strip() if isinstance(descricao, str) else None,
+              status, data_atendimento, data_conclusao, id_atendimento))
+        cursor.execute("DELETE FROM Atendimento_Servico WHERE ID_atendimento = %s", (id_atendimento,))
+        cursor.executemany("""
+            INSERT INTO Atendimento_Servico (ID_atendimento, ID_servico, quantidade)
+            VALUES (%s, %s, %s)
+        """, [(id_atendimento, id_servico, quantidade) for id_servico, quantidade in servicos])
+        cursor.execute("SELECT valor_total FROM Atendimento WHERE ID_atendimento = %s", (id_atendimento,))
+        atendimento = cursor.fetchone()
+        conexao.commit()
+        return flask.jsonify({
+            "success": True,
+            "id": id_atendimento,
+            "valor_total": float(atendimento["valor_total"] or 0),
+            "mensagem": "Atendimento atualizado com sucesso."
+        })
+    except Exception:
+        conexao.rollback()
+        raise
+    finally:
+        cursor.close()
+        conexao.close()
+
 
 @app.route('/api/atendimentos', methods=["POST"])
 @login_required

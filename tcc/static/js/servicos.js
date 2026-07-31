@@ -5,6 +5,9 @@ const editModal = document.getElementById("editModal");
 const tabelaServicos = document.getElementById("servicosTableBody");
 const searchInput = document.getElementById("searchInput");
 const filterType = document.getElementById("filterType");
+const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+const deleteConfirmName = document.getElementById("deleteConfirmName");
+let servicoParaExcluir = null;
 
 function formatarMoeda(valor) {
     return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -155,16 +158,31 @@ document.getElementById("editForm").addEventListener("submit", async (evento) =>
 });
 
 async function deleteServico(id) {
-    if (!confirm("Deseja realmente excluir este serviço?")) return;
+    const servico = servicos.find((item) => Number(item.id) === Number(id));
+    if (!servico) return;
+    servicoParaExcluir = servico;
+    deleteConfirmName.textContent = servico.nome;
+    deleteConfirmModal.classList.add("active");
+}
+
+async function executarExclusaoServico() {
+    if (!servicoParaExcluir) return;
+    const id = servicoParaExcluir.id;
     try {
         await respostaJson(await fetch("/pegar_servico", {
             method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id })
         }));
+        fecharConfirmacaoExclusao();
         await carregarServicos();
     } catch (erro) {
         console.error("Erro ao excluir serviço:", erro);
         alert(erro.message);
     }
+}
+
+function fecharConfirmacaoExclusao() {
+    deleteConfirmModal.classList.remove("active");
+    servicoParaExcluir = null;
 }
 
 createModal.addEventListener("click", (evento) => {
@@ -173,10 +191,17 @@ createModal.addEventListener("click", (evento) => {
 editModal.addEventListener("click", (evento) => {
     if (evento.target === editModal) closeEditModal();
 });
+deleteConfirmModal.addEventListener("click", (evento) => {
+    if (evento.target === deleteConfirmModal) fecharConfirmacaoExclusao();
+});
+document.getElementById("closeDeleteConfirm").addEventListener("click", fecharConfirmacaoExclusao);
+document.getElementById("cancelDeleteConfirm").addEventListener("click", fecharConfirmacaoExclusao);
+document.getElementById("confirmDeleteAction").addEventListener("click", executarExclusaoServico);
 document.addEventListener("keydown", (evento) => {
     if (evento.key === "Escape") {
         closeCreateModal();
         closeEditModal();
+        fecharConfirmacaoExclusao();
     }
 });
 searchInput.addEventListener("input", filtrarServicos);

@@ -217,6 +217,10 @@ const dayTooltip =
         "dayTooltip"
     );
 
+const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+const deleteConfirmName = document.getElementById("deleteConfirmName");
+let lembreteParaExcluir = null;
+
 
 /* ===========================================================
    INICIALIZAÇÃO
@@ -238,6 +242,8 @@ document.addEventListener(
 
         verificarNovoLembrete();
 
+        verificarEdicaoLembrete();
+
         inicializarTooltip();
 
     }
@@ -249,6 +255,13 @@ document.addEventListener(
 =========================================================== */
 
 function inicializarEventos() {
+
+    deleteConfirmModal.addEventListener("click", event => {
+        if (event.target === deleteConfirmModal) fecharConfirmacaoExclusao();
+    });
+    document.getElementById("closeDeleteConfirm").addEventListener("click", fecharConfirmacaoExclusao);
+    document.getElementById("cancelDeleteConfirm").addEventListener("click", fecharConfirmacaoExclusao);
+    document.getElementById("confirmDeleteAction").addEventListener("click", executarExclusaoLembrete);
 
 
     /* -------------------------------------------------------
@@ -1934,16 +1947,18 @@ async function excluirLembrete(
         return;
     }
 
+    const lembrete = lembretes.find(item => Number(item.id) === Number(id));
+    if (!lembrete) return;
 
-    const confirmar =
-        confirm(
-            "Deseja realmente excluir este lembrete?"
-        );
+    lembreteParaExcluir = lembrete;
+    deleteConfirmName.textContent = lembrete.atendimento || "este lembrete";
+    deleteConfirmModal.classList.add("active");
+}
 
+async function executarExclusaoLembrete() {
 
-    if (!confirmar) {
-        return;
-    }
+    if (!lembreteParaExcluir) return;
+    const id = lembreteParaExcluir.id;
 
 
     try {
@@ -2016,6 +2031,7 @@ async function excluirLembrete(
 
 
         atualizarInterfaceAgenda();
+        fecharConfirmacaoExclusao();
 
 
     } catch (error) {
@@ -3603,6 +3619,31 @@ function verificarNovoLembrete() {
 
     }
 
+}
+
+function fecharConfirmacaoExclusao() {
+    deleteConfirmModal.classList.remove("active");
+    lembreteParaExcluir = null;
+}
+
+function verificarEdicaoLembrete() {
+    if (new URLSearchParams(window.location.search).get("editarLembrete") !== "1") return;
+
+    const dados = sessionStorage.getItem("lembreteParaEdicao");
+    sessionStorage.removeItem("lembreteParaEdicao");
+    if (!dados) return;
+
+    try {
+        const referencia = JSON.parse(dados);
+        const lembrete = lembretes.find(item =>
+            Number(item.id) === Number(referencia.id_lembrete) ||
+            Number(item.id_atendimento) === Number(referencia.id_atendimento)
+        );
+        if (lembrete) abrirModalEdicao(lembrete);
+        else alert("Este atendimento n\u00e3o possui um lembrete associado para atualizar.");
+    } catch (error) {
+        console.error("Erro ao abrir lembrete para edi\u00e7\u00e3o:", error);
+    }
 }
 
 

@@ -85,6 +85,8 @@ let servicosSelecionados = [];
 
 let atendimentoCriado = null;
 
+let atendimentoEmEdicao = null;
+
 
 /* ===========================================================
    ELEMENTOS DO DOM
@@ -177,6 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarEventos();
 
     atualizarTabela();
+
+    inicializarEdicao();
 
 });
 
@@ -1206,7 +1210,7 @@ async function salvarAtendimento(event) {
 
         nome: nome,
 
-        cliente_id:
+        id_cliente:
             clienteSelecionado
                 ? clienteSelecionado.id
                 : clienteIdInput.value,
@@ -1236,7 +1240,15 @@ async function salvarAtendimento(event) {
         valor_total:
             calcularTotal(),
 
-        status: "Pendente"
+        status: atendimentoEmEdicao ? atendimentoEmEdicao.status : "PENDENTE",
+
+        data_atendimento: atendimentoEmEdicao
+            ? atendimentoEmEdicao.data_atendimento
+            : undefined,
+
+        data_conclusao: atendimentoEmEdicao
+            ? atendimentoEmEdicao.data_conclusao
+            : undefined
 
     };
 
@@ -1244,9 +1256,11 @@ async function salvarAtendimento(event) {
     try {
 
         const response = await fetch(
-            CONFIG.rotas.criarAtendimento,
+            atendimentoEmEdicao
+                ? `${CONFIG.rotas.criarAtendimento}/${atendimentoEmEdicao.id}`
+                : CONFIG.rotas.criarAtendimento,
             {
-                method: "POST",
+                method: atendimentoEmEdicao ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -1264,7 +1278,7 @@ async function salvarAtendimento(event) {
         }
 
         atendimentoCriado = {
-            id: resultado.id,
+            id: resultado.id || atendimentoEmEdicao?.id,
             ...dadosAtendimento,
             titulo: `${dadosAtendimento.cliente_nome} — ${dadosAtendimento.servicos.map(servico => servico.nome).join(", ")}`,
             valor_total: resultado.valor_total
@@ -1292,9 +1306,16 @@ async function salvarAtendimento(event) {
     */
 
     sessionStorage.setItem(
-        "atendimentoParaLembrete",
+        atendimentoEmEdicao
+            ? "lembreteParaEdicao"
+            : "atendimentoParaLembrete",
         JSON.stringify(
-            atendimentoCriado
+            atendimentoEmEdicao
+                ? {
+                    id_atendimento: atendimentoEmEdicao.id,
+                    id_lembrete: atendimentoEmEdicao.lembrete?.id || null
+                }
+                : atendimentoCriado
         )
     );
 
@@ -1371,10 +1392,51 @@ function redirecionarParaAgenda() {
     */
 
 
-    window.location.href =
-        CONFIG.rotas.agenda +
-        "?novoLembrete=1";
+    window.location.href = CONFIG.rotas.agenda + (
+        atendimentoEmEdicao
+            ? "?editarLembrete=1"
+            : "?novoLembrete=1"
+    );
 
+}
+
+async function inicializarEdicao() {
+    const id = new URLSearchParams(window.location.search).get("editar");
+    if (!id) return;
+
+    try {
+        const response = await fetch(`${CONFIG.rotas.criarAtendimento}/${encodeURIComponent(id)}`);
+        const resultado = await response.json();
+        if (!response.ok || !resultado.success) {
+            throw new Error(resultado.erro || "N\u00e3o foi poss\u00edvel carregar o atendimento.");
+        }
+
+        atendimentoEmEdicao = resultado.atendimento;
+        document.title = "Editar Atendimento - BLK Higieniza\u00e7\u00e3o";
+        document.body.classList.add("is-editing");
+        document.getElementById("editingIndicator").hidden = false;
+        document.getElementById("attendancePageTitle").textContent = "EDITAR ATENDIMENTO";
+        document.getElementById("agendaModalTitle").textContent = "Atendimento salvo!";
+        document.getElementById("agendaModalMessage").textContent = "Deseja atualizar o lembrete para este atendimento na agenda?";
+        document.getElementById("atendimentoId").value = atendimentoEmEdicao.id;
+        nomeAtendimento.value = atendimentoEmEdicao.nome || "";
+        descricaoAtendimento.value = atendimentoEmEdicao.descricao || "";
+
+        const cliente = clientesDisponiveis.find(item => Number(item.id) === Number(atendimentoEmEdicao.id_cliente));
+        selecionarCliente(cliente || { id: atendimentoEmEdicao.id_cliente, nome: atendimentoEmEdicao.cliente });
+        servicosSelecionados = atendimentoEmEdicao.servicos.map(servico => ({
+            id: servico.id,
+            nome: servico.nome,
+            custoBase: Number(servico.valorUnitario) || 0,
+            quantidade: Number(servico.quantidade) || 1,
+            valor: Number(servico.valor) || 0
+        }));
+        atualizarTabela();
+    } catch (error) {
+        console.error("Erro ao carregar atendimento para edi\u00e7\u00e3o:", error);
+        alert(error.message || "N\u00e3o foi poss\u00edvel carregar o atendimento.");
+        window.location.href = CONFIG.rotas.atendimentos;
+    }
 }
 
 

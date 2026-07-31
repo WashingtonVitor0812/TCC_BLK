@@ -72,9 +72,13 @@
 
         <section class="attendance-title-row">
 
-            <h1 class="attendance-title">
+            <h1 id="attendancePageTitle" class="attendance-title">
                 CRIAR ATENDIMENTO
             </h1>
+
+            <span id="editingIndicator" class="editing-indicator" hidden>
+                EDIÇÃO
+            </span>
 
 
             <div class="attendance-document-actions">
@@ -558,7 +562,7 @@
             </h2>
 
 
-            <p>
+            <p id="agendaModalMessage">
                 Deseja criar um lembrete para este atendimento
                 na agenda?
             </p>

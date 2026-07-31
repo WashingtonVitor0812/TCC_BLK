@@ -59,6 +59,27 @@ body {
     font-weight: 600;
 }
 
+.editing-indicator {
+    margin-left: auto;
+    margin-right: 12px;
+    padding: 7px 11px;
+    border: 1px solid #ffb27f;
+    border-radius: 999px;
+    background: #fff2ea;
+    color: #c74e09;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+}
+
+.attendance-creation-page.is-editing .atendimento-form {
+    border: 1px solid rgba(11, 77, 173, .14);
+}
+
+.attendance-creation-page.is-editing .attendance-save-btn {
+    min-width: 190px;
+}
+
 .attendance-document-actions {
     display: flex;
     gap: 8px;
@@ -385,6 +406,7 @@ textarea:focus-visible { outline: 2px solid #0b4dad; outline-offset: 2px; }
 @media (max-width: 700px) {
     .attendance-form-page { padding: 18px 12px 28px; }
     .attendance-title { font-size: 27px; }
+    .editing-indicator { margin-right: 8px; padding: 6px 9px; font-size: 11px; }
     .atendimento-form { padding: 14px; }
     .attendance-top-form { grid-template-columns: 1fr; }
     .attendance-description { grid-column: auto; grid-row: auto; height: 96px; }

@@ -27,6 +27,10 @@ const editModal =
 const clientesTableBody =
     document.getElementById("clientesTableBody");
 
+const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+const deleteConfirmName = document.getElementById("deleteConfirmName");
+let clienteParaExcluir = null;
+
 
 // ============================================================
 // RENDERIZAÇÃO DOS CLIENTES
@@ -837,22 +841,22 @@ document
 
 async function deleteClient(id) {
 
+    const cliente = clientes.find(item => Number(item.id) === Number(id));
+    if (!cliente) return;
+
+    clienteParaExcluir = cliente;
+    deleteConfirmName.textContent = cliente.nome || "este cliente";
+    deleteConfirmModal.classList.add("active");
+}
+
+async function executarExclusaoCliente() {
+
+    if (!clienteParaExcluir) return;
+    const id = clienteParaExcluir.id;
+
     // ----------------------------------------
     // Confirmação
     // ----------------------------------------
-
-    const confirmar =
-        confirm(
-            "Deseja realmente excluir este cliente?"
-        );
-
-
-    if (!confirmar) {
-
-        return;
-
-    }
-
 
     try {
 
@@ -913,6 +917,7 @@ async function deleteClient(id) {
         // ------------------------------------
 
         await carregarClientes();
+        fecharConfirmacaoExclusao();
 
     }
 
@@ -931,6 +936,18 @@ async function deleteClient(id) {
     }
 
 }
+
+function fecharConfirmacaoExclusao() {
+    deleteConfirmModal.classList.remove("active");
+    clienteParaExcluir = null;
+}
+
+deleteConfirmModal.addEventListener("click", event => {
+    if (event.target === deleteConfirmModal) fecharConfirmacaoExclusao();
+});
+document.getElementById("closeDeleteConfirm").addEventListener("click", fecharConfirmacaoExclusao);
+document.getElementById("cancelDeleteConfirm").addEventListener("click", fecharConfirmacaoExclusao);
+document.getElementById("confirmDeleteAction").addEventListener("click", executarExclusaoCliente);
 
 
 // ============================================================

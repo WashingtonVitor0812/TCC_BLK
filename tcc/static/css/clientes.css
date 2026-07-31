@@ -1244,6 +1244,14 @@ input:focus-visible {
 
 }
 
+.delete-confirm-modal { width: min(420px, 100%); text-align: center; }
+.delete-confirm-modal p { color: #555; line-height: 1.5; }
+.delete-confirm-modal strong { color: #003f97; overflow-wrap: anywhere; }
+.delete-confirm-actions { display: flex; justify-content: center; gap: 12px; margin-top: 24px; }
+.delete-confirm-actions button { width: 130px; margin: 0; }
+.cancel-delete-btn { height: 42px; border: 0; border-radius: 6px; background: #e3e5e8; color: #404040; font-size: 16px; font-weight: 600; cursor: pointer; }
+.cancel-delete-btn:hover { background: #d3d6da; }
+
 
 /* ===========================================================
    FILTRO DE PESQUISA
