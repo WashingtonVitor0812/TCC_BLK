@@ -90,6 +90,14 @@
                 <option value="descricao">Descrição</option>
                 <option value="id">ID</option>
             </select>
+            <select id="sortOrder" aria-label="Ordenar serviços">
+                <option value="criado-desc">Criação: mais recente</option>
+                <option value="criado-asc">Criação: mais antiga</option>
+                <option value="editado-desc">Edição: mais recente</option>
+                <option value="editado-asc">Edição: mais antiga</option>
+                <option value="nome-asc">A–Z</option>
+                <option value="nome-desc">Z–A</option>
+            </select>
 
         </div>
 
@@ -143,7 +151,8 @@
             <input
                 id="createNome"
                 type="text"
-                placeholder="Nome*"
+                maxlength="100"
+                placeholder="Nome* (máx.: 100)"
                 required>
 
             <input
@@ -156,7 +165,8 @@
 
             <textarea
                 id="createDescricao"
-                placeholder="Descrição"></textarea>
+                maxlength="65535"
+                placeholder="Descrição (máx.: 65535)"></textarea>
 
             <button
                 type="submit"
@@ -199,6 +209,8 @@
             <input
                 id="editNome"
                 type="text"
+                maxlength="100"
+                placeholder="Nome (máx.: 100)"
                 required>
 
             <input
@@ -209,7 +221,9 @@
                 required>
 
             <textarea
-                id="editDescricao"></textarea>
+                id="editDescricao"
+                maxlength="65535"
+                placeholder="Descrição (máx.: 65535)"></textarea>
 
             <button
                 type="submit"

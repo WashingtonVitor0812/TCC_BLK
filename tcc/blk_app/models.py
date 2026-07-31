@@ -1,3 +1,4 @@
+from datetime import datetime
 from .extensions import db
 
 
@@ -9,6 +10,8 @@ class Cliente(db.Model):
     data_cadastro = db.Column(db.Date, nullable=False)
     endereco = db.Column(db.String(255))
     link_endereco = db.Column("link_endereco", db.String(255))
+    criado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    atualizado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     atendimentos = db.relationship("Atendimento", back_populates="cliente")
 
 
@@ -18,6 +21,8 @@ class Servico(db.Model):
     nome = db.Column("nome_servico", db.String(100), nullable=False)
     valor_base = db.Column(db.Numeric(10, 2), nullable=False)
     descricao = db.Column(db.Text)
+    criado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    atualizado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class Atendimento(db.Model):
@@ -31,6 +36,8 @@ class Atendimento(db.Model):
     status = db.Column(db.Enum("PENDENTE", "EM_ANDAMENTO", "CONCLUIDO", "CANCELADO"))
     data_conclusao = db.Column(db.Date)
     data_atendimento = db.Column(db.Date, nullable=False)
+    criado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    atualizado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     cliente = db.relationship("Cliente", back_populates="atendimentos")
     itens = db.relationship("AtendimentoServico", cascade="all, delete-orphan", back_populates="atendimento")
     lembretes = db.relationship("Lembrete", cascade="all, delete-orphan", back_populates="atendimento")

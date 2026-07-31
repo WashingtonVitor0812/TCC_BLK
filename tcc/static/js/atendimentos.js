@@ -5,6 +5,7 @@ let atendimentoSelecionado = null;
 const tbody = document.getElementById("atendimentosTableBody");
 const searchInput = document.getElementById("searchInput");
 const filterType = document.getElementById("filterType");
+const sortOrder = document.getElementById("sortOrder");
 const viewModal = document.getElementById("viewModal");
 const editModal = document.getElementById("editModal");
 const deleteModal = document.getElementById("deleteModal");
@@ -25,6 +26,7 @@ function formatarMoeda(valor) {
 }
 
 function formatarData(data) {
+    if (!data) return "Data nao definida";
     if (!data) return "—";
     const [ano, mes, dia] = data.split("-");
     return ano && mes && dia ? `${dia}/${mes}/${ano}` : data;
@@ -83,17 +85,12 @@ function renderAtendimentos(lista = atendimentos) {
         linha.insertCell().textContent = atendimento.servicos || "Sem serviço informado";
         linha.insertCell().textContent = formatarMoeda(atendimento.desconto);
         linha.insertCell().textContent = formatarMoeda(atendimento.valor_total);
-        linha.insertCell().textContent = formatarData(atendimento.data_atendimento);
+        linha.insertCell().textContent = formatarData(atendimento.data_lembrete);
         linha.insertCell().textContent = atendimento.cliente || "Cliente não encontrado";
 
         const status = linha.insertCell();
         status.appendChild(criarSelectStatus(atendimento.status, async (evento) => {
-            await atualizarAtendimento(atendimento.id, {
-                id_cliente: atendimento.id_cliente,
-                status: evento.target.value,
-                data_atendimento: atendimento.data_atendimento,
-                data_conclusao: atendimento.data_conclusao
-            });
+            await atualizarStatusAtendimento(atendimento.id, evento.target.value);
         }));
 
         const acoes = linha.insertCell();
@@ -137,10 +134,10 @@ function obterAtendimentosFiltrados() {
         return nome.includes(termo) || servicos.includes(termo) ||
             cliente.includes(termo) || status.includes(termo);
     }).sort((primeiro, segundo) => {
-        const diferenca = (ordemStatus[primeiro.status] ?? 99) -
-            (ordemStatus[segundo.status] ?? 99);
-        if (diferenca !== 0) return diferenca;
-        return String(segundo.data_atendimento || "").localeCompare(String(primeiro.data_atendimento || ""));
+        const [campo, direcao] = (sortOrder.value || "criado-desc").split("-");
+        const chave = campo === "nome" ? "nome" : campo === "editado" ? "editadoEm" : "criadoEm";
+        const resultado = String(primeiro[chave] || "").localeCompare(String(segundo[chave] || ""), "pt-BR");
+        return direcao === "asc" ? resultado : -resultado;
     });
 }
 
@@ -197,6 +194,23 @@ async function atualizarAtendimento(id, dados) {
     }
 }
 
+async function atualizarStatusAtendimento(id, status) {
+    try {
+        const resposta = await fetch(`/api/atendimentos/${id}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+        });
+        const retorno = await resposta.json();
+        if (!resposta.ok || !retorno.success) throw new Error(retorno.erro || "Nao foi possivel atualizar o status.");
+        await carregarAtendimentos();
+    } catch (erro) {
+        console.error("Erro ao atualizar status:", erro);
+        alert(erro.message);
+        await carregarAtendimentos();
+    }
+}
+
 async function concluirAtendimento(id) {
     try {
         const resposta = await fetch(`/api/atendimentos/${id}/concluir`, { method: "POST" });
@@ -227,7 +241,7 @@ async function visualizarAtendimento(id) {
         const atendimento = await obterAtendimento(id);
         document.getElementById("viewNome").textContent = atendimento.nome || `Atendimento #${atendimento.id}`;
         document.getElementById("viewCliente").textContent = atendimento.cliente;
-        document.getElementById("viewData").textContent = formatarData(atendimento.data_atendimento);
+        document.getElementById("viewData").textContent = formatarData(atendimento.data_lembrete);
         document.getElementById("viewStatus").textContent = textoStatus(atendimento.status);
         document.getElementById("viewDescricao").textContent = atendimento.data_conclusao
             ? `Conclusão: ${formatarData(atendimento.data_conclusao)}`
@@ -330,6 +344,7 @@ function closeDeleteModal() { deleteModal.classList.remove("active"); }
 
 searchInput.addEventListener("input", filtrarAtendimentos);
 filterType.addEventListener("change", filtrarAtendimentos);
+sortOrder.addEventListener("change", filtrarAtendimentos);
 confirmDelete.addEventListener("click", excluirAtendimento);
 
 [viewModal, editModal, deleteModal].forEach((modal) => {

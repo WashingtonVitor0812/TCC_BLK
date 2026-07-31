@@ -148,6 +148,14 @@
                 <option value="endereco">Endereço</option>
                 <option value="id">ID</option>
             </select>
+            <select id="sortOrder" aria-label="Ordenar clientes">
+                <option value="criado-desc">Criação: mais recente</option>
+                <option value="criado-asc">Criação: mais antiga</option>
+                <option value="editado-desc">Edição: mais recente</option>
+                <option value="editado-asc">Edição: mais antiga</option>
+                <option value="nome-asc">A–Z</option>
+                <option value="nome-desc">Z–A</option>
+            </select>
 
         </div>
 
@@ -242,7 +250,8 @@
             <input
                 type="text"
                 id="createNome"
-                placeholder="Nome*"
+                maxlength="100"
+                placeholder="Nome* (máx.: 100)"
                 autocomplete="name"
                 required
             >
@@ -251,7 +260,8 @@
             <input
                 type="text"
                 id="createTelefone"
-                placeholder="Telefone*"
+                maxlength="20"
+                placeholder="Telefone* (máx.: 20)"
                 autocomplete="tel"
                 required
             >
@@ -260,7 +270,8 @@
             <input
                 type="text"
                 id="createEndereco"
-                placeholder="Endereço*"
+                maxlength="255"
+                placeholder="Endereço* (máx.: 255)"
                 autocomplete="street-address"
                 required
             >
@@ -317,7 +328,8 @@
             <input
                 type="text"
                 id="editNome"
-                placeholder="Nome*"
+                maxlength="100"
+                placeholder="Nome* (máx.: 100)"
                 autocomplete="name"
                 required
             >
@@ -326,7 +338,8 @@
             <input
                 type="text"
                 id="editTelefone"
-                placeholder="Telefone*"
+                maxlength="20"
+                placeholder="Telefone* (máx.: 20)"
                 autocomplete="tel"
                 required
             >
@@ -335,7 +348,8 @@
             <input
                 type="text"
                 id="editEndereco"
-                placeholder="Endereço*"
+                maxlength="255"
+                placeholder="Endereço* (máx.: 255)"
                 autocomplete="street-address"
                 required
             >

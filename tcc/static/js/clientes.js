@@ -17,6 +17,7 @@ const searchInput =
 
 const filterType =
     document.getElementById("filterType");
+const sortOrder = document.getElementById("sortOrder");
 
 const createModal =
     document.getElementById("createModal");
@@ -405,6 +406,11 @@ function obterClientesFiltrados() {
                             .toLowerCase()
                             .includes(termo);
 
+    }).sort((primeiro, segundo) => {
+        const [campo, direcao] = (sortOrder.value || "criado-desc").split("-");
+        const chave = campo === "nome" ? "nome" : campo === "editado" ? "editadoEm" : "criadoEm";
+        const resultado = String(primeiro[chave] || "").localeCompare(String(segundo[chave] || ""), "pt-BR");
+        return direcao === "asc" ? resultado : -resultado;
     });
 }
 
@@ -418,6 +424,7 @@ filterType.addEventListener(
     "change",
     filtrarClientes
 );
+sortOrder.addEventListener("change", filtrarClientes);
 
 
 // ============================================================

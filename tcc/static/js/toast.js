@@ -4,6 +4,7 @@
 
     function removerToast(toast) {
         if (!toast || toast.classList.contains("toast-out")) return;
+        window.clearTimeout(toast._timer);
         toast.classList.add("toast-out");
         toast.addEventListener("animationend", event => {
             if (event.target === toast && event.animationName === "toast-out") {
@@ -15,6 +16,21 @@
     function mostrarToast(mensagem, categoria) {
         if (!mensagem) return;
         const agora = Date.now();
+        const toastExistente = [...document.querySelectorAll(".toast-card")].find(toast =>
+            toast.querySelector(".toast-card__message")?.textContent === mensagem &&
+            !toast.classList.contains("toast-out")
+        );
+        if (toastExistente) {
+            window.clearTimeout(toastExistente._timer);
+            toastExistente.classList.remove("toast-out");
+            toastExistente.classList.remove("toast-reiniciado");
+            toastExistente.classList.add("toast-timer-pausado");
+            void toastExistente.offsetWidth;
+            toastExistente.classList.remove("toast-timer-pausado");
+            toastExistente.classList.add("toast-reiniciado");
+            toastExistente._timer = window.setTimeout(() => removerToast(toastExistente), 5500);
+            return;
+        }
         if (mensagem === ultimaMensagem && agora - ultimoToastEm < 750) return;
         ultimaMensagem = mensagem;
         ultimoToastEm = agora;
@@ -31,7 +47,7 @@
         toast.querySelector(".toast-card__message").textContent = mensagem;
         toast.querySelector("button").addEventListener("click", () => removerToast(toast));
         container.appendChild(toast);
-        window.setTimeout(() => removerToast(toast), 5500);
+        toast._timer = window.setTimeout(() => removerToast(toast), 5500);
     }
 
     window.mostrarToast = mostrarToast;
@@ -45,7 +61,26 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".toast-card").forEach(toast => {
-            window.setTimeout(() => removerToast(toast), 5500);
+            toast._timer = window.setTimeout(() => removerToast(toast), 5500);
+        });
+
+        document.addEventListener("input", event => {
+            const campo = event.target;
+            if (!(campo instanceof HTMLInputElement || campo instanceof HTMLTextAreaElement)) return;
+            const limite = Number(campo.maxLength);
+            if (limite > 0 && campo.value.length >= limite) {
+                mostrarToast("Limite máximo de caracteres atingido!", "error");
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            const campo = event.target;
+            if (!(campo instanceof HTMLInputElement || campo instanceof HTMLTextAreaElement)) return;
+            const limite = Number(campo.maxLength);
+            const teclaDeTexto = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+            if (limite > 0 && teclaDeTexto && campo.value.length >= limite && campo.selectionStart === campo.selectionEnd) {
+                mostrarToast("Limite máximo de caracteres atingido!", "error");
+            }
         });
     });
 

@@ -39,6 +39,8 @@
 }
 .toast-card.error::after { background: #d94141; }
 .toast-card.toast-out::after { animation-play-state: paused; }
+.toast-card.toast-timer-pausado::after { animation: none !important; }
+.toast-card.toast-reiniciado::after { animation: toast-timer 5.5s linear forwards; }
 .toast-card__message { flex: 1; font-size: 14px; line-height: 1.4; }
 .toast-card__close { border: 0; background: transparent; color: #76808c; font-size: 21px; cursor: pointer; }
 

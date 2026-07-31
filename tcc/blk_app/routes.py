@@ -10,6 +10,9 @@ from .models import Atendimento, AtendimentoServico, Cliente, Lembrete, Servico
 
 web = Blueprint("web", __name__)
 STATUS = {"PENDENTE", "EM_ANDAMENTO", "CONCLUIDO", "CANCELADO"}
+LIMITES = {"cliente_nome": 100, "cliente_telefone": 20, "cliente_endereco": 255,
+           "cliente_link_endereco": 255, "servico_nome": 100, "atendimento_nome": 150,
+           "texto": 65535}
 
 
 def login_required(view):
@@ -21,6 +24,11 @@ def login_required(view):
 
 def erro(message, status=400):
     return jsonify(success=False, erro=message), status
+
+
+def validar_tamanho(valor, limite, campo):
+    if valor is not None and len(str(valor)) > limite:
+        raise ValueError(f"{campo} deve ter no maximo {limite} caracteres.")
 
 
 def credenciais_login_validas(email, senha):
@@ -41,12 +49,16 @@ def credenciais_login_validas(email, senha):
 def cliente_json(cliente):
     return {"id": cliente.id, "nome": cliente.nome, "telefone": cliente.telefone,
             "endereco": cliente.endereco, "dataCadastro": str(cliente.data_cadastro),
-            "linkEndereco": cliente.link_endereco}
+            "linkEndereco": cliente.link_endereco,
+            "criadoEm": cliente.criado_em.isoformat() if cliente.criado_em else None,
+            "editadoEm": cliente.atualizado_em.isoformat() if cliente.atualizado_em else None}
 
 
 def servico_json(servico):
     return {"id": servico.id, "nome": servico.nome, "valorBase": float(servico.valor_base),
-            "descricao": servico.descricao}
+            "descricao": servico.descricao,
+            "criadoEm": servico.criado_em.isoformat() if servico.criado_em else None,
+            "editadoEm": servico.atualizado_em.isoformat() if servico.atualizado_em else None}
 
 
 def atendimento_json(atendimento, detalhado=False):
@@ -56,12 +68,15 @@ def atendimento_json(atendimento, detalhado=False):
              "data_atendimento": str(atendimento.data_atendimento),
              "data_conclusao": str(atendimento.data_conclusao) if atendimento.data_conclusao else None,
              "desconto": float(atendimento.desconto or 0),
-             "valor_total": float(atendimento.valor_total or 0)}
+             "valor_total": float(atendimento.valor_total or 0),
+             "criadoEm": atendimento.criado_em.isoformat() if atendimento.criado_em else None,
+             "editadoEm": atendimento.atualizado_em.isoformat() if atendimento.atualizado_em else None}
+    lembrete = max(atendimento.lembretes, key=lambda item: item.id, default=None)
+    dados["data_lembrete"] = str(lembrete.data) if lembrete else None
     if detalhado:
         dados["servicos"] = [{"id": item.servico_id, "nome": item.servico.nome,
             "quantidade": item.quantidade, "valorUnitario": float(item.servico.valor_base),
             "valor": float(item.valor or item.servico.valor_base * item.quantidade)} for item in atendimento.itens]
-        lembrete = max(atendimento.lembretes, key=lambda item: item.id, default=None)
         dados["lembrete"] = {"id": lembrete.id} if lembrete else None
     else:
         dados["servicos"] = ", ".join(item.servico.nome for item in atendimento.itens) or "Sem serviço informado"
@@ -74,6 +89,7 @@ def parse_atendimento(dados, existente=None):
         raise ValueError("Formato inválido.")
     nome = str(dados.get("nome", "")).strip()
     if not nome: raise ValueError("Nome do atendimento não informado.")
+    validar_tamanho(nome, LIMITES["atendimento_nome"], "Nome do atendimento")
     try: cliente_id = int(dados.get("id_cliente", dados.get("cliente_id")))
     except (TypeError, ValueError): raise ValueError("Cliente não informado.")
     cliente = db.session.get(Cliente, cliente_id)
@@ -98,7 +114,9 @@ def parse_atendimento(dados, existente=None):
     try: desconto = Decimal(str(dados.get("desconto", 0)))
     except (InvalidOperation, TypeError, ValueError): raise ValueError("Desconto inválido.")
     if desconto < 0: raise ValueError("O desconto não pode ser negativo.")
-    return nome, cliente, status, data_atendimento, data_conclusao, dados.get("descricao"), desconto, selecionados
+    descricao = dados.get("descricao")
+    validar_tamanho(descricao, LIMITES["texto"], "Descricao")
+    return nome, cliente, status, data_atendimento, data_conclusao, descricao, desconto, selecionados
 
 
 @web.get("/")
@@ -166,6 +184,10 @@ def pegar_cliente():
                 cliente.nome = str(dados.get("nome", "")).strip(); cliente.telefone = dados.get("telefone"); cliente.endereco = dados.get("endereco"); cliente.link_endereco = dados.get("linkEndereco")
                 if not cliente.nome: return erro("Nome do cliente não informado.")
                 mensagem = "Cliente atualizado com sucesso!"
+        validar_tamanho(cliente.nome, LIMITES["cliente_nome"], "Nome do cliente")
+        validar_tamanho(cliente.telefone, LIMITES["cliente_telefone"], "Telefone")
+        validar_tamanho(cliente.endereco, LIMITES["cliente_endereco"], "Endereco")
+        validar_tamanho(cliente.link_endereco, LIMITES["cliente_link_endereco"], "Link do endereco")
         db.session.commit(); return jsonify(success=True, mensagem=mensagem)
     except Exception as exc: db.session.rollback(); return erro(str(exc), 500)
 
@@ -188,6 +210,8 @@ def pegar_servico():
         try: servico.valor_base = Decimal(str(dados.get("valorBase")))
         except (InvalidOperation, ValueError): return erro("Valor base inválido.")
         if not servico.nome or servico.valor_base < 0: return erro("Nome ou valor base inválido.")
+        validar_tamanho(servico.nome, LIMITES["servico_nome"], "Nome do servico")
+        validar_tamanho(servico.descricao, LIMITES["texto"], "Descricao")
         db.session.commit(); return jsonify(success=True, mensagem=mensagem)
     except Exception as exc: db.session.rollback(); return erro(str(exc), 500)
 
@@ -229,6 +253,23 @@ def concluir_atendimento(id_atendimento):
         db.session.rollback()
         return erro(str(exc), 500)
 
+@web.patch("/api/atendimentos/<int:id_atendimento>/status")
+@login_required
+def atualizar_status_atendimento(id_atendimento):
+    atendimento = db.session.get(Atendimento, id_atendimento)
+    if not atendimento: return erro("Atendimento nao encontrado.", 404)
+    status = str((request.get_json(silent=True) or {}).get("status", "")).strip().upper()
+    if status not in STATUS: return erro("Status invalido.")
+    try:
+        atendimento.status = status
+        atendimento.data_conclusao = date.today() if status == "CONCLUIDO" else None
+        db.session.commit()
+        return jsonify(success=True, atendimento=atendimento_json(atendimento), mensagem="Status atualizado com sucesso!")
+    except Exception as exc:
+        db.session.rollback()
+        return erro(str(exc), 500)
+
+
 @web.route("/api/atendimentos/<int:id_atendimento>", methods=["GET", "PUT", "DELETE"])
 @login_required
 def atendimento_por_id(id_atendimento):
@@ -259,7 +300,9 @@ def dados_lembrete(dados):
     try: atendimento = db.session.get(Atendimento, int(dados.get("id_atendimento"))); data_lembrete = date.fromisoformat(dados.get("data"))
     except (TypeError, ValueError): raise ValueError("Atendimento ou data inválidos.")
     if not atendimento: raise LookupError("Atendimento não encontrado.")
-    return atendimento, data_lembrete, str(dados.get("descricao") or "").strip()
+    descricao = str(dados.get("descricao") or "").strip()
+    validar_tamanho(descricao, LIMITES["texto"], "Descricao")
+    return atendimento, data_lembrete, descricao
 
 @web.post("/pegar_dados")
 @login_required

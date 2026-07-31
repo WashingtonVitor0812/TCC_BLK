@@ -807,6 +807,7 @@ function atualizarTabela() {
                         data-index="${index}"
                         value="${servico.quantidade}"
                         min="1"
+                        max="2147483647"
                         step="1"
                         aria-label="Quantidade"
                     >
@@ -883,6 +884,10 @@ function configurarEventosTabela() {
         .querySelectorAll(".service-cost")
         .forEach(input => {
 
+            input.addEventListener("focus", () => {
+                input.select();
+            });
+
             input.addEventListener(
                 "input",
                 () => {
@@ -926,6 +931,10 @@ function configurarEventosTabela() {
         .querySelectorAll(".service-quantity")
         .forEach(input => {
 
+            input.addEventListener("focus", () => {
+                input.select();
+            });
+
             input.addEventListener(
                 "input",
                 () => {
@@ -938,10 +947,11 @@ function configurarEventosTabela() {
                         parseInt(input.value);
 
 
-                    if (
-                        Number.isNaN(quantidade) ||
-                        quantidade < 1
-                    ) {
+                    if (input.value === "") {
+                        return;
+                    }
+
+                    if (Number.isNaN(quantidade) || quantidade < 1) {
 
                         quantidade = 1;
 
@@ -959,6 +969,15 @@ function configurarEventosTabela() {
                 }
 
             );
+
+            input.addEventListener("blur", () => {
+                if (!input.value || Number(input.value) < 1) {
+                    input.value = 1;
+                    const index = Number(input.dataset.index);
+                    servicosSelecionados[index].quantidade = 1;
+                    recalcularServico(index);
+                }
+            });
 
         });
 

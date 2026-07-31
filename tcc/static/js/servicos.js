@@ -5,6 +5,7 @@ const editModal = document.getElementById("editModal");
 const tabelaServicos = document.getElementById("servicosTableBody");
 const searchInput = document.getElementById("searchInput");
 const filterType = document.getElementById("filterType");
+const sortOrder = document.getElementById("sortOrder");
 const deleteConfirmModal = document.getElementById("deleteConfirmModal");
 const deleteConfirmName = document.getElementById("deleteConfirmName");
 let servicoParaExcluir = null;
@@ -92,6 +93,11 @@ function obterServicosFiltrados() {
 
         return nome.includes(termo) || descricao.includes(termo) ||
             valorBase.includes(termo) || id.includes(termo);
+    }).sort((primeiro, segundo) => {
+        const [campo, direcao] = (sortOrder.value || "criado-desc").split("-");
+        const chave = campo === "nome" ? "nome" : campo === "editado" ? "editadoEm" : "criadoEm";
+        const resultado = String(primeiro[chave] || "").localeCompare(String(segundo[chave] || ""), "pt-BR");
+        return direcao === "asc" ? resultado : -resultado;
     });
 }
 
@@ -247,5 +253,6 @@ document.getElementById("btnCompartilharPDF").addEventListener("click", async ()
 
 searchInput.addEventListener("input", filtrarServicos);
 filterType.addEventListener("change", filtrarServicos);
+sortOrder.addEventListener("change", filtrarServicos);
 
 carregarServicos();
