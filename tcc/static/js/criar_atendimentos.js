@@ -131,6 +131,12 @@ const servicosTableBody =
 const valorTotal =
     document.getElementById("valorTotal");
 
+const valorSubtotal =
+    document.getElementById("valorSubtotal");
+
+const descontoAtendimento =
+    document.getElementById("descontoAtendimento");
+
 
 const servicosSelecionadosInput =
     document.getElementById("servicosSelecionados");
@@ -338,6 +344,16 @@ function inicializarEventos() {
         btnCriarLembrete.addEventListener(
             "click",
             redirecionarParaAgenda
+        );
+
+    }
+
+
+    if (descontoAtendimento) {
+
+        descontoAtendimento.addEventListener(
+            "input",
+            calcularTotal
         );
 
     }
@@ -1057,7 +1073,7 @@ function removerServico(index) {
 
 function calcularTotal() {
 
-    const total =
+    const subtotal =
         servicosSelecionados.reduce(
             (soma, servico) => {
 
@@ -1069,6 +1085,27 @@ function calcularTotal() {
             0
         );
 
+
+    let desconto =
+        Number(descontoAtendimento?.value) || 0;
+
+    if (desconto < 0) {
+        desconto = 0;
+    }
+
+    if (descontoAtendimento) {
+        descontoAtendimento.value = desconto;
+        descontoAtendimento.max = subtotal;
+    }
+
+    const total = Math.max(subtotal - desconto, 0);
+
+    if (valorSubtotal) {
+
+        valorSubtotal.textContent =
+            formatarMoeda(subtotal);
+
+    }
 
     if (valorTotal) {
 
@@ -1239,6 +1276,9 @@ async function salvarAtendimento(event) {
 
         valor_total:
             calcularTotal(),
+
+        desconto:
+            Number(descontoAtendimento?.value) || 0,
 
         status: atendimentoEmEdicao ? atendimentoEmEdicao.status : "PENDENTE",
 

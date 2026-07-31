@@ -72,7 +72,7 @@ function renderAtendimentos(lista = atendimentos) {
     if (lista.length === 0) {
         const linha = tbody.insertRow();
         const celula = linha.insertCell();
-        celula.colSpan = 7;
+        celula.colSpan = 8;
         celula.textContent = "Nenhum atendimento encontrado.";
         return;
     }
@@ -81,6 +81,7 @@ function renderAtendimentos(lista = atendimentos) {
         const linha = tbody.insertRow();
         linha.insertCell().textContent = atendimento.nome || `Atendimento #${atendimento.id}`;
         linha.insertCell().textContent = atendimento.servicos || "Sem serviço informado";
+        linha.insertCell().textContent = formatarMoeda(atendimento.desconto);
         linha.insertCell().textContent = formatarMoeda(atendimento.valor_total);
         linha.insertCell().textContent = formatarData(atendimento.data_atendimento);
         linha.insertCell().textContent = atendimento.cliente || "Cliente não encontrado";

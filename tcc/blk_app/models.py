@@ -2,7 +2,7 @@ from .extensions import db
 
 
 class Cliente(db.Model):
-    __tablename__ = "Cliente"
+    __tablename__ = "cliente"
     id = db.Column("ID_cliente", db.Integer, primary_key=True)
     nome = db.Column("nome_cliente", db.String(100), nullable=False)
     telefone = db.Column(db.String(20))
@@ -13,7 +13,7 @@ class Cliente(db.Model):
 
 
 class Servico(db.Model):
-    __tablename__ = "Servico"
+    __tablename__ = "servico"
     id = db.Column("ID_servico", db.Integer, primary_key=True)
     nome = db.Column("nome_servico", db.String(100), nullable=False)
     valor_base = db.Column(db.Numeric(10, 2), nullable=False)
@@ -21,13 +21,14 @@ class Servico(db.Model):
 
 
 class Atendimento(db.Model):
-    __tablename__ = "Atendimento"
+    __tablename__ = "atendimento"
     id = db.Column("ID_atendimento", db.Integer, primary_key=True)
-    cliente_id = db.Column("ID_cliente", db.Integer, db.ForeignKey("Cliente.ID_cliente"), nullable=False)
+    cliente_id = db.Column("ID_cliente", db.Integer, db.ForeignKey("cliente.ID_cliente"), nullable=False)
     nome = db.Column("nome_atendimento", db.String(150))
     descricao = db.Column(db.Text)
+    desconto = db.Column(db.Numeric(10, 2), nullable=False, server_default=db.text("0"))
     valor_total = db.Column(db.Numeric(10, 2))
-    status = db.Column(db.String(20))
+    status = db.Column(db.Enum("PENDENTE", "EM_ANDAMENTO", "CONCLUIDO", "CANCELADO"))
     data_conclusao = db.Column(db.Date)
     data_atendimento = db.Column(db.Date, nullable=False)
     cliente = db.relationship("Cliente", back_populates="atendimentos")
@@ -36,19 +37,19 @@ class Atendimento(db.Model):
 
 
 class AtendimentoServico(db.Model):
-    __tablename__ = "Atendimento_Servico"
-    atendimento_id = db.Column("ID_atendimento", db.Integer, db.ForeignKey("Atendimento.ID_atendimento"), primary_key=True)
-    servico_id = db.Column("ID_servico", db.Integer, db.ForeignKey("Servico.ID_servico"), primary_key=True)
-    quantidade = db.Column(db.Integer, nullable=False, default=1)
-    valor = db.Column(db.Numeric(10, 2), nullable=False, default=0)
+    __tablename__ = "atendimento_servico"
+    atendimento_id = db.Column("ID_atendimento", db.Integer, db.ForeignKey("atendimento.ID_atendimento"), primary_key=True)
+    servico_id = db.Column("ID_servico", db.Integer, db.ForeignKey("servico.ID_servico"), primary_key=True)
+    quantidade = db.Column(db.Integer, nullable=False, server_default=db.text("1"))
+    valor = db.Column(db.Numeric(10, 2), nullable=False, server_default=db.text("0"))
     atendimento = db.relationship("Atendimento", back_populates="itens")
     servico = db.relationship("Servico")
 
 
 class Lembrete(db.Model):
-    __tablename__ = "Lembrete"
+    __tablename__ = "lembrete"
     id = db.Column("ID_lembrete", db.Integer, primary_key=True)
-    atendimento_id = db.Column("ID_atendimento", db.Integer, db.ForeignKey("Atendimento.ID_atendimento"))
+    atendimento_id = db.Column("ID_atendimento", db.Integer, db.ForeignKey("atendimento.ID_atendimento"))
     data = db.Column("data_lembrete", db.Date, nullable=False)
     descricao = db.Column(db.Text)
     atendimento = db.relationship("Atendimento", back_populates="lembretes")

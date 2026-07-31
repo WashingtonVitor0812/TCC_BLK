@@ -38,6 +38,7 @@ def atendimento_json(atendimento, detalhado=False):
              "descricao": atendimento.descricao or "", "status": atendimento.status or "PENDENTE",
              "data_atendimento": str(atendimento.data_atendimento),
              "data_conclusao": str(atendimento.data_conclusao) if atendimento.data_conclusao else None,
+             "desconto": float(atendimento.desconto or 0),
              "valor_total": float(atendimento.valor_total or 0)}
     if detalhado:
         dados["servicos"] = [{"id": item.servico_id, "nome": item.servico.nome,
@@ -77,7 +78,10 @@ def parse_atendimento(dados, existente=None):
         servico = db.session.get(Servico, servico_id)
         if not servico: raise LookupError("Um ou mais serviços não foram encontrados.")
         ids.add(servico_id); selecionados.append((servico, quantidade))
-    return nome, cliente, status, data_atendimento, data_conclusao, dados.get("descricao"), selecionados
+    try: desconto = Decimal(str(dados.get("desconto", 0)))
+    except (InvalidOperation, TypeError, ValueError): raise ValueError("Desconto inválido.")
+    if desconto < 0: raise ValueError("O desconto não pode ser negativo.")
+    return nome, cliente, status, data_atendimento, data_conclusao, dados.get("descricao"), desconto, selecionados
 
 
 @web.get("/")
@@ -171,15 +175,16 @@ def api_atendimentos():
 @login_required
 def criar_atendimento_api():
     try:
-        nome, cliente, status, data_atendimento, data_conclusao, descricao, itens = parse_atendimento(request.get_json(silent=True))
-        atendimento = Atendimento(cliente=cliente, nome=nome, descricao=descricao.strip() if isinstance(descricao, str) else None, status=status, data_atendimento=data_atendimento, data_conclusao=data_conclusao)
+        nome, cliente, status, data_atendimento, data_conclusao, descricao, desconto, itens = parse_atendimento(request.get_json(silent=True))
+        atendimento = Atendimento(cliente=cliente, nome=nome, descricao=descricao.strip() if isinstance(descricao, str) else None, desconto=desconto, status=status, data_atendimento=data_atendimento, data_conclusao=data_conclusao)
         db.session.add(atendimento); db.session.flush()
         total = Decimal("0")
         for servico, quantidade in itens:
             valor = servico.valor_base * quantidade; total += valor
             db.session.add(AtendimentoServico(atendimento=atendimento, servico=servico, quantidade=quantidade, valor=valor))
-        atendimento.valor_total = total; db.session.commit()
-        return jsonify(success=True, id=atendimento.id, valor_total=float(total), mensagem="Atendimento cadastrado com sucesso!"), 201
+        if desconto > total: return erro("O desconto não pode ser maior que o subtotal.")
+        atendimento.valor_total = total - desconto; db.session.commit()
+        return jsonify(success=True, id=atendimento.id, desconto=float(desconto), valor_total=float(atendimento.valor_total), mensagem="Atendimento cadastrado com sucesso!"), 201
     except (ValueError, LookupError) as exc: return erro(str(exc), 400)
     except Exception as exc: db.session.rollback(); return erro(str(exc), 500)
 
@@ -193,16 +198,18 @@ def atendimento_por_id(id_atendimento):
         if request.method == "DELETE":
             db.session.delete(atendimento); db.session.commit()
             return jsonify(success=True, mensagem="Atendimento excluído com sucesso!")
-        nome, cliente, status, data_atendimento, data_conclusao, descricao, itens = parse_atendimento(request.get_json(silent=True), atendimento)
+        nome, cliente, status, data_atendimento, data_conclusao, descricao, desconto, itens = parse_atendimento(request.get_json(silent=True), atendimento)
         atendimento.nome, atendimento.cliente, atendimento.status = nome, cliente, status
         atendimento.data_atendimento, atendimento.data_conclusao = data_atendimento, data_conclusao
         atendimento.descricao = descricao.strip() if isinstance(descricao, str) else None
+        atendimento.desconto = desconto
         atendimento.itens.clear(); total = Decimal("0")
         for servico, quantidade in itens:
             valor = servico.valor_base * quantidade; total += valor
             atendimento.itens.append(AtendimentoServico(servico=servico, quantidade=quantidade, valor=valor))
-        atendimento.valor_total = total; db.session.commit()
-        return jsonify(success=True, id=atendimento.id, valor_total=float(total), mensagem="Atendimento atualizado com sucesso!")
+        if desconto > total: return erro("O desconto não pode ser maior que o subtotal.")
+        atendimento.valor_total = total - desconto; db.session.commit()
+        return jsonify(success=True, id=atendimento.id, desconto=float(desconto), valor_total=float(atendimento.valor_total), mensagem="Atendimento atualizado com sucesso!")
     except (ValueError, LookupError) as exc: return erro(str(exc), 400)
     except Exception as exc: db.session.rollback(); return erro(str(exc), 500)
 

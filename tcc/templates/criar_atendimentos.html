@@ -440,9 +440,44 @@
 
 
                             <td class="attendance-total-label">
-                                Total:
+                                Subtotal:
                             </td>
 
+
+                            <td
+                                id="valorSubtotal"
+                                class="attendance-grand-total"
+                            >
+                                R$ 0,00
+                            </td>
+
+                        </tr>
+
+                        <tr class="attendance-total-row">
+
+                            <td colspan="3" class="attendance-total-label">
+                                <label for="descontoAtendimento">Desconto:</label>
+                            </td>
+
+                            <td>
+                                <input
+                                    type="number"
+                                    id="descontoAtendimento"
+                                    class="service-cost"
+                                    min="0"
+                                    step="0.01"
+                                    value="0"
+                                    aria-label="Desconto"
+                                >
+                            </td>
+
+                        </tr>
+
+                        <tr class="attendance-total-row">
+
+                            <td colspan="3" class="attendance-total-label">
+                                Total:
+                            </td>
 
                             <td
                                 id="valorTotal"

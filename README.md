@@ -22,6 +22,20 @@ As rotas utilizadas pelos arquivos JavaScript foram mantidas para compatibilidad
 
 ## Migrações do banco
 
+O banco atual foi registrado na revisão de linha de base do Alembic. A partir de
+agora, após alterar os modelos em `tcc/blk_app/models.py`, gere e aplique uma
+nova migração:
+
+```powershell
+.\.venv\Scripts\flask.exe --app tcc.run:app db migrate -m "descreva a alteração"
+.\.venv\Scripts\flask.exe --app tcc.run:app db upgrade
+```
+
+Revise o arquivo gerado em `migrations/versions/` antes de executar o comando
+`db upgrade` em um banco compartilhado ou de produção.
+
+## Migrações do banco
+
 As alterações do esquema são versionadas em `migrations/`. Para aplicar as
 migrações pendentes, execute:
 
