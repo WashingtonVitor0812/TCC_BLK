@@ -24,7 +24,7 @@ def create_app():
         raise RuntimeError(
             "FLASK_SECRET_KEY nao foi configurada. Crie o arquivo .env a partir de .env.example."
         )
-
+    # ORM
     app = Flask(__name__, template_folder="../templates", static_folder="../static")
     app.config.update(
         SECRET_KEY=secret_key,
