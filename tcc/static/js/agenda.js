@@ -217,6 +217,12 @@ const dayTooltip =
 const deleteConfirmModal = document.getElementById("deleteConfirmModal");
 const deleteConfirmName = document.getElementById("deleteConfirmName");
 let lembreteParaExcluir = null;
+let dataPassadaConfirmada = false;
+const agendaSearchInput = document.getElementById("agendaSearchInput");
+const agendaSearchFilter = document.getElementById("agendaSearchFilter");
+const pastRemindersButton = document.getElementById("pastRemindersButton");
+const pastRemindersCount = document.getElementById("pastRemindersCount");
+const pastDateConfirmModal = document.getElementById("pastDateConfirmModal");
 
 
 /* ===========================================================
@@ -235,6 +241,8 @@ document.addEventListener(
 
         renderizarListaLembretes();
 
+        atualizarContadorLembretesAtrasados();
+
         carregarAtendimentos();
 
         verificarNovoLembrete();
@@ -252,6 +260,23 @@ document.addEventListener(
 =========================================================== */
 
 function inicializarEventos() {
+    const fecharConfirmacaoDataPassada = () => {
+        dataPassadaConfirmada = false;
+        pastDateConfirmModal?.classList.remove("active");
+        pastDateConfirmModal?.setAttribute("aria-hidden", "true");
+    };
+    document.getElementById("closePastDateConfirm")?.addEventListener("click", fecharConfirmacaoDataPassada);
+    document.getElementById("cancelPastDateConfirm")?.addEventListener("click", fecharConfirmacaoDataPassada);
+    pastDateConfirmModal?.addEventListener("click", event => { if (event.target === pastDateConfirmModal) fecharConfirmacaoDataPassada(); });
+    document.getElementById("confirmPastDateAction")?.addEventListener("click", () => {
+        dataPassadaConfirmada = true;
+        pastDateConfirmModal?.classList.remove("active");
+        pastDateConfirmModal?.setAttribute("aria-hidden", "true");
+        reminderForm?.requestSubmit();
+    });
+    agendaSearchInput?.addEventListener("input", renderizarListaLembretes);
+    agendaSearchFilter?.addEventListener("change", renderizarListaLembretes);
+    pastRemindersButton?.addEventListener("click", abrirNotificacoesAtrasadas);
 
     deleteConfirmModal.addEventListener("click", event => {
         if (event.target === deleteConfirmModal) fecharConfirmacaoExclusao();
@@ -1594,6 +1619,13 @@ async function salvarLembrete(
 
     event.preventDefault();
 
+    if (reminderDate?.value && reminderDate.value < new Date().toISOString().slice(0, 10) && !dataPassadaConfirmada) {
+        pastDateConfirmModal?.classList.add("active");
+        pastDateConfirmModal?.setAttribute("aria-hidden", "false");
+        return;
+    }
+    dataPassadaConfirmada = false;
+
 
     if (
         !reminderDate ||
@@ -2274,6 +2306,8 @@ function atualizarInterfaceAgenda() {
 
     renderizarListaLembretes();
 
+    atualizarContadorLembretesAtrasados();
+
 }
 
 
@@ -2297,6 +2331,8 @@ function renderizarListaLembretes() {
        atualmente sendo exibido no calendário.
     */
 
+    const termoBusca = agendaSearchInput?.value.trim().toLowerCase() || "";
+    const tipoBusca = agendaSearchFilter?.value || "nome";
     const lembretesDoMes =
         lembretes
             .filter(
@@ -2305,7 +2341,7 @@ function renderizarListaLembretes() {
                         lembrete,
                         mesAtual,
                         anoAtual
-                    )
+                    ) && (!termoBusca || (tipoBusca === "data" ? String(lembrete.data).includes(termoBusca) : String(lembrete.atendimento || "").toLowerCase().includes(termoBusca)))
             )
             .sort(
                 (a, b) => {
@@ -3618,12 +3654,76 @@ function verificarNovoLembrete() {
 
 }
 
+function atualizarContadorLembretesAtrasados() {
+    if (!pastRemindersCount) return;
+    const hoje = new Date().toISOString().slice(0, 10);
+    const quantidade = lembretes.filter(lembrete => lembrete.data && lembrete.data < hoje).length;
+    pastRemindersCount.hidden = quantidade === 0;
+    pastRemindersCount.textContent = quantidade > 99 ? "99+" : String(quantidade);
+}
+
+function abrirNotificacoesAtrasadas() {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const atrasados = lembretes.filter(lembrete => lembrete.data && lembrete.data < hoje);
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay active";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.innerHTML = `<div class="modal notifications-modal"><button class="close-btn" type="button">&times;</button><h2>NOTIFICAÇÕES</h2><div class="notification-tabs"><button type="button" data-tab="atrasados">Atrasados</button><button type="button" data-tab="concluidos">Concluídos</button></div><div class="notifications-list"></div></div>`;
+    const lista = modal.querySelector(".notifications-list");
+    const concluidos = atendimentos.filter(atendimento => atendimento.status === "CONCLUIDO");
+    const renderizar = (aba) => {
+        lista.innerHTML = "";
+        const itens = aba === "concluidos" ? concluidos : atrasados;
+        if (!itens.length) { lista.textContent = aba === "concluidos" ? "Nenhum atendimento concluído." : "Nenhum lembrete atrasado."; return; }
+        itens.forEach(item => {
+            if (aba === "concluidos") { const linha = document.createElement("div"); linha.className = "notification-item"; linha.innerHTML = `<strong></strong><span></span>`; linha.querySelector("strong").textContent = item.nome || `Atendimento #${item.id}`; linha.querySelector("span").textContent = item.cliente || ""; lista.appendChild(linha); return; }
+            adicionarAviso(item);
+        });
+    };
+    const adicionarAviso = (lembrete) => {
+        const item = document.createElement("div");
+        item.className = "notification-item";
+        item.innerHTML = `<strong></strong><span></span><div><button type="button" class="go">Ir para mês</button><button type="button" class="remove">Excluir</button></div>`;
+        item.querySelector("strong").textContent = lembrete.atendimento || "Sem atendimento";
+        item.querySelector("span").textContent = formatarDataLembrete(lembrete.data);
+        item.querySelector(".go").onclick = () => { const [ano, mes] = lembrete.data.split("-").map(Number); anoAtual = ano; mesAtual = mes - 1; atualizarInterfaceAgenda(); modal.remove(); setTimeout(() => document.querySelector(`[data-id="${lembrete.id}"]`)?.classList.add("highlight-reminder"), 0); };
+        item.querySelector(".remove").onclick = () => { modal.remove(); excluirLembrete(lembrete.id); };
+        lista.appendChild(item);
+    };
+    lista.innerHTML = "";
+    modal.querySelectorAll(".notification-tab").forEach(botao => botao.onclick = () => {
+        modal.querySelectorAll(".notification-tab").forEach(item => item.classList.toggle("active", item === botao));
+        renderizar(botao.dataset.tab);
+    });
+    modal.querySelector(".notification-tab")?.classList.add("active");
+    renderizar("atrasados");
+    const fechar = () => {
+        document.removeEventListener("keydown", fecharComEsc);
+        modal.remove();
+    };
+    const fecharComEsc = event => {
+        if (event.key === "Escape") fechar();
+    };
+    modal.querySelector(".close-btn").onclick = fechar;
+    modal.addEventListener("click", event => {
+        if (event.target === modal) fechar();
+    });
+    document.addEventListener("keydown", fecharComEsc);
+    document.body.appendChild(modal);
+}
+
+function formatarDataLembrete(data) {
+    const [ano, mes, dia] = String(data || "").split("-");
+    return ano ? `${dia}/${mes}/${ano}` : "Data não definida";
+}
+
 function fecharConfirmacaoExclusao() {
     deleteConfirmModal.classList.remove("active");
     lembreteParaExcluir = null;
 }
 
-function verificarEdicaoLembrete() {
+async function verificarEdicaoLembrete() {
     if (new URLSearchParams(window.location.search).get("editarLembrete") !== "1") return;
 
     const dados = sessionStorage.getItem("lembreteParaEdicao");
@@ -3636,8 +3736,16 @@ function verificarEdicaoLembrete() {
             Number(item.id) === Number(referencia.id_lembrete) ||
             Number(item.id_atendimento) === Number(referencia.id_atendimento)
         );
-        if (lembrete) abrirModalEdicao(lembrete);
-        else alert("Este atendimento n\u00e3o possui um lembrete associado para atualizar.");
+        if (lembrete) {
+            abrirModalEdicao(lembrete);
+            return;
+        }
+        const resposta = await fetch(`/api/lembretes/atendimento/${encodeURIComponent(referencia.id_atendimento)}`);
+        const resultado = await resposta.json();
+        if (!resposta.ok || !resultado.success) throw new Error(resultado.erro || "Lembrete nao encontrado.");
+        const lembreteEncontrado = normalizarLembrete(resultado.lembrete);
+        adicionarLembreteLocal(lembreteEncontrado);
+        abrirModalEdicao(lembreteEncontrado);
     } catch (error) {
         console.error("Erro ao abrir lembrete para edi\u00e7\u00e3o:", error);
     }

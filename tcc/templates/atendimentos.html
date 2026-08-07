@@ -47,6 +47,13 @@
                     <input type="text" id="searchInput" placeholder="Pesquisar atendimentos" autocomplete="off">
                     <button type="button" aria-label="Pesquisar"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
+                <select id="statusSearch" aria-label="Selecionar status" hidden>
+                    <option value="">Todos os status</option>
+                    <option value="PENDENTE">Pendente</option>
+                    <option value="EM_ANDAMENTO">Agendado</option>
+                    <option value="CONCLUIDO">Concluído</option>
+                    <option value="CANCELADO">Cancelado</option>
+                </select>
 
                 <select id="filterType" aria-label="Filtrar atendimentos por campo">
                     <option value="todos">Todos os campos</option>

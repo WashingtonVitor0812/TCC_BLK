@@ -6,6 +6,7 @@ const tbody = document.getElementById("atendimentosTableBody");
 const searchInput = document.getElementById("searchInput");
 const filterType = document.getElementById("filterType");
 const sortOrder = document.getElementById("sortOrder");
+const statusSearch = document.getElementById("statusSearch");
 const viewModal = document.getElementById("viewModal");
 const editModal = document.getElementById("editModal");
 const deleteModal = document.getElementById("deleteModal");
@@ -13,7 +14,7 @@ const confirmDelete = document.getElementById("confirmDelete");
 
 const STATUS = {
     PENDENTE: "Pendente",
-    EM_ANDAMENTO: "Em andamento",
+    EM_ANDAMENTO: "Agendado",
     CONCLUIDO: "Concluído",
     CANCELADO: "Cancelado"
 };
@@ -105,7 +106,6 @@ function renderAtendimentos(lista = atendimentos) {
         grupo.append(
             criarBotao("fa-pen", "Editar", () => abrirEdicao(atendimento.id)),
             criarBotao("fa-eye", "Visualizar", () => visualizarAtendimento(atendimento.id)),
-            botaoConcluir,
             criarBotao("fa-trash", "Excluir", () => confirmarExclusao(atendimento.id))
         );
         acoes.appendChild(grupo);
@@ -113,7 +113,7 @@ function renderAtendimentos(lista = atendimentos) {
 }
 
 function obterAtendimentosFiltrados() {
-    const termo = searchInput.value.trim().toLowerCase();
+    const termo = filterType.value === "status" ? statusSearch.value : searchInput.value.trim().toLowerCase();
     const filtro = filterType.value;
     const ordemStatus = {
         PENDENTE: 0,
@@ -130,7 +130,7 @@ function obterAtendimentosFiltrados() {
         if (filtro === "nome") return nome.includes(termo);
         if (filtro === "cliente") return cliente.includes(termo);
         if (filtro === "servicos") return servicos.includes(termo);
-        if (filtro === "status") return status.includes(termo);
+        if (filtro === "status") return !termo || atendimento.status === termo;
         return nome.includes(termo) || servicos.includes(termo) ||
             cliente.includes(termo) || status.includes(termo);
     }).sort((primeiro, segundo) => {
@@ -343,7 +343,13 @@ function closeEditModal() { editModal.classList.remove("active"); }
 function closeDeleteModal() { deleteModal.classList.remove("active"); }
 
 searchInput.addEventListener("input", filtrarAtendimentos);
-filterType.addEventListener("change", filtrarAtendimentos);
+filterType.addEventListener("change", () => {
+    const porStatus = filterType.value === "status";
+    searchInput.hidden = porStatus;
+    statusSearch.hidden = !porStatus;
+    filtrarAtendimentos();
+});
+statusSearch.addEventListener("change", filtrarAtendimentos);
 sortOrder.addEventListener("change", filtrarAtendimentos);
 confirmDelete.addEventListener("click", excluirAtendimento);
 

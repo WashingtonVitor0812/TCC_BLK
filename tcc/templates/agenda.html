@@ -96,6 +96,7 @@
 
         <div class="page-header-actions">
             <div class="document-actions">
+                <button type="button" id="pastRemindersButton" class="notifications-button" title="Notificacoes" aria-label="Notificacoes"><i class="fa-solid fa-bell"></i><span id="pastRemindersCount" class="notifications-count" hidden>0</span></button>
                 <button type="button" id="btnGerarPDF" title="Gerar PDF do mês" aria-label="Gerar PDF do mês"><i class="fa-solid fa-file-pdf"></i></button>
                 <button type="button" id="btnCompartilharPDF" title="Compartilhar PDF do mês" aria-label="Compartilhar PDF do mês"><i class="fa-solid fa-share"></i></button>
             </div>
@@ -131,6 +132,10 @@
         ================================================== -->
 
         <section class="reminders-panel">
+            <div class="agenda-search">
+                <input id="agendaSearchInput" type="search" placeholder="Pesquisar lembretes">
+                <select id="agendaSearchFilter" aria-label="Filtrar lembretes"><option value="nome">Nome</option><option value="data">Data</option></select>
+            </div>
 
 
             <div class="reminders-header">
@@ -719,6 +724,18 @@
             <div class="delete-confirm-actions">
                 <button type="button" class="cancel-delete-btn" id="cancelDeleteConfirm">Cancelar</button>
                 <button type="button" class="submit-btn" id="confirmDeleteAction">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pastDateConfirmModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal past-date-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="pastDateConfirmTitle">
+            <button type="button" class="close-btn" id="closePastDateConfirm" aria-label="Fechar">&times;</button>
+            <h2 id="pastDateConfirmTitle">CRIAR LEMBRETE EM DATA PASSADA?</h2>
+            <p>Este lembrete será criado para uma data anterior à atual. Deseja continuar?</p>
+            <div class="delete-confirm-actions">
+                <button type="button" class="cancel-delete-btn" id="cancelPastDateConfirm">Cancelar</button>
+                <button type="button" class="submit-btn" id="confirmPastDateAction">Criar lembrete</button>
             </div>
         </div>
     </div>

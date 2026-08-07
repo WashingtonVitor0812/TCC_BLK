@@ -407,6 +407,28 @@ body {
     gap: 7px;
 }
 
+.agenda-search { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid #e2e2e2; background: #f8fafc; }
+.agenda-search input, .agenda-search select { min-width: 0; height: 34px; border: 1px solid #cfd5dd; border-radius: 6px; padding: 0 8px; color: #273142; background: #fff; }
+.agenda-search input { flex: 1; }
+.agenda-search input:focus, .agenda-search select:focus { outline: 2px solid rgba(11, 77, 173, .28); border-color: #0b4dad; }
+.notifications-modal { position: relative; width: min(520px, 94vw); padding: 28px; }
+.notifications-modal h2 { padding-right: 36px; }
+.notification-tabs { display: flex; gap: 8px; margin: 14px 0; border-bottom: 1px solid #e2e8f0; }
+.notification-tabs button { padding: 8px 10px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #526172; cursor: pointer; font-weight: 700; }
+.notification-tabs button:hover, .notification-tabs button:focus-visible { color: #0b4dad; border-bottom-color: #ff7417; outline: none; }
+.notification-tabs button.active { color: #0b4dad; border-bottom-color: #ff7417; }
+.notifications-button { position: relative; }
+.notifications-count { position: absolute; top: -7px; right: -7px; min-width: 18px; height: 18px; padding: 0 4px; border: 2px solid #0b4dad; border-radius: 999px; background: #d94141; color: #fff; font-size: 11px; font-weight: 700; line-height: 14px; text-align: center; }
+.notifications-list { display: grid; gap: 10px; max-height: 55vh; overflow: auto; }
+.notification-item { display: grid; gap: 5px; padding: 12px; border: 1px solid #e2e2e2; border-radius: 8px; background: #f8fafc; }
+.notification-item strong { color: #003f97; }
+.notification-item span { color: #5f6670; font-size: 14px; }
+.notification-item div { display: flex; gap: 8px; }
+.notification-item button { border: 0; border-radius: 5px; padding: 7px 10px; cursor: pointer; background: #0b4dad; color: #fff; }
+.notification-item .remove { background: #d94141; }
+.highlight-reminder { animation: reminder-highlight 1.8s ease; }
+@keyframes reminder-highlight { 0%,100% { box-shadow: none; } 45% { box-shadow: 0 0 0 3px #ff7417; } }
+
 .logout-form { margin: 0; }
 .logout-button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; border: 1px solid #ff8a43; border-radius: 7px; background: rgba(255, 116, 23, .12); box-shadow: 0 2px 0 rgba(0, 0, 0, .12); color: #fff; cursor: pointer; font: inherit; font-size: 16px; font-weight: 700; padding: 6px 15px; transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
 .logout-button:hover { border-color: #ff7417; background: #ff7417; box-shadow: 0 5px 12px rgba(0, 0, 0, .24); transform: translateY(-2px); }
@@ -439,6 +461,8 @@ body {
 }
 
 .delete-confirm-modal { width: min(420px, 100%); text-align: center; }
+.past-date-confirm-modal { position: relative; width: min(440px, 100%); text-align: center; }
+.past-date-confirm-modal p { margin-top: 12px; color: #5f6670; line-height: 1.5; }
 .delete-confirm-modal p { color: #555; line-height: 1.5; }
 .delete-confirm-modal strong { color: #003f97; overflow-wrap: anywhere; }
 .delete-confirm-actions { display: flex; justify-content: center; gap: 12px; margin-top: 24px; }

@@ -221,6 +221,16 @@ def pegar_servico():
 def api_atendimentos():
     return jsonify([atendimento_json(a) for a in Atendimento.query.order_by(Atendimento.data_atendimento.desc()).all()])
 
+
+@web.get("/api/lembretes/atendimento/<int:id_atendimento>")
+@login_required
+def lembrete_por_atendimento(id_atendimento):
+    lembrete = Lembrete.query.filter_by(atendimento_id=id_atendimento).order_by(Lembrete.id.desc()).first()
+    if not lembrete: return erro("Lembrete nao encontrado.", 404)
+    return jsonify(success=True, lembrete={"id": lembrete.id, "id_atendimento": lembrete.atendimento_id,
+                   "data": str(lembrete.data), "descricao": lembrete.descricao or "",
+                   "atendimento": lembrete.atendimento.nome or f"Atendimento #{lembrete.atendimento_id}"})
+
 @web.route("/api/atendimentos", methods=["POST"])
 @login_required
 def criar_atendimento_api():
@@ -284,6 +294,7 @@ def atendimento_por_id(id_atendimento):
         atendimento.nome, atendimento.cliente, atendimento.status = nome, cliente, status
         atendimento.data_atendimento, atendimento.data_conclusao = data_atendimento, data_conclusao
         atendimento.descricao = descricao.strip() if isinstance(descricao, str) else None
+        if status == "CONCLUIDO": atendimento.data_conclusao = date.today()
         atendimento.desconto = desconto
         atendimento.itens.clear(); total = Decimal("0")
         for servico, quantidade in itens:
